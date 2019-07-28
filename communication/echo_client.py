@@ -52,7 +52,7 @@ if __name__ == '__main__':
     host_server = '127.0.0.1'
     port_server = 65432
     host_client = '127.0.0.1'
-    port_client = port_server + 1  
+    port_client = port_server + 1
     filename = "small.mp4"
     max_clients = 1
 
