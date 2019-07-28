@@ -1,0 +1,5 @@
+.idea/
+*.mp4
+*.webm
+venv/
+*.pyc
