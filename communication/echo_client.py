@@ -49,10 +49,10 @@ def set_up_server(host_server, port_server, max_clients):
     return s
 
 if __name__ == '__main__':
-    host_server = '127.0.0.1'  # The server's hostname or IP address
-    port_server = 65432  # The port used by the server
-    host_client = '127.0.0.1'  # The server's hostname or IP address
-    port_client = port_server + 1  # The port used by the server
+    host_server = '127.0.0.1'
+    port_server = 65432
+    host_client = '127.0.0.1'
+    port_client = port_server + 1  
     filename = "small.mp4"
     max_clients = 1
 
