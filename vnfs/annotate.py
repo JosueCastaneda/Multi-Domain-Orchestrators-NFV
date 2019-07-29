@@ -1,14 +1,12 @@
-#This VNF annotates video with text
-# Import everything needed to edit video clips
-from moviepy.editor import *
+from moviepy.editor import VideoFileClip, TextClip, CompositeVideoClip
 
 
-def annotate(source, text, duration):
+def annotate(source, text, duration=2, font_size=50, color="white"):
 
     main_clip = VideoFileClip(source)
 
     # Generate a text clip. You can customize the font, color, etc.
-    txt_clip = TextClip(text, fontsize=50, color='white')
+    txt_clip = TextClip(text, fontsize=font_size, color=color)
 
     # Say that you want it to appear 10s at the center of the screen
     txt_clip = txt_clip.set_pos('center').set_duration(duration)

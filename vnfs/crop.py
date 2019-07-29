@@ -1,5 +1,4 @@
-# Import everything needed to edit video clips
-from moviepy.editor import *
+from moviepy.editor import VideoFileClip
 
 def crop(source, initial_time, end_time):
     clip = VideoFileClip(source)

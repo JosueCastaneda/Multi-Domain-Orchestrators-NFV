@@ -3,3 +3,4 @@
 *.webm
 venv/
 *.pyc
+*.pk
