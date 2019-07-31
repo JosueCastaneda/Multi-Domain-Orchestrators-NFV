@@ -1,6 +1,9 @@
 import os
 import pickle
 import socket
+import sys
+
+sys.path.append('../')
 
 from entities.communication_entity_package import CommunicationEntityPackage
 from entities.parameter_annotation_package import ParameterAnnotationPackage

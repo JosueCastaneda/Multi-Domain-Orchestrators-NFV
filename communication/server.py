@@ -2,7 +2,9 @@ import os
 import pickle
 import socket
 import time
+import sys
 
+sys.path.append('../')
 from entities.communication_entity_package import CommunicationEntityPackage
 from vnfs.annotate import annotate
 from vnfs.crop import crop
