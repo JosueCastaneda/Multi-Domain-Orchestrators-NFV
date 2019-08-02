@@ -14,9 +14,9 @@ from entities.parameter_resize_package import ParameterResizePackage
 
 
 def send_video(file_name: str, server: socket):
-    print("Sending video..")
     os.chdir("../videos")
     file_path = os.getcwd() + "/" + file_name
+    print("Sending video.. ", file_path)
     with open(file_path, "rb") as video:
         buffer = video.read()
         server.sendall(buffer)
@@ -73,9 +73,9 @@ def set_up_server(client: CommunicationEntityPackage) -> socket:
 
 
 def init_parameters():
-    host_server = '127.0.0.1'
+    host_server = '10.0.0.123'
     port_server = 65432
-    host_client = '127.0.0.1'
+    host_client = '12.0.0.123'
     port_client = port_server + 1
     filename = "small"
     format_file = ".mp4"
