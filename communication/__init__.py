@@ -1,2 +1,2 @@
-from .server import *
-from .client import *
+from .bidirectional_server import *
+from .bidirectional_client import *
