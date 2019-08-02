@@ -18,6 +18,11 @@ def send_video(file_name: str, server_s: socket):
     print("Sending video..")
     os.chdir("../communication")
     file_path = os.getcwd() + "/" + file_name
+
+    # Send first the name of the video
+    server_s.send(file_name.encode("UTF-8"))
+    print("Server response: ", server_s.recv(1024).decode("UTF-8"))
+
     with open(file_path, "rb") as video:
         buffer = video.read()
         server_s.sendall(buffer)

@@ -42,11 +42,16 @@ def read_video_package(buffer, client: socket, name_processed_video: str):
             video.write(buffer)
             buffer = client.recv(1024)
 
+def acknowledge_message(client: socket, message: str):
+    message_encoded = message.encode("UTF-8")
+    client.send(message_encoded)
 
 def serve_clients(server_connection: socket, name_processed_video: str):
     print("Listening for connections...")
     client_socket, address = server_connection.accept()
     print("Connection from: " + str(address))
+    print('The name sent by server is:', client_socket.recv(1024).decode("UTF-8"))
+    acknowledge_message(client_socket, "Ok")
     try:
         print("Starting to read bytes..")
         buffer = client_socket.recv(1024)

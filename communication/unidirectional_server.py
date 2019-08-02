@@ -95,10 +95,13 @@ def get_request_parameters(client: socket):
     return pickle.loads(parameters)
 
 
-def serve_clients(server_connection: socket, name_processed_video: str):
+def serve_clients(server_connection: socket):
     print("Listening for connections...")
     client_socket, address = server_connection.accept()
     print("Connection from: " + str(address))
+
+    name_processed_video = client_socket.recv(1024).decode("UTF-8")
+    acknowledge_message(client_socket, "Ok")
     try:
         print("Starting to read bytes..")
         buffer = client_socket.recv(1024)
