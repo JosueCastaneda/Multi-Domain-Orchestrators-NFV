@@ -78,8 +78,10 @@ def set_up_server(server_s: socket):
 
 
 def connect_to_server(host_server, port_server):
+    print("Attempting to connect....")
     s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     s.connect((host_server, port_server))
+    print('Connection with host: ', host_server + " " + port_server)
     return s
 
 
@@ -115,6 +117,7 @@ def serve_clients(server_connection: socket):
                 save_processed_video(video, parameters.file_pack.process_name)
 
                 # send process video back to client
+                print('Sending video to client:')
                 s_client = connect_to_server(parameters.new_client.host, parameters.new_client.port)
                 send_video(parameters.file_pack.full_name_processed(), s_client)
                 s_client.close()
