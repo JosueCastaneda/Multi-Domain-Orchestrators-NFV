@@ -78,10 +78,10 @@ def set_up_server(server_s: socket):
 
 
 def connect_to_server(host_server, port_server):
-    print("Attempting to connect.... ", host_server + " " + port_server)
+    print("Attempting to connect.... ", str(host_server) + " " + str(port_server))
     s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     s.connect((host_server, port_server))
-    print('Connection with host: ', host_server + " " + port_server)
+    print('Connection with host: ', str(host_server) + " " + str(port_server))
     return s
 
 

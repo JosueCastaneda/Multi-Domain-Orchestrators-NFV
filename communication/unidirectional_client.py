@@ -75,7 +75,7 @@ def set_up_server(client: CommunicationEntityPackage) -> socket:
 def init_parameters():
     host_server = '10.0.0.12'
     port_server = 65432
-    host_client = '12.0.0.13'
+    host_client = '10.0.0.13'
     port_client = port_server + 1
     filename = "small"
     format_file = ".mp4"
