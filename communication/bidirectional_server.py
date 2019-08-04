@@ -133,7 +133,7 @@ def serve_clients(server_connection: socket):
 
 
 def init_parameters() -> CommunicationEntityPackage:
-    host_server = "10.0.0.123"
+    host_server = "10.0.0.12"
     port_server = 65432
     max_clients = 5
     server_param = CommunicationEntityPackage(host_server, port_server, max_clients)
