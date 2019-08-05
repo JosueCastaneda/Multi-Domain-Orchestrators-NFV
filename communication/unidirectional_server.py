@@ -48,8 +48,9 @@ def process_package(data: str, parameters):
     return video, (end - start)
 
 
-def read_video_package(client_socket: socket, file_pack):
-    source_file_complete = file_pack.name + "_server" + file_pack.format
+# def read_video_package(client_socket: socket, name: str, parameters):
+def read_video_package(client_socket: socket, parameters):
+    source_file_complete = str(parameters.current_vnf_index) + "_" + parameters.file_pack.full_name_processed()
     buffer = client_socket.recv(1024)
 
     with open(source_file_complete, "wb") as video:
@@ -89,8 +90,7 @@ def acknowledge_message(client: socket, message: str):
 
 def get_request_parameters(client: socket):
     acknowledge_message(client, "Ok")
-    # TODO: This could be a potential problem for bigger messages
-    parameters = client.recv(1024)
+    parameters = client.recv(4096)
     acknowledge_message(client, "Ok")
     return pickle.loads(parameters)
 
@@ -100,22 +100,22 @@ def serve_clients(server_connection: socket):
     client_socket, address = server_connection.accept()
     print("Connection from: " + str(address))
 
-    name_processed_video = client_socket.recv(1024).decode("UTF-8")
-    acknowledge_message(client_socket, "Ok")
-    try:
-        print("Starting to read bytes..")
-        buffer = client_socket.recv(1024)
-        read_video_package(buffer, client_socket, name_processed_video)
-        client_socket.close()
-
-    except KeyboardInterrupt:
-        if client_socket:
+    operation = client_socket.recv(1024).decode("UTF-8")
+    if operation == "begin":
+        try:
+            parameters = get_request_parameters(client_socket)
+            print("Starting to read bytes..")
+            read_video_package(client_socket, parameters)
             client_socket.close()
+        except KeyboardInterrupt:
+            if client_socket:
+                client_socket.close()
     client_socket.close()
 
+
 def init_parameters() -> CommunicationEntityPackage:
-    host_server = "10.0.0.13"
-    port_server = 65432
+    host_server = "127.0.0.1"
+    port_server = 65435
     max_clients = 5
     server_param = CommunicationEntityPackage(host_server, port_server, max_clients)
     return server_param

@@ -1,7 +1,6 @@
 import os
 import pickle
 import socket
-import time
 import sys
 
 sys.path.append('../')
@@ -12,17 +11,13 @@ from vnfs.invert_colors import invert_colors
 from vnfs.resize_video import resize_video
 from vnfs.speed_up import speed_up_raw
 from vnfs.transcoder_mp4 import transcoder_mp4
+from entities.parameter_package import ParameterPackage
 
 
 def send_video(file_name: str, server_s: socket):
     print("Sending video..")
     os.chdir("../communication")
     file_path = os.getcwd() + "/" + file_name
-
-    # Send first the name of the video
-    server_s.send(file_name.encode("UTF-8"))
-    print("Server response: ", server_s.recv(1024).decode("UTF-8"))
-
     with open(file_path, "rb") as video:
         buffer = video.read()
         server_s.sendall(buffer)
@@ -30,10 +25,9 @@ def send_video(file_name: str, server_s: socket):
 
 def process_package(data: str, parameters):
     # Todo: Handle the selection of processing function with a pattern
-    virtual_function = parameters.operation
+    virtual_function = parameters.get_current_operation()
     full_name = os.getcwd() + "/" + data
 
-    start = time.time()
     if virtual_function == 'annotate':
         video = annotate(full_name, parameters.annotation_parameter.text)
     elif virtual_function == 'crop':
@@ -48,13 +42,12 @@ def process_package(data: str, parameters):
         video = resize_video(full_name, width, height)
     elif virtual_function == 'speed_up':
         video = speed_up_raw(full_name, parameters.speed_factor)
+    return video
 
-    end = time.time()
-    return video, (end - start)
-
-
+# TODO: The name of the package should be updated
 def read_video_package(client_socket: socket, file_pack):
     source_file_complete = file_pack.name + "_server" + file_pack.format
+    # I need to ack the server
     buffer = client_socket.recv(1024)
 
     with open(source_file_complete, "wb") as video:
@@ -77,11 +70,11 @@ def set_up_server(server_s: socket):
     return s
 
 
-def connect_to_server(host_server, port_server):
-    print("Attempting to connect.... ", str(host_server) + " " + str(port_server))
+def connect_to_server(server):
+    print("Attempting to connect.... ", str(server.host) + " " + str(server.port))
     s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-    s.connect((host_server, port_server))
-    print('Connection with host: ', str(host_server) + " " + str(port_server))
+    s.connect((server.host, server.port))
+    print('Connection with host: ', str(server.host) + " " + str(server.port))
     return s
 
 
@@ -95,11 +88,43 @@ def acknowledge_message(client: socket, message: str):
 
 
 def get_request_parameters(client: socket):
+    print("Sending ack to server 1")
     acknowledge_message(client, "Ok")
-    # TODO: This could be a potential problem for bigger messages
-    parameters = client.recv(1024)
+    parameters = client.recv(4096)
+    print("Sending ack to server 2")
     acknowledge_message(client, "Ok")
     return pickle.loads(parameters)
+
+# TODO: Update function definition to include the new name
+# def send_video_to_client(parameters, new_name_file: str):
+def send_video_to_client(parameters):
+    print('Sending video to client:')
+    parameters.increase_time()
+    parameters.increase_current_vnf()
+    parameters.file_pack.name = parameters.file_pack.full_name_processed()
+    s_client = connect_to_server(parameters.get_current_vnf_server())
+    send_parameters(s_client, parameters)
+    send_video(parameters.file_pack.full_name_processed(), s_client)
+    s_client.close()
+
+
+# TODO: Document function with python docstrings
+def send_parameters(server_socket: socket, parameters: ParameterPackage):
+    print('Sending parameters..')
+    initial_message = "begin"
+    server_socket.send(initial_message.encode("UTF-8"))
+    print("Server response: ", server_socket.recv(1024).decode("UTF-8"))
+    data_string = pickle.dumps(parameters)
+    server_socket.send(data_string)
+    print("Server response: ", server_socket.recv(1024).decode("UTF-8"))
+
+
+def process_video(client_socket: socket, parameters):
+    video_file_name = read_video_package(client_socket, parameters.file_pack)
+    print("The filename is: ", video_file_name)
+    video = process_package(video_file_name, parameters)
+    save_processed_video(video, parameters.file_pack.process_name)
+    return video_file_name
 
 
 def serve_clients(server_connection: socket):
@@ -112,18 +137,9 @@ def serve_clients(server_connection: socket):
         if operation_request == "begin":
             try:
                 parameters = get_request_parameters(client_socket)
-                video_file_name = read_video_package(client_socket, parameters.file_pack)
-                video, time_processing = process_package(video_file_name, parameters)
-                save_processed_video(video, parameters.file_pack.process_name)
-
-                # send process video back to client
-                print('Sending video to client:')
-                s_client = connect_to_server(parameters.new_client.host, parameters.new_client.port)
-                send_video(parameters.file_pack.full_name_processed(), s_client)
-                s_client.close()
-
-                # Delete the video both video files
-                remove_videos(video_file_name, parameters.file_pack.full_name_processed())
+                original_video_name = process_video(client_socket, parameters)
+                send_video_to_client(parameters)
+                # remove_videos(original_video_name, parameters.file_pack.full_name_processed())
                 client_socket.close()
             except KeyboardInterrupt:
                 if client_socket:
@@ -133,7 +149,7 @@ def serve_clients(server_connection: socket):
 
 
 def init_parameters() -> CommunicationEntityPackage:
-    host_server = "10.0.0.12"
+    host_server = "127.0.0.1"
     port_server = 65432
     max_clients = 5
     server_param = CommunicationEntityPackage(host_server, port_server, max_clients)

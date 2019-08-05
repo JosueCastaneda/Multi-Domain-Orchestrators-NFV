@@ -2,6 +2,7 @@ import os
 import pickle
 import socket
 import sys
+import time
 
 sys.path.append('../')
 
@@ -21,7 +22,6 @@ def send_video(file_name: str, server: socket):
         buffer = video.read()
         server.sendall(buffer)
     print("Video sent..")
-
 
 # TODO: Document function with python docstrings
 def send_parameters(server_socket: socket, parameters: ParameterPackage):
@@ -76,6 +76,8 @@ def set_up_server(client: CommunicationEntityPackage) -> socket:
     s.listen(client.max_clients)
     return s
 
+def get_current_time():
+    return time.time()
 
 def init_parameters():
     host_server = '127.0.0.1'
@@ -102,14 +104,14 @@ def init_parameters():
     resize_pack = ParameterResizePackage(width, height)
 
     parameters = ParameterPackage(file_pack, operation, speed_factor=speed_factor, second=second,
-                                  new_client=new_client, new_server=server, crop=parameter_crop,
+                                  vnf_servers=server, crop=parameter_crop,
                                   annotation=annotation_pack, resize=resize_pack)
     return parameters
 
-
+# TODO: Update this class to containe up to date definitions
 if __name__ == '__main__':
     param = init_parameters()
-    client_connection_server = connect_to_server(param.new_server.host, param.new_server.port)
+    client_connection_server = connect_to_server(param.vnf_servers.host, param.vnf_servers.port)
     send_parameters(client_connection_server, param)
     send_video(param.file_pack.full_name_original(), client_connection_server)
     client_connection_server.close()

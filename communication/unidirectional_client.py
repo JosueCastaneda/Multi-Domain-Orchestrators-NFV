@@ -59,9 +59,9 @@ def serve_clients(server_connection: socket, name_processed_video: str):
     client_socket.close()
 
 
-def connect_to_server(host_server: str, port_server:str):
+def connect_to_server(server):
     s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-    s.connect((host_server, port_server))
+    s.connect((server.host, server.port))
     return s
 
 
@@ -73,38 +73,42 @@ def set_up_server(client: CommunicationEntityPackage) -> socket:
 
 
 def init_parameters():
-    host_server = '10.0.0.12'
-    port_server = 65432
-    host_client = '10.0.0.13'
-    port_client = port_server + 1
     filename = "small"
     format_file = ".mp4"
-    operation = "speed_up"
-    filename_processed = "small_processed_" + operation
+    # TODO: Implement serving multiple clients at once
     max_clients = 1
     speed_factor = 2
     text = "Test"
     width = 200
     height = 200
     second = "grb_2"
+    servers = list()
+    operations = ["speed_up", "annotate", "invert_colors"]
+    filename_processed = "small_processed_" + operations[0]
+    number_servers = 4
+    # TODO: This can be done with a cycle
+    host_server = '127.0.0.1'
+    port_server = 65432
+
+    for i in range(number_servers):
+        servers.append(CommunicationEntityPackage(host_server, port_server))
+        port_server += 1
 
     # Packages
     file_pack = ParameterFilePackage(filename, format_file, filename_processed)
     parameter_crop = ParameterCropPackage(2, 4)
-    server = CommunicationEntityPackage(host_server, port_server)
-    new_client = CommunicationEntityPackage(host_client, port_client, max_clients)
     annotation_pack = ParameterAnnotationPackage(text)
     resize_pack = ParameterResizePackage(width, height)
 
-    parameters = ParameterPackage(file_pack, operation, speed_factor=speed_factor, second=second,
-                                  new_client=new_client, new_server=server, crop=parameter_crop,
+    parameters = ParameterPackage(file_pack, operations, speed_factor=speed_factor, second=second,
+                                  vnf_servers=servers, crop=parameter_crop,
                                   annotation=annotation_pack, resize=resize_pack)
     return parameters
 
 
 if __name__ == '__main__':
     param = init_parameters()
-    client_connection_server = connect_to_server(param.new_server.host, param.new_server.port)
+    client_connection_server = connect_to_server(param.get_current_vnf_server())
     send_parameters(client_connection_server, param)
     send_video(param.file_pack.full_name_original(), client_connection_server)
     client_connection_server.close()
