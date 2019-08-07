@@ -105,7 +105,12 @@ def serve_clients(server_connection: socket):
         try:
             parameters = get_request_parameters(client_socket)
             print("Starting to read bytes..")
-            read_video_package(client_socket, parameters)
+            file_name = read_video_package(client_socket, parameters)
+            total_time = (time.time() - parameters.latest_time) + parameters.processed_time
+            print("Time taken: ", total_time)
+            pickle.dump(total_time, open("time_" + file_name+".pk", "wb"))
+            x = pickle.load(open("time_" + file_name+".pk", "rb"))
+            print("Time taken retrieved: ", x)
             client_socket.close()
         except KeyboardInterrupt:
             if client_socket:
