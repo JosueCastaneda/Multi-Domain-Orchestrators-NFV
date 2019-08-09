@@ -88,10 +88,8 @@ def acknowledge_message(client: socket, message: str):
 
 
 def get_request_parameters(client: socket):
-    print("Sending ack to server 1")
     acknowledge_message(client, "Ok")
     parameters = client.recv(4096)
-    print("Sending ack to server 2")
     acknowledge_message(client, "Ok")
     return pickle.loads(parameters)
 
