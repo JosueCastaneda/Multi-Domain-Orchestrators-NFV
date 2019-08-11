@@ -1,16 +1,31 @@
+import os
+
 from moviepy.editor import VideoFileClip, TextClip, CompositeVideoClip
 
+from communication.messages.abstract import AbstractMessage
+from entities.parameter_annotation_package import ParameterAnnotationPackage
 
-def annotate(source, text, duration=2, font_size=50, color="white"):
 
-    main_clip = VideoFileClip(source)
+class Annotate(AbstractMessage):
 
-    # Generate a text clip. You can customize the font, color, etc.
-    txt_clip = TextClip(text, fontsize=font_size, color=color)
+    def __init__(self, data):
+        super().__init__(data)
 
-    # Say that you want it to appear 10s at the center of the screen
-    txt_clip = txt_clip.set_pos('center').set_duration(duration)
+    def process_package(self, source: str, parameters: ParameterAnnotationPackage):
+        main_clip = VideoFileClip(source)
+        txt_clip = TextClip(parameters.text, fontsize=parameters.font_size, color=parameters.color)
+        txt_clip = txt_clip.set_pos('center').set_duration(parameters.duration)
+        video = CompositeVideoClip([main_clip, txt_clip])
+        return video
 
-    # Overlay the text clip on the first video clip
-    video = CompositeVideoClip([main_clip, txt_clip])
-    return video
+    def process_message(self):
+        self.current_server.acknowledge_message(self.client_socket, "OK")
+
+        video_file_name = self.current_server.read_video_package(self.data.file_pack, self.client_socket)
+        video = self.process_package(os.getcwd() + "/" + video_file_name, self.data.annotation_parameter)
+
+        self.current_server.save_processed_video(video, self.data.file_pack.process_name, self.data.file_pack.format)
+
+        self.current_server.send_video_to_client(self.data)
+
+        self.terminate_connections()

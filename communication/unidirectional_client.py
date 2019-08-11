@@ -5,12 +5,8 @@ import sys
 
 sys.path.append('../')
 
-from entities.communication_entity_package import CommunicationEntityPackage
-from entities.parameter_annotation_package import ParameterAnnotationPackage
-from entities.parameter_crop_package import ParameterCropPackage
-from entities.parameter_file_package import ParameterFilePackage
-from entities.parameter_package import ParameterPackage
-from entities.parameter_resize_package import ParameterResizePackage
+from entities import *
+from vnfs import *
 
 
 def send_video(file_name: str, server: socket):
@@ -26,9 +22,6 @@ def send_video(file_name: str, server: socket):
 # TODO: Document function with python docstrings
 def send_parameters(server_socket: socket, parameters: ParameterPackage):
     print('Sending parameters..')
-    initial_message = "begin"
-    server_socket.send(initial_message.encode("UTF-8"))
-    print("Server response: ", server_socket.recv(1024).decode("UTF-8"))
     data_string = pickle.dumps(parameters)
     server_socket.send(data_string)
     print("Server response: ", server_socket.recv(1024).decode("UTF-8"))
@@ -83,9 +76,9 @@ def init_parameters():
     height = 200
     second = "grb_2"
     servers = list()
-    operations = ["speed_up", "annotate", "invert_colors"]
+    operations = ["annotate", "invert_colors", "speed_up"]
     filename_processed = "small_processed_" + operations[0]
-    number_servers = 4
+    number_servers = 2
     # TODO: This can be done with a cycle
     host_server = '127.0.0.1'
     port_server = 65432
@@ -103,12 +96,14 @@ def init_parameters():
     parameters = ParameterPackage(file_pack, operations, speed_factor=speed_factor, second=second,
                                   vnf_servers=servers, crop=parameter_crop,
                                   annotation=annotation_pack, resize=resize_pack)
-    return parameters
+
+    anotate_parameters = ResizeVideo(parameters)
+    return anotate_parameters
 
 
 if __name__ == '__main__':
     param = init_parameters()
-    client_connection_server = connect_to_server(param.get_current_vnf_server())
+    client_connection_server = connect_to_server(param.data.get_current_vnf_server())
     send_parameters(client_connection_server, param)
-    send_video(param.file_pack.full_name_original(), client_connection_server)
+    send_video(param.data.file_pack.full_name_original(), client_connection_server)
     client_connection_server.close()

@@ -1,13 +1,11 @@
+import os
 import pickle
 import socket
-import sys
 
-sys.path.append('../')
-from entities.communication_entity_package import CommunicationEntityPackage
-from communication.message_handler import MessageHandler
-from entities.message_type import MessageType
-from communication.messages.migration import MigrationMessage
 from communication.messages.abstract import AbstractMessage
+from communication.messages.migration import MigrationMessage
+from entities.communication_entity_package import CommunicationEntityPackage
+from entities.message_type import MessageType
 from entities.topology import Topology
 
 
@@ -17,7 +15,6 @@ class GenericServer:
         self.send_channel = None
         self.receive_channel = None
         self.set_up_receive_channel(socket_pkg)
-        self.message_handler = MessageHandler(self)
         self.orchestrator = orchestrator
 
     def serve_clients(self):
@@ -27,6 +24,8 @@ class GenericServer:
             print("Connection from: " + str(address))
             try:
                 message = self.get_message(client_socket)
+                message.current_server = self
+                message.client_socket = client_socket
                 message.process_message()
             except KeyboardInterrupt:
                 if client_socket:
@@ -55,9 +54,14 @@ class GenericServer:
         ans = self.request_channel.recv(1024).decode("UTF-8")
         return ans
 
-    def get_message(self, client: socket):
+    def get_ack(self, client: socket):
+        ans = client.recv(1024).decode("UTF-8")
+        return ans
+
+    def get_message(self, client: socket) -> AbstractMessage:
+        # TODO: This gets errors
         parameters = client.recv(4096)
-        self.acknowledge_message(client, "Ok")
+        # self.acknowledge_message(client, str(MessageType.MSG_RECIVED))
         return pickle.loads(parameters)
 
     def generate_new_message_parameters(self, vnf_topology: Topology):
@@ -73,13 +77,47 @@ class GenericServer:
         print('Sending Message..')
         data_string = pickle.dumps(message)
         self.send_channel.send(data_string)
-        # Answer from the client
         answer_message = pickle.loads(self.send_channel.recv(4096))
         self.acknowledge_message(self.send_channel, str(MessageType.MSG_RECIVED))
-        message_type = answer_message.operation
-        new_message = self.generate_new_message_parameters(answer_message.topology)
-        return message_type, new_message
+        return answer_message
 
+    def read_video_package(self, file_pack, client_socket):
+        source_file_complete = file_pack.name + "_server" + file_pack.format
+        buffer = client_socket.recv(1024)
+        with open(source_file_complete, "wb") as video:
+            while buffer:
+                video.write(buffer)
+                buffer = client_socket.recv(1024)
+        return source_file_complete
 
+    # TODO: Update function definition to include the new name
+    def send_video_to_client(self, parameters):
+        print('Sending video to client:')
+        parameters.increase_time()
+        parameters.increase_current_vnf()
+        parameters.file_pack.name = parameters.file_pack.full_name_processed()
+        self.connect_to_another_server(parameters.get_current_vnf_server())
+        self.send_message(parameters)
+        self.get_ack(self.send_channel)
+        self.send_video(parameters.file_pack.full_name_processed())
 
+    def send_video(self, file_name: str):
+        print("Sending video..")
+        # os.chdir("../communication")
+        file_path = os.getcwd() + "/" + file_name
+        with open(file_path, "rb") as video:
+            buffer = video.read()
+            self.send_channel.sendall(buffer)
 
+    # TODO: Change constants by using polymorphism
+    def save_processed_video(self, video, name: str, format=""):
+        if format == ".mp4":
+            self.transcoder_mp4(video, name)
+        elif format == ".webm":
+            self.transcoder_web(video, name)
+
+    def transcoder_mp4(self, source_clip, name):
+        source_clip.write_videofile(name + ".mp4")
+
+    def transcoder_web(self, source_clip, name):
+        source_clip.write_videofile(name + ".webm")

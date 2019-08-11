@@ -7,12 +7,12 @@ from communication.messages.vnf_found import VNFFound
 
 class SearchVNFMessage(AbstractMessage):
 
-    def __init__(self, server):
-        self.server = server
+    def __init__(self, server=None):
+        self.current_server = server
         print('Hello')
 
     def process_message(self):
-        vnf_local = self.server.orchestrator.get_local_vnf(self.parameters.source_vnf)
+        vnf_local = self.current_server.orchestrator.get_local_vnf(self.parameters.source_vnf)
         if vnf_local is None:
             answer = VNFNotFound(self.data)
         else:

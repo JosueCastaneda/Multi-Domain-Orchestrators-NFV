@@ -1,5 +1,6 @@
 import time
 
+
 class ParameterPackage:
 
     def __init__(self, file_pack, operations,
@@ -17,7 +18,6 @@ class ParameterPackage:
         self.resize_parameter = resize
         # Current time when this package was generated
         self.latest_time = time.time()
-        # TODO: Update this time, it will be sent by the server to multiple clients
         self.processed_time = 0
 
     def increase_time(self):
@@ -26,7 +26,8 @@ class ParameterPackage:
         self.latest_time = new_latest_time
 
     def increase_current_vnf(self):
-        self.current_vnf_index += 1
+        if len(self.vnf_servers) > self.current_vnf_index + 1:
+            self.current_vnf_index += 1
 
     def get_current_vnf_server(self):
         return self.vnf_servers[self.current_vnf_index]

@@ -1,8 +1,5 @@
-import sys
-
-sys.path.append('../')
 from communication.generic_server import GenericServer
-from entities.message_type import MessageType
+from communication.messages.vnf_found import VNFFound
 
 
 class Orchestrator:
@@ -24,6 +21,14 @@ class Orchestrator:
                 return vnf
         return None
 
+    # TODO: Implement this function
+    def handle_add_orchestrator(self, parameters):
+        self.add_orchestrator(parameters.orchestrator)
+
+    # TODO:Implement this function
+    def handle_add_vnf(self, parameters):
+        self.vnfs.append(parameters.vnf)
+
     def add_orchestrator(self, orchestrator):
         self.orchestrators.append(orchestrator)
 
@@ -36,11 +41,11 @@ class Orchestrator:
 
     # TODO: Implement the new vnf and its parameters for the link using threads
     def send_message_to_orchestrators(self, message):
+        message.source_server = self.server
         for o in self.orchestrators:
             self.server.connect_to_another_server(o.server)
-            answer, new_vnf_message = self.server.send_message_query_vnf(message)
+            answer_message = self.server.send_message_query_vnf(message)
             self.server.disconnect_send_channel()
-            if answer == MessageType.VNF_FOUND:
-                return new_vnf_message
+            if isinstance(answer_message, VNFFound):
+                return answer_message
         return None
-
