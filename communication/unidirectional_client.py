@@ -3,10 +3,23 @@ import pickle
 import socket
 import sys
 
+
 sys.path.append('../')
 
-from entities import *
-from vnfs import *
+from entities.message_type import MessageType
+# from entities import *
+# from vnfs import *
+from entities.communication_entity_package import CommunicationEntityPackage
+from entities.parameter_annotation_package import ParameterAnnotationPackage
+from entities.parameter_crop_package import ParameterCropPackage
+from entities.parameter_file_package import ParameterFilePackage
+from entities.parameter_package import ParameterPackage
+from entities.parameter_resize_package import ParameterResizePackage
+from vnfs.annotate import Annotate
+from vnfs.speed_up import SpeedUp
+from vnfs.invert_colors import InvertColors
+from vnfs.crop import Crop
+from vnfs.resize_video import ResizeVideo
 
 
 def send_video(file_name: str, server: socket):
@@ -76,9 +89,10 @@ def init_parameters():
     height = 200
     second = "grb_2"
     servers = list()
-    operations = ["annotate", "invert_colors", "speed_up"]
-    filename_processed = "small_processed_" + operations[0]
-    number_servers = 2
+    # operations = ["annotate", "invert_colors", "speed_up"]
+    operations = [MessageType.ANNOTATE, MessageType.INVERT_COLORS, MessageType.SPEED_UP]
+    filename_processed = "small_processed_" + str(operations[0])
+    number_servers = 4
     # TODO: This can be done with a cycle
     host_server = '127.0.0.1'
     port_server = 65432
@@ -97,7 +111,7 @@ def init_parameters():
                                   vnf_servers=servers, crop=parameter_crop,
                                   annotation=annotation_pack, resize=resize_pack)
 
-    anotate_parameters = ResizeVideo(parameters)
+    anotate_parameters = Annotate(parameters)
     return anotate_parameters
 
 

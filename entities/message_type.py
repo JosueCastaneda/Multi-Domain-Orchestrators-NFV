@@ -1,5 +1,6 @@
 from enum import Enum
 
+
 class MessageType(Enum):
     MIGRATION = 1
     SEARCH_VNF = 2

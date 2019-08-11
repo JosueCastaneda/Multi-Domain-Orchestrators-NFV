@@ -47,10 +47,6 @@ def connect_to_server(host_server, port_server):
     return s
 
 
-def save_processed_video(video, name: str):
-    transcoder_mp4(video, name)
-
-
 def acknowledge_message(client: socket, message: str):
     message_encoded = message.encode("UTF-8")
     client.send(message_encoded)
@@ -84,7 +80,7 @@ def serve_clients(server_connection: socket):
 
 def init_parameters() -> CommunicationEntityPackage:
     host_server = "127.0.0.1"
-    port_server = 65433
+    port_server = 65435
     max_clients = 5
     server_param = CommunicationEntityPackage(host_server, port_server, max_clients)
     return server_param

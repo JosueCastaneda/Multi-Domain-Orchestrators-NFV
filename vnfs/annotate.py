@@ -28,4 +28,6 @@ class Annotate(AbstractMessage):
 
         self.current_server.send_video_to_client(self.data)
 
+        # TODO: We need to send the parameters
+
         self.terminate_connections()

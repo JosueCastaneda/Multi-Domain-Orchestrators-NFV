@@ -2,11 +2,22 @@ import os
 import pickle
 import socket
 
+import sys
+
+
+sys.path.append('../')
+print(sys.path)
+
 from communication.messages.abstract import AbstractMessage
 from communication.messages.migration import MigrationMessage
 from entities.communication_entity_package import CommunicationEntityPackage
 from entities.message_type import MessageType
 from entities.topology import Topology
+from vnfs.annotate import Annotate
+from vnfs.speed_up import SpeedUp
+from vnfs.invert_colors import InvertColors
+from vnfs.crop import Crop
+from vnfs.resize_video import ResizeVideo
 
 
 class GenericServer:
@@ -97,7 +108,24 @@ class GenericServer:
         parameters.increase_current_vnf()
         parameters.file_pack.name = parameters.file_pack.full_name_processed()
         self.connect_to_another_server(parameters.get_current_vnf_server())
-        self.send_message(parameters)
+
+        # TODO: Use polimorphism
+        if len(parameters.operations) > parameters.current_vnf_index:
+            new_operation = parameters.operations[parameters.current_vnf_index]
+            if new_operation == MessageType.ANNOTATE:
+                new_parameters = Annotate(parameters)
+            elif new_operation == MessageType.SPEED_UP:
+                new_parameters = SpeedUp(parameters)
+            elif new_operation == MessageType.INVERT_COLORS:
+                new_parameters = InvertColors(parameters)
+            elif new_operation == MessageType.CROP:
+                new_parameters = Crop(parameters)
+            elif new_operation == MessageType.RESIZE:
+                new_parameters = ResizeVideo(parameters)
+        else:
+            new_parameters = parameters
+
+        self.send_message(new_parameters)
         self.get_ack(self.send_channel)
         self.send_video(parameters.file_pack.full_name_processed())
 

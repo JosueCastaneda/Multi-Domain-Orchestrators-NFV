@@ -14,7 +14,7 @@ if __name__ == '__main__':
 
     # VNF
     vnf_host = "127.0.0.1"
-    vnf_port = 65432
+    vnf_port = 65434
     vnf_name = "annotate"
     annotate_vnf = GenericVNF(vnf_host, vnf_port, vnf_name)
 
