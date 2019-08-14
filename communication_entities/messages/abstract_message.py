@@ -1,5 +1,9 @@
 class AbstractMessage:
-
+    """
+        This class represents a generic message, all messages
+        have the process_message function and override it with
+        their own implementation
+    """
     def __init__(self, data, client=None, source_server=None):
         self.data = data
         self.client = client

@@ -2,7 +2,7 @@ import os
 
 from moviepy.editor import VideoFileClip, TextClip, CompositeVideoClip
 
-from communication.messages.abstract import AbstractMessage
+from communication.messages.abstract_message import AbstractMessage
 from entities.parameter_annotation_package import ParameterAnnotationPackage
 
 
@@ -27,7 +27,5 @@ class Annotate(AbstractMessage):
         self.current_server.save_processed_video(video, self.data.file_pack.process_name, self.data.file_pack.format)
 
         self.current_server.send_video_to_client(self.data)
-
-        # TODO: We need to send the parameters
 
         self.terminate_connections()

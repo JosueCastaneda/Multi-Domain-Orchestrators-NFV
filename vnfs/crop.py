@@ -2,7 +2,7 @@ import os
 
 from moviepy.editor import VideoFileClip
 
-from communication.messages.abstract import AbstractMessage
+from communication.messages.abstract_message import AbstractMessage
 from entities.parameter_crop_package import ParameterCropPackage
 
 

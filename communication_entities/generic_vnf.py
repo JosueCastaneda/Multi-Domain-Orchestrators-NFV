@@ -4,9 +4,9 @@ import sys
 
 sys.path.append('../')
 
-from communication.generic_server import GenericServer
+from communication_entities.generic_server import GenericServer
 from entities.communication_entity_package import CommunicationEntityPackage
-from communication.messages.add_vnf_message import AddVNF
+from communication_entities.messages.add_vnf_message import AddVNF
 from utilities.logger import *
 
 

@@ -6,8 +6,8 @@ import sys
 
 sys.path.append('../')
 
-from communication.messages.abstract_message import AbstractMessage
-from communication.messages.topology_message import TopologyMessage
+from communication_entities.messages.abstract_message import AbstractMessage
+from communication_entities.messages.topology_message import TopologyMessage
 from utilities.message_type import MessageType
 from entities.parameter_package import ParameterPackage
 from entities.topology import Topology

@@ -1,11 +1,13 @@
 import time
 
 
+# TODO: Refactor this class, it has many responsibilities and bloated construction
 class ParameterPackage:
 
-    def __init__(self, file_pack, operations,
+    def __init__(self, file_pack=None, operations=None,
                  speed_factor=0, second="", audio_file="",
-                 vnf_servers=None, annotation=None, crop=None, resize=None):
+                 vnf_servers=None, annotation=None, crop=None, resize=None,
+                 vnf_name="", topology=None):
         self.file_pack = file_pack
         self.operations = operations
         self.vnf_servers = vnf_servers
@@ -19,6 +21,8 @@ class ParameterPackage:
         # Current time when this package was generated
         self.latest_time = time.time()
         self.processed_time = 0
+        self.vnf_name = vnf_name
+        self.topology = topology
 
     def increase_time(self):
         new_latest_time = time.time()

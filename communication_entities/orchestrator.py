@@ -3,9 +3,9 @@ import sys
 
 sys.path.append('../')
 
-from communication.generic_server import GenericServer
+from communication_entities.generic_server import GenericServer
 from entities.communication_entity_package import CommunicationEntityPackage
-from communication.messages.vnf_found_message import VNFFound
+from communication_entities.messages.vnf_found_message import VNFFound
 from utilities.logger import *
 
 class Orchestrator:

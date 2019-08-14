@@ -5,7 +5,7 @@ sys.path.append('../')
 
 from moviepy.editor import VideoFileClip, vfx
 
-from communication.messages.abstract import AbstractMessage
+from communication.messages.abstract_message import AbstractMessage
 
 
 class SpeedUp(AbstractMessage):

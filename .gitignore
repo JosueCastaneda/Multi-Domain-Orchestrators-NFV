@@ -1,6 +1,9 @@
 .idea/
+example_scripts/
+tests/
+venv/
 *.mp4
 *.webm
-venv/
 *.pyc
 *.pk
+*.log

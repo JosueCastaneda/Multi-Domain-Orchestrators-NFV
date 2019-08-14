@@ -2,24 +2,31 @@ import sys
 
 sys.path.append('../')
 
-from communication.generic_vnf import GenericVNF
+
+from entities.communication_entity_package import CommunicationEntityPackage
+from communication_entities.generic_vnf import GenericVNF
+from entities.topology import Topology
 
 # TODO: Create scripts and use threads and non-blocking sockets to run the example in a single machine
 if __name__ == '__main__':
-    # Unidirectional Client
-    # client_host = "127.0.0.1"
-    # client_port = 65431
-    # client_name = "client"
-    # client = GenericVNF(client_host, client_port, client_name)
+
+    # Orchestrator
+    orchestrator_host = "127.0.0.1"
+    orchestrator_port = 65431
+    orchestrator = CommunicationEntityPackage(orchestrator_host, orchestrator_port)
 
     # VNF
     vnf_host = "127.0.0.1"
-    vnf_port = 65434
-    vnf_name = "annotate"
-    annotate_vnf = GenericVNF(vnf_host, vnf_port, vnf_name)
-
-    # Unidirectional Server
-    # server_host = "127.0.0.1"
-    # server_port = 65433
-    # server_name = "server"
-    # server = GenericVNF(server_host, server_port, server_name)
+    if orchestrator_port == 65431:
+        vnf_port = 65437
+        vnf_name = "annotate"
+        top = Topology(10, 2, 1.5, 2)
+    elif orchestrator_port == 65433:
+        vnf_port = 65439
+        vnf_name = "speed_up"
+        top = Topology(22, 22, 13.5, 42)
+    elif orchestrator_port == 65435:
+        vnf_port = 65441
+        vnf_name = "invert_color"
+        top = Topology(40, 25, 8.5, 32)
+    annotate_vnf = GenericVNF(vnf_host, vnf_port, vnf_name, topology=top, orchestrator=orchestrator)

@@ -30,11 +30,11 @@ class ParameterFilePackage:
             Return the name with format of the source file
         :return: name plus format of source file
         """
-        return self.name + self.format
+        return ''.join([self.name, self.format])
 
     def full_name_processed(self):
         """
             Return the name with format of the processed file
         :return: names plus format of processed file
         """
-        return self.process_name + self.format
+        return ''.join([self.process_name, self.format])

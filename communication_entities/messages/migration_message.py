@@ -1,5 +1,5 @@
-from communication.messages.abstract_message import AbstractMessage
-from communication.messages.search_vnf_message import SearchVNFMessage
+from communication_entities.messages.abstract_message import AbstractMessage
+from communication_entities.messages.search_vnf_message import SearchVNFMessage
 from entities.parameter_package import ParameterPackage
 from utilities.logger import *
 
