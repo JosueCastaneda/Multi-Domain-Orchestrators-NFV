@@ -6,6 +6,8 @@ class AbstractMessage:
         self.source_server = source_server
         self.current_server = None
         self.client_socket = None
+        self.client_addres = None
+        self.test_server = None
 
     def process_message(self):
         pass
