@@ -2,7 +2,7 @@ import os
 
 from moviepy.editor import VideoFileClip, TextClip, CompositeVideoClip
 
-from communication.messages.abstract_message import AbstractMessage
+from communication_entities.messages.abstract_message import AbstractMessage
 from entities.parameter_annotation_package import ParameterAnnotationPackage
 
 

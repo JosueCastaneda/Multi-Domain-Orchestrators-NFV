@@ -15,13 +15,22 @@ class SearchVNFMessage(AbstractMessage):
         if vnf_local is None:
             log.info("VNF not Found!")
             answer = VNFNotFound(self.data)
+            log.info(''.join(["Sending message to", str(self.client_addres)]))
+            self.current_server.connect_to_another_server(self.test_server)
+            self.current_server.send_message(answer)
+            self.current_server.get_ack_channel()
+            self.current_server.disconnect_send_channel()
+            self.terminate_connections()
         else:
             log.info("Found!")
             self.data.topology = vnf_local[2]
+            self.data.topology.ip = vnf_local[0]
+            self.data.topology.port = vnf_local[1]
             answer = VNFFound(self.data)
-        log.info(''.join(["Sending message to", str(self.client_addres)]))
-        self.current_server.connect_to_another_server(self.test_server)
-        self.current_server.send_message(answer)
-        self.current_server.get_ack_channel()
-        self.current_server.disconnect_send_channel()
-        self.terminate_connections()
+            log.info(''.join(["Sending message to", str(self.client_addres)]))
+            self.current_server.connect_to_another_server(self.test_server)
+            self.current_server.send_message(answer)
+            self.current_server.get_ack_channel()
+            self.current_server.disconnect_send_channel()
+            # self.current_server.handle_migration()
+            self.terminate_connections()

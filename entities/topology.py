@@ -5,6 +5,8 @@ class Topology:
         self.bw = bandwidth
         self.loss = loss
         self.jitter = jitter
+        self.ip = None
+        self.port = None
 
     def set_delay(self, val):
         self.delay = val
@@ -41,3 +43,11 @@ class Topology:
 
     def decrease_jitter(self, val):
         self.jitter -= val
+
+    def to_string(self):
+        return ''.join(["IP: ", self.ip,
+                        " Port: ", str(self.port),
+                        " Delay: ", str(self.delay),
+                        " Bandwidth: ", str(self.bw),
+                        " Loss: ", str(self.loss),
+                        " Jitter: ", str(self.jitter)])

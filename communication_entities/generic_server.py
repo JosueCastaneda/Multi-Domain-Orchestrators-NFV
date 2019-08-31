@@ -19,12 +19,17 @@ from vnfs.resize_video import ResizeVideo
 from utilities.socket_size import SocketSize
 from utilities.logger import *
 
+
 class GenericServer:
 
     def __init__(self, orchestrator, socket_pkg=None):
         self.send_channel = None
         self.receive_channel = None
         self.receive_two_communication_channel = None
+        self.send_virtual_channel = None
+        self.send_orchestrator_channel = None
+        # FIXME: Temporary solution because a virtual link needs to be established
+        self.sockt_pkg = socket_pkg
         if socket_pkg is not None:
             self.set_up_receive_channel(socket_pkg)
         self.orchestrator = orchestrator
@@ -39,10 +44,12 @@ class GenericServer:
             log.info(''.join(["Connection from: ", str(address)]))
             try:
                 message = self.get_message(client_socket)
+                print(type(message))
                 message.current_server = self
                 message.client_addres = address
                 message.client_socket = client_socket
                 message.process_message()
+                print("CONNECTIONS ENDED")
             except KeyboardInterrupt:
                 log.exception("Keyboard interruption")
                 if client_socket:
@@ -54,6 +61,14 @@ class GenericServer:
         self.send_channel = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         self.send_channel.connect((server.host, server.port))
 
+    def connect_to_orchestrator(self, server):
+        self.send_orchestrator_channel = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        self.send_orchestrator_channel.connect((server.host, server.port))
+
+    def connect_to_another_server_virtual(self, server):
+        self.send_virtual_channel = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        self.send_virtual_channel.connect((server.host, server.port))
+
     def wait_for_reply_two_communication_channel(self):
         conn, addr = self.receive_two_communication_channel.accept()
         answer_two_channel = conn.recv(SocketSize.RECEIVE_BUFFER.value)
@@ -63,6 +78,9 @@ class GenericServer:
 
     def disconnect_send_channel(self):
         self.send_channel.close()
+
+    def disconnect_send_virtual_channel(self):
+        self.send_virtual_channel.close()
 
     def set_up_two_communication_channel(self, socket_pkg):
         self.receive_two_communication_channel = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
@@ -77,6 +95,11 @@ class GenericServer:
     def acknowledge_message(self, client: socket, message: str):
         message_encoded = message.encode("UTF-8")
         client.send(message_encoded)
+
+    def send_message_to_socket(self, client: socket, message):
+        log.info("Sending Message using socket: ")
+        data_string = pickle.dumps(message)
+        client.send(data_string)
 
     def get_ack_channel(self):
         return self.send_channel.recv(SocketSize.ACK_BUFFER.value).decode("UTF-8")
@@ -98,6 +121,16 @@ class GenericServer:
         log.info("Sending Message using send_channel")
         data_string = pickle.dumps(message)
         self.send_channel.send(data_string)
+
+    def send_message_to_orchestrator(self, message):
+        log.info("Sending Message using send_channel_orchestrator")
+        data_string = pickle.dumps(message)
+        self.send_orchestrator_channel.send(data_string)
+
+    def send_message_virtual(self, message):
+        log.info("Sending Message using send_virtual_channel")
+        data_string = pickle.dumps(message)
+        self.send_virtual_channel.send(data_string)
 
     def send_message_query_vnf(self, message):
         log.info("Sending Message using send_channel")

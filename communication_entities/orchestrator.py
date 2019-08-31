@@ -32,11 +32,20 @@ class Orchestrator:
     def add_vnf(self, vnf_host, vnf_port, vnf_name, topology):
         self.vnfs[vnf_name] = [vnf_host, vnf_port, topology]
 
+    def remove_vnf(self, vnf_name):
+        self.vnfs.remove(vnf_name)
+
     def send_message_to_vnf(self, vnf, message):
         vnf_server = CommunicationEntityPackage(vnf[0], vnf[1])
         self.server.connect_to_another_server(vnf_server)
         self.server.send_message(message)
         self.server.disconnect_send_channel()
+
+    def search_and_remove_vnf(self, vnf):
+        for v in self.vnfs:
+            if self.are_vnfs_equal(self.vnfs[v], vnf):
+                self.vnfs.pop(v)
+                break
 
     # TODO: Implement the new vnf and its parameters for the link using threads
     def send_message_to_orchestrators(self, message):
