@@ -10,4 +10,3 @@ class RemoveVnfFromOrchestrator(AbstractMessage):
 
     def process_message(self):
         log.info("Topology message received...")
-        print("Finish processing message")

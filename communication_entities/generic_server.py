@@ -28,7 +28,6 @@ class GenericServer:
         self.receive_two_communication_channel = None
         self.send_virtual_channel = None
         self.send_orchestrator_channel = None
-        # FIXME: Temporary solution because a virtual link needs to be established
         self.sockt_pkg = socket_pkg
         if socket_pkg is not None:
             self.set_up_receive_channel(socket_pkg)
@@ -41,7 +40,6 @@ class GenericServer:
         while True:
             log.info("Listening for connections...")
             client_socket, address = self.receive_channel.accept()
-            log.info(''.join(["Connection from: ", str(address)]))
             try:
                 message = self.get_message(client_socket)
                 print(type(message))
@@ -50,6 +48,9 @@ class GenericServer:
                 message.client_socket = client_socket
                 message.process_message()
                 print("CONNECTIONS ENDED")
+                if isinstance(self.orchestrator, GenericServer):
+                    print("I AM CALLED")
+                    self.orchestrator.print_state_vnf()
             except KeyboardInterrupt:
                 log.exception("Keyboard interruption")
                 if client_socket:
@@ -110,6 +111,7 @@ class GenericServer:
 
     def get_message(self, client: socket) -> AbstractMessage:
         parameters = client.recv(SocketSize.RECEIVE_BUFFER.value)
+        debug_load = pickle.loads(parameters)
         return pickle.loads(parameters)
 
     def generate_new_message_parameters(self, vnf_topology: Topology):
@@ -117,10 +119,18 @@ class GenericServer:
         new_message = TopologyMessage(data=param)
         return new_message
 
-    def send_message(self, message):
+    def send_message(self, message: AbstractMessage):
         log.info("Sending Message using send_channel")
         data_string = pickle.dumps(message)
         self.send_channel.send(data_string)
+
+    def send_and_receive_message_to_orchestrator(self, message):
+        log.info("Sending Message using send_channel_orchestrator")
+        self.connect_to_another_server(self.orchestrator.orchestrator)
+        self.send_message(message)
+        x = self.send_channel.recv(SocketSize.RECEIVE_BUFFER.value)
+        answer_message = pickle.loads(x)
+        return answer_message.data.topology
 
     def send_message_to_orchestrator(self, message):
         log.info("Sending Message using send_channel_orchestrator")

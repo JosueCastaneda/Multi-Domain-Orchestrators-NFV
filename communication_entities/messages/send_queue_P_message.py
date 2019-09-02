@@ -9,7 +9,4 @@ class SendQueuePMessage(AbstractMessage):
         self.current_server = None
 
     def process_message(self):
-        # Here we need to wait to handle the migration....
-        log.info("Sending P message to P...")
-        print("Hey poderoso")
-
+        log.info("Sending P message..")

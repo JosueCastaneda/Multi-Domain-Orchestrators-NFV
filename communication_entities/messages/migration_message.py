@@ -1,8 +1,6 @@
 from communication_entities.messages.abstract_message import AbstractMessage
 from communication_entities.messages.search_vnf_message import SearchVNFMessage
 from entities.parameter_package import ParameterPackage
-from utilities.logger import *
-
 
 class MigrationMessage(AbstractMessage):
     """
@@ -18,14 +16,12 @@ class MigrationMessage(AbstractMessage):
         """
         self.current_server = None
         self.source_vnf_name = source_vnf_name
-        # FIXME: Which needs to obtain the state of the old one
         self.new_in_chain_vnf_name = new_in_chain_vnf_name
 
     def process_message(self):
         local_vnf = self.current_server.orchestrator.get_local_vnf(self.source_vnf_name)
         new_vnf = self.current_server.orchestrator.get_local_vnf(self.new_in_chain_vnf_name)
         if new_vnf is None:
-            log.info("Not found, sending to orchestrators...")
             data = ParameterPackage(vnf_name=self.new_in_chain_vnf_name)
             message_request = SearchVNFMessage(data)
             message_request.test_server = self.current_server.orchestrator.server_orch
@@ -35,5 +31,5 @@ class MigrationMessage(AbstractMessage):
             new_vnf_message = self.current_server.generate_new_message_parameters(new_vnf.topology)
         self.current_server.orchestrator.send_message_to_vnf(local_vnf, new_vnf_message)
         # This next line can be commented when debugging since it will remove the vnf and further testing cannot be done
-        # self.current_server.orchestrator.search_and_remove_vnf(local_vnf)
+        self.current_server.orchestrator.search_and_remove_vnf(local_vnf)
 

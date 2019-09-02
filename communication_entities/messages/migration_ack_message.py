@@ -9,7 +9,6 @@ class MigrationAckMessage(AbstractMessage):
         self.current_server = None
 
     def process_message(self):
-        # Here we need to wait to handle the migration....
         log.info("Migration ACK")
 
 

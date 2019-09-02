@@ -9,7 +9,4 @@ class SwitchMessage(AbstractMessage):
         self.current_server = None
 
     def process_message(self):
-        # Here we need to wait to handle the migration....
         log.info("Switch...")
-        print("Hey poderoso")
-

@@ -1,14 +1,14 @@
 import pickle
 
 from communication_entities.messages.abstract_message import AbstractMessage
-from communication_entities.messages.migration_ack_message import MigrationAckMessage
 from communication_entities.messages.send_queue_P_message import SendQueuePMessage
 from communication_entities.messages.send_queue_Q_message import SendQueueQMessage
 from communication_entities.messages.switch_done_message import SwitchDoneMessage
 from entities.service_package import ServicePackage
+from utilities.logger import *
 
 
-class MigrationDeactivateMessage(AbstractMessage):
+class MigrationDeactivateRecursiveMessage(AbstractMessage):
 
     def __init__(self, data, server=None):
         super().__init__(data)
@@ -26,7 +26,6 @@ class MigrationDeactivateMessage(AbstractMessage):
         m1 = self.client_socket.recv(4096)
         answer_message = pickle.loads(m1)
         if operation == "P":
-            # data_queue_tmp = self.current_server.orchestrator.get_all_data_from_queue(self.current_server.orchestrator.queue_P)
             data_queue_tmp = self.current_server.orchestrator.get_all_data_from_queue("P")
         elif operation == "Q":
             data_queue_tmp = self.current_server.orchestrator.get_all_data_from_queue("Q")
@@ -45,16 +44,6 @@ class MigrationDeactivateMessage(AbstractMessage):
         return recursive_migration_took_place, new_vnf
 
     def process_message(self):
-        recursive_migration_took_place, new_vnf = self.check_if_migration_is_needed()
-        if recursive_migration_took_place:
-            m = MigrationAckMessage(new_vnf)
-            self.current_server.send_message_to_socket(self.client_socket, m)
-            x = self.client_socket.recv(4096)
-            return
-            # sys.exit()
-        m = MigrationAckMessage("Ok")
-        self.current_server.send_message_to_socket(self.client_socket, m)
-
         data_q = self.handle_queue_migration("Q")
         m1 = SendQueueQMessage(data_q)
         self.current_server.send_message_to_socket(self.client_socket, m1)

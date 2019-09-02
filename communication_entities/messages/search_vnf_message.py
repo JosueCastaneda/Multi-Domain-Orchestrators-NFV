@@ -32,5 +32,4 @@ class SearchVNFMessage(AbstractMessage):
             self.current_server.send_message(answer)
             self.current_server.get_ack_channel()
             self.current_server.disconnect_send_channel()
-            # self.current_server.handle_migration()
             self.terminate_connections()

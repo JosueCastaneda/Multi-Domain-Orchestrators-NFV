@@ -8,9 +8,10 @@ class RawTextMessage(AbstractMessage):
         self.text = text
 
     def wait_for_R_queue(self):
-        # Wait for the sending of queue R
         m1 = self.client_socket.recv(4096)
         answer_message = pickle.loads(m1)
+        for d in answer_message.data:
+            self.current_server.orchestrator.add_states_to_queue(d, "R")
 
     def wait_for_terminate(self):
         m2 = self.client_socket.recv(4096)
@@ -19,13 +20,13 @@ class RawTextMessage(AbstractMessage):
     def wait_for_all_queues(self):
         m2 = self.client_socket.recv(4096)
         answer_message = pickle.loads(m2)
-        self.current_server.orchestrator.add_affected_vnf(answer_message.data[3])
-        # TODO: Update the queues for the state
-        # print("Hello")
+        for d in answer_message.data[0]:
+            self.current_server.orchestrator.add_states_to_queue(d, "Q")
+        for d in answer_message.data[1]:
+            self.current_server.orchestrator.add_states_to_queue(d, "P")
+        self.current_server.orchestrator.add_affected_vnf(answer_message.data[2])
 
     def process_message(self):
-        print("Hello my friend: ", self.text)
         self.wait_for_R_queue()
         self.wait_for_all_queues()
         self.wait_for_terminate()
-        print("Finish processing message")

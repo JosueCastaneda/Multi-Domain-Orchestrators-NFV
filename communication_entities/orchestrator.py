@@ -8,6 +8,7 @@ from entities.communication_entity_package import CommunicationEntityPackage
 from communication_entities.messages.vnf_found_message import VNFFound
 from utilities.logger import *
 
+
 class Orchestrator:
 
     def __init__(self, server, orchestrators=[], topology=None, name=""):

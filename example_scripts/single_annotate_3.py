@@ -40,4 +40,5 @@ if __name__ == '__main__':
             top = Topology(40, 25, 8.5, 32)
 
     annotate_vnf = GenericVNF(vnf_host, vnf_port, vnf_name,
-                              service_package=service, topology=top, orchestrator=orchestrator)
+                              service_package=service, topology=top, orchestrator=orchestrator,
+                              initial=7)
