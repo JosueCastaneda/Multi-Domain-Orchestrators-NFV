@@ -2,9 +2,10 @@ from communication_entities.messages.abstract_message import AbstractMessage
 from communication_entities.messages.search_vnf_message import SearchVNFMessage
 from entities.parameter_package import ParameterPackage
 
+
 class MigrationMessage(AbstractMessage):
     """
-        The migration messaged sent to the orchestrator
+        The migration message sent to the orchestrator
     """
 
     def __init__(self, source_vnf_name, new_in_chain_vnf_name):

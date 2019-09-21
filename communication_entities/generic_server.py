@@ -111,7 +111,6 @@ class GenericServer:
 
     def get_message(self, client: socket) -> AbstractMessage:
         parameters = client.recv(SocketSize.RECEIVE_BUFFER.value)
-        debug_load = pickle.loads(parameters)
         return pickle.loads(parameters)
 
     def generate_new_message_parameters(self, vnf_topology: Topology):
@@ -193,10 +192,10 @@ class GenericServer:
             self.send_channel.sendall(buffer)
 
     # TODO: Change constants by using polymorphism
-    def save_processed_video(self, video, name: str, format=""):
-        if format == ".mp4":
+    def save_processed_video(self, video, name: str, format_file=""):
+        if format_file == ".mp4":
             self.transcoder_mp4(video, name)
-        elif format == ".webm":
+        elif format_file == ".webm":
             self.transcoder_web(video, name)
 
     def transcoder_mp4(self, source_clip, name):

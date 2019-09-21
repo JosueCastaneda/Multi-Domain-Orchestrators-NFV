@@ -3,7 +3,7 @@ from communication_entities.messages.abstract_message import AbstractMessage
 
 class AddVNF(AbstractMessage):
 
-    def __init__(self, vnf_host, vnf_port, vnf_name, topology):
+    def __init__(self, vnf_host, vnf_port, vnf_name, topology=None):
         self.current_server = None
         self.vnf_host = vnf_host
         self.vnf_port = vnf_port

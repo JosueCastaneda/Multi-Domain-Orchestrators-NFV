@@ -1,3 +1,6 @@
+from entities.parameter_package import ParameterPackage
+
+
 class AbstractMessage:
     """
         This class represents a generic message, all messages
@@ -15,6 +18,30 @@ class AbstractMessage:
 
     def process_message(self):
         pass
+
+    def process_with_parameters(self, parameter: ParameterPackage):
+        pass
+
+    def parse_name(self, name: str):
+        is_format = name[-4:]
+        if is_format == ".mp4" or is_format == ".webm":
+            return name[:-4]
+        return name
+
+    def save_video(self, video, name: str, format_file="", operation=""):
+        name = self.parse_name(name)
+        if format_file == ".mp4":
+            self.transcoder_mp4(video, name + operation)
+        elif format_file == ".webm":
+            self.transcoder_web(video, name + operation)
+
+    def transcoder_mp4(self, source_clip, name):
+        source_clip.write_videofile(name + ".mp4")
+        print("File ", name, " saved!")
+
+    def transcoder_web(self, source_clip, name):
+        source_clip.write_videofile(name + ".webm")
+        print("File ", name, " saved!")
 
     def terminate_connections(self):
         self.client_socket.close()

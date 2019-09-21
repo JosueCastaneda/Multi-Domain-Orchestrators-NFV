@@ -11,14 +11,14 @@ from utilities.logger import *
 
 class Orchestrator:
 
-    def __init__(self, server, orchestrators=[], topology=None, name=""):
+    def __init__(self, server, orchestrators=None, topology=None, name=""):
         self.vnfs = {}
         self.orchestrators = orchestrators
         self.topology = topology
         self.server = GenericServer(self, server)
         self.name = name
         self.server_orch = server
-        self.serve_clients()
+        log.info(''.join(["Orchestrator: ", self.name, " is running!"]))
 
     def serve_clients(self):
         self.server.serve_clients()

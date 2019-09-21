@@ -25,23 +25,37 @@ from utilities.socket_size import SocketSize
 
 class GenericVNF:
 
-    def __init__(self, host, port, name, service_package,
+    def __init__(self, host, port, name, service_package=None,
                  clients=5, topology=None, orchestrator=None, initial=0):
-        self.server_param = CommunicationEntityPackage(host, port, clients)
+
+        p_host, p_port, p_name = self.parse_parameters(host, port, name)
+        self.server_param = CommunicationEntityPackage(p_host, p_port, clients)
         self.server = GenericServer(self, self.server_param)
-        self.name = name
+        self.name = p_name
         self.topology = topology
-        log.info(''.join(["VNF: ", self.name, " is running!"]))
-        self.server.connect_to_orchestrator(orchestrator)
-        add_message = AddVNF(host, port, self.name, self.topology)
-        self.server.send_message_to_orchestrator(add_message)
         self.affected_vnfs = []
         self.queue_Q = [initial]
         self.queue_P = [initial + 1]
         self.queue_R = [initial + 2]
         self.service_package = service_package
         self.orchestrator = orchestrator
-        self.serve_clients()
+        self.set_up_to_orchestrator(orchestrator, p_host, p_port)
+        log.info(''.join(["VNF: ", self.name, " is running!"]))
+
+    # TODO: Get the topology and possible service working on for migration
+    def set_up_to_orchestrator(self, orchestrator, host, port):
+        self.server.connect_to_orchestrator(orchestrator)
+        add_message = AddVNF(host, port, self.name, self.topology)
+        self.server.send_message_to_orchestrator(add_message)
+
+    def parse_parameters(self, host, port, name):
+        if type(host) != str:
+            host = str(host)
+        if type(port) != int:
+            port = int(port)
+        if type(name) != str:
+            name = str(name)
+        return host, port, name
 
     def print_state_vnf(self):
         """
