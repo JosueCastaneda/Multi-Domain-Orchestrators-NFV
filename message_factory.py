@@ -47,18 +47,12 @@ def main(argv):
     vnf_port = ""
 
     try:
-        # opts, args = getopt.getopt(argv, "h:p:n:t:m:v:w",
         opts, args = getopt.getopt(argv, "t:h:p:n:m:v:w",
                                    ["type=", "host=", "port=", "name=", "new_name=", "vnf_host=", "vnf_port="])
-        # ["host=", "port=", "name=", "type=", "new_name=", "vnf_host=", "vnf_port="])
     except getopt.GetoptError:
         print(help_message)
         sys.exit(2)
     for opt, arg in opts:
-        # if opt in "--help":
-        #     print("Error:")
-        #     print(help_message)
-        #     sys.exit()
         if debug:
             print("Option: ", opt, " Argument: ", arg)
         if opt in ("-h", "--host"):
@@ -88,8 +82,8 @@ def main(argv):
         elif message_type == "new_pop":
             print("Request new pop")
         elif message_type == "process":
-            number_servers = 3
-            operations = [MessageType.INVERT_COLORS, MessageType.ANNOTATE, MessageType.SPEED_UP, MessageType.CROP]
+            number_servers = 2
+            operations = [MessageType.INVERT_COLORS, MessageType.ANNOTATE, MessageType.SPEED_UP]
             file_name = "videos/small.mp4"
             format_file = ".mp4"
             filename_processed = "small_processed_" + str(operations[0])
@@ -97,13 +91,14 @@ def main(argv):
             p = ParameterAnnotationPackage(text="Test", font_size=30, color="white")
             crop_p = ParameterCropPackage(initial_time=1, end_time=2)
 
-            host_server = '127.0.0.1'
-            port_server = 4433
+            # host_server = '127.0.0.1'
+            hosts_server_num = ["10.0.0.12", "10.0.0.13", "10.0.0.14"]
+            port_server = 5461
             speed_factor = 1.5
             servers = list()
 
             for i in range(number_servers):
-                servers.append(CommunicationEntityPackage(host_server, port_server))
+                servers.append(CommunicationEntityPackage(hosts_server_num[i], port_server))
                 port_server += 2
 
             parameters = ParameterPackage(annotation=p,

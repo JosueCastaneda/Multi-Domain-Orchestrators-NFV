@@ -35,14 +35,13 @@ def main(argv):
     else:
         try:
             opts, args = getopt.getopt(argv, "h:v:o:q:n:",
-                                       ["help=", "vnf_port=", "orq_host=", "orq_port=", "vnf_name="])
+                                       ["vnf_host=", "vnf_port=", "orq_host=", "orq_port=", "vnf_name="])
         except getopt.GetoptError:
             print(help_message)
             sys.exit(2)
         for opt, arg in opts:
-            if opt in ("-h", "--help"):
-                print(help_message)
-                sys.exit()
+            if opt in ("-h", "--vnf_host"):
+                vnf_host = arg
             elif opt in ("-v", "--vnf_port"):
                 vnf_port = arg
             elif opt in ("-o", "--orq_host"):

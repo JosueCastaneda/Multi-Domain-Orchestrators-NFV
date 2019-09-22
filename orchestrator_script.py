@@ -20,14 +20,13 @@ def main(argv):
     name = ""
 
     try:
-        opts, args = getopt.getopt(argv, "h:p:n:", ["help=", "port=", "name="])
+        opts, args = getopt.getopt(argv, "h:p:n:", ["host=", "port=", "name="])
     except getopt.GetoptError:
         print(help_message)
         sys.exit(2)
     for opt, arg in opts:
-        if opt in ("-h", "--help"):
-            print(help_message)
-            sys.exit()
+        if opt in ("-h", "--host"):
+            host = arg
         elif opt in ("-p", "--port"):
             port = arg
         elif opt in("-n", "--name"):
