@@ -20,7 +20,7 @@ def valid_input(vnf_host, vnf_port, vnf_name, orchestrator_port, orchestrator_ho
 
 def main(argv):
     vnf_host = "127.0.0.1"
-    debug = True
+    debug = False
     vnf_port = ""
     orchestrator_host = ""
     orchestrator_port = ""
