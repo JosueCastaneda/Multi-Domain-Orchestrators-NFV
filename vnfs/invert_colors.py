@@ -12,7 +12,8 @@ class InvertColors(AbstractMessage):
     def __init__(self, data):
         super().__init__(data)
 
-    def process_package(self, source):
+    @staticmethod
+    def process_package(source):
         log.info(''.join(["SOURCE: ", source]))
         inverted_clip = (VideoFileClip(source).fx(vfx.invert_colors))
         return inverted_clip

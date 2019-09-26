@@ -81,8 +81,8 @@ def main(argv):
         elif message_type == "new_pop":
             print("Request new pop")
         elif message_type == "process":
-            number_servers = 1
-            operations = [MessageType.ANNOTATE, MessageType.SPEED_UP]
+            number_servers = 2
+            operations = [MessageType.ANNOTATE, MessageType.SPEED_UP, MessageType.INVERT_COLORS]
             file_name = "videos/small.mp4"
             format_file = ".mp4"
             filename_processed = "small_processed_" + str(operations[0])
@@ -90,7 +90,6 @@ def main(argv):
             p = ParameterAnnotationPackage(text="Test", font_size=30, color="white")
             crop_p = ParameterCropPackage(initial_time=1, end_time=2)
 
-            # host_server = '127.0.0.1'
             # hosts_server_num = ["10.0.0.13", "10.0.0.14"]
             hosts_server_num = ["127.0.0.1", "127.0.0.1"]
             port_server = 4435
@@ -111,6 +110,7 @@ def main(argv):
 
         # Send VNF port
         send_channel = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        print("Host: ", host, " Port: ", port)
         send_channel.connect((host, port))
         data_string = pickle.dumps(m)
         send_channel.send(data_string)

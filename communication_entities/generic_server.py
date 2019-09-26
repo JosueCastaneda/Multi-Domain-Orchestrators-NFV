@@ -96,11 +96,13 @@ class GenericServer:
         log.info(''.join(["Self Host: ", socket_pkg.host, " Port: ", str(socket_pkg.port)]))
         self.receive_channel.listen(socket_pkg.max_clients)
 
-    def acknowledge_message(self, client: socket, message: str):
+    @staticmethod
+    def acknowledge_message(client: socket, message: str):
         message_encoded = message.encode("UTF-8")
         client.send(message_encoded)
 
-    def send_message_to_socket(self, client: socket, message):
+    @staticmethod
+    def send_message_to_socket(client: socket, message):
         log.info("Sending Message using socket: ")
         data_string = pickle.dumps(message)
         client.send(data_string)
@@ -108,15 +110,18 @@ class GenericServer:
     def get_ack_channel(self):
         return self.send_channel.recv(SocketSize.ACK_BUFFER.value).decode("UTF-8")
 
-    def get_ack(self, client: socket):
+    @staticmethod
+    def get_ack(client: socket):
         ans = client.recv(SocketSize.ACK_BUFFER.value).decode("UTF-8")
         return ans
 
-    def get_message(self, client: socket) -> AbstractMessage:
+    @staticmethod
+    def get_message(client: socket) -> AbstractMessage:
         parameters = client.recv(SocketSize.RECEIVE_BUFFER.value)
         return pickle.loads(parameters)
 
-    def generate_new_message_parameters(self, vnf_topology: Topology):
+    @staticmethod
+    def generate_new_message_parameters(vnf_topology: Topology):
         param = ParameterPackage(vnf_topology)
         new_message = TopologyMessage(data=param)
         return new_message
@@ -151,7 +156,8 @@ class GenericServer:
         answer_message = self.wait_for_reply_two_communication_channel()
         return answer_message
 
-    def read_video_package(self, file_pack, client_socket):
+    @staticmethod
+    def read_video_package(file_pack, client_socket):
         source_file_complete = ''.join([file_pack.name, "_server", file_pack.format])
         buffer = client_socket.recv(SocketSize.ACK_BUFFER.value)
         with open(source_file_complete, "wb") as video:
@@ -202,8 +208,10 @@ class GenericServer:
         elif format_file == ".webm":
             self.transcoder_web(video, name)
 
-    def transcoder_mp4(self, source_clip, name):
+    @staticmethod
+    def transcoder_mp4(source_clip, name):
         source_clip.write_videofile(name + ".mp4")
 
-    def transcoder_web(self, source_clip, name):
+    @staticmethod
+    def transcoder_web(source_clip, name):
         source_clip.write_videofile(name + ".webm")

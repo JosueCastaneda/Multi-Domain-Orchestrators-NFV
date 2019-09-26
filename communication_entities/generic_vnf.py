@@ -48,7 +48,8 @@ class GenericVNF:
         add_message = AddVNF(host, port, self.name, self.topology)
         self.server.send_message_to_orchestrator(add_message)
 
-    def parse_parameters(self, host, port, name):
+    @staticmethod
+    def parse_parameters(host, port, name):
         if type(host) != str:
             host = str(host)
         if type(port) != int:
@@ -130,7 +131,8 @@ class GenericVNF:
         self.handle_migration_affected(new_vnf)
 
     # TODO: Implement this to fit the VNF usage...
-    def process_queue(self, my_queue):
+    @staticmethod
+    def process_queue(my_queue):
         log.info("Processing queue.....")
 
         return my_queue
@@ -262,6 +264,7 @@ class GenericVNF:
     def serve_clients(self):
         self.server.serve_clients()
 
-    def remove_videos(self, name_original: str, name_processed: str):
+    @staticmethod
+    def remove_videos(name_original: str, name_processed: str):
         os.remove(name_original)
         os.remove(name_processed)

@@ -38,11 +38,11 @@ class MigrationDeactivateRecursiveMessage(AbstractMessage):
         new_requirements = ServicePackage()
         new_requirements.create_from_topology(self.data)
         is_valid = self.current_server.orchestrator.service_package.is_new_vnf_valid_for_service(new_requirements)
-        recursive_migration_took_place = False
+        recursive_took_place = False
         new_vnf = None
         if not is_valid:
-            recursive_migration_took_place, new_vnf = self.current_server.orchestrator.check_migration_recursive(self.data)
-        return recursive_migration_took_place, new_vnf
+            recursive_took_place, new_vnf = self.current_server.orchestrator.check_migration_recursive(self.data)
+        return recursive_took_place, new_vnf
 
     def process_message(self):
         data_q = self.handle_queue_migration("Q")

@@ -8,10 +8,10 @@ help_message = "orchestrator_script.py -p <port> -n <orch_name>"
 
 
 def valid_input(host, port, name):
-    all_paremeters_given = host != "" and port != "" and name != ""
+    all_parameters_given = host != "" and port != "" and name != ""
     # TODO: Write function to check the ports are in correct format
     all_parameters_format = True
-    return all_paremeters_given and all_parameters_format
+    return all_parameters_given and all_parameters_format
 
 
 def main(argv):

@@ -13,7 +13,8 @@ class Annotate(AbstractMessage):
     def __init__(self, data):
         super().__init__(data)
 
-    def process_package(self, source: str, parameters: ParameterAnnotationPackage):
+    @staticmethod
+    def process_package(source: str, parameters: ParameterAnnotationPackage):
         log.info(''.join(["SOURCE: ", source]))
         main_clip = VideoFileClip(source)
         txt_clip = TextClip(parameters.text, fontsize=parameters.font_size, color=parameters.color)

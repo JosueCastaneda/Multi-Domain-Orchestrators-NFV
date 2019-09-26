@@ -28,7 +28,7 @@ class MigrationDeactivateMessage(AbstractMessage):
         answer_message = pickle.loads(m1)
         log.info(answer_message)
         if operation == "P":
-            # data_queue_tmp = self.current_server.orchestrator.get_all_data_from_queue(self.current_server.orchestrator.queue_P)
+# data_queue_tmp = self.current_server.orchestrator.get_all_data_from_queue(self.current_server.orchestrator.queue_P)
             data_queue_tmp = self.current_server.orchestrator.get_all_data_from_queue("P")
         elif operation == "Q":
             data_queue_tmp = self.current_server.orchestrator.get_all_data_from_queue("Q")
@@ -40,11 +40,11 @@ class MigrationDeactivateMessage(AbstractMessage):
         new_requirements = ServicePackage()
         new_requirements.create_from_topology(self.data)
         is_valid = self.current_server.orchestrator.service_package.is_new_vnf_valid_for_service(new_requirements)
-        recursive_migration_took_place = False
+        recursive_took_place = False
         new_vnf = None
         if not is_valid:
-            recursive_migration_took_place, new_vnf = self.current_server.orchestrator.check_migration_recursive(self.data)
-        return recursive_migration_took_place, new_vnf
+            recursive_took_place, new_vnf = self.current_server.orchestrator.check_migration_recursive(self.data)
+        return recursive_took_place, new_vnf
 
     def process_message(self):
         recursive_migration_took_place, new_vnf = self.check_if_migration_is_needed()

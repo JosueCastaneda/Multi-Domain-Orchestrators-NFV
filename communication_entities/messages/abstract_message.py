@@ -23,7 +23,8 @@ class AbstractMessage:
     def process_with_parameters(self, parameter: ParameterPackage):
         pass
 
-    def parse_name(self, name: str):
+    @staticmethod
+    def parse_name(name: str):
         is_format = name[-4:]
         if is_format == ".mp4" or is_format == ".webm":
             return name[:-4]
@@ -36,11 +37,13 @@ class AbstractMessage:
         elif format_file == ".webm":
             self.transcoder_web(video, name + operation)
 
-    def transcoder_mp4(self, source_clip, name):
+    @staticmethod
+    def transcoder_mp4(source_clip, name):
         source_clip.write_videofile(name + ".mp4")
         log.info(''.join(["File ", name, " saved!"]))
 
-    def transcoder_web(self, source_clip, name):
+    @staticmethod
+    def transcoder_web(source_clip, name):
         source_clip.write_videofile(name + ".webm")
         log.info(''.join(["File ", name, " saved!"]))
 

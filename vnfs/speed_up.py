@@ -11,7 +11,8 @@ class SpeedUp(AbstractMessage):
     def __init__(self, data):
         super().__init__(data)
 
-    def process_package(self, source: str, factor: int):
+    @staticmethod
+    def process_package(source: str, factor: int):
         log.info(''.join(["SOURCE: ", source]))
         speed_clip = (VideoFileClip(source).fx(vfx.speedx, factor=factor))
         return speed_clip

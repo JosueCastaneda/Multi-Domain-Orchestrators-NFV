@@ -22,11 +22,11 @@ class ProcessDataMessage(AbstractMessage):
         """
         super().__init__(None)
         self.current_server = None
-        self.current_operation_index = 0
+        self.current_op_index = 0
         self.parameters = parameters
 
     def increase_operation_index(self):
-        self.current_operation_index += 1
+        self.current_op_index += 1
 
     def create_message_type_by_operation(self, operation):
         # TODO: Change to polymorphism
@@ -45,15 +45,14 @@ class ProcessDataMessage(AbstractMessage):
 
         return m1
 
-    # TODO: Working on this
     def send_video_to_next_vnf_in_chain(self, new_file):
-        log.info(''.join(["LEN SEND: ", str(len(self.parameters.vnf_servers)), " IDX: ", str(self.current_operation_index)]))
-        if len(self.parameters.vnf_servers) > self.current_operation_index:
-            vnf_server = self.parameters.vnf_servers[self.current_operation_index]
+        log.info(''.join(["LEN SEND: ", str(len(self.parameters.vnf_servers)), " IDX: ", str(self.current_op_index)]))
+        if len(self.parameters.vnf_servers) > self.current_op_index:
+            vnf_server = self.parameters.vnf_servers[self.current_op_index]
             self.current_server.connect_to_another_server(CommunicationEntityPackage(vnf_server.host, vnf_server.port))
             self.increase_operation_index()
             new_message = ProcessDataMessage(self.parameters)
-            new_message.current_operation_index = self.current_operation_index
+            new_message.current_op_index = self.current_op_index
             new_message.parameters.file_pack.name = new_file
 
             # First send the video with a channel
@@ -63,7 +62,6 @@ class ProcessDataMessage(AbstractMessage):
             self.current_server.connect_to_another_server_virtual(CommunicationEntityPackage(vnf_server.host,
                                                                                              vnf_server.port + 1))
 
-            # self.current_server.send_virtual_channel.send("Hello server!".encode())
             filename = new_file
             f = open(filename, 'rb')
             l_buffer = f.read(1024)
@@ -83,9 +81,9 @@ class ProcessDataMessage(AbstractMessage):
             self.current_server.disconnect_send_channel()
 
     def process_message(self):
-        log.info(''.join(["Current index: ", str(self.current_operation_index)]))
-        if len(self.parameters.operations) > self.current_operation_index:
-            operation = self.parameters.operations[self.current_operation_index]
+        log.info(''.join(["Current index: ", str(self.current_op_index)]))
+        if len(self.parameters.operations) > self.current_op_index:
+            operation = self.parameters.operations[self.current_op_index]
             m1 = self.create_message_type_by_operation(operation)
             new_file = m1.process_with_parameters(self.parameters)
             self.send_video_to_next_vnf_in_chain(new_file)
