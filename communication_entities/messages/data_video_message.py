@@ -15,11 +15,11 @@ class DataVideoMessage(AbstractMessage):
         while True:
             conn, address = self.current_server.receive_two_communication_channel.accept()
             log.info('Got connection from', address)
-            data = conn.recv(1024)
-            log.info('Server received', repr(data))
+            # data = conn.recv(1024)
+            # log.info('Server received', repr(data))
 
-            # with open("test_video.mp4", 'wb') as f:
-            with open(self.video_name, 'wb') as f:
+            with open("test_video.mp4", 'wb') as f:
+            # with open(self.video_name, 'wb') as f:
                 log.info('file opened')
                 while True:
                     log.info('receiving data...')
