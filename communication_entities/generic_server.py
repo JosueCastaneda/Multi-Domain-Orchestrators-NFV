@@ -60,12 +60,12 @@ class GenericServer:
 
     def connect_to_another_server(self, server):
         self.send_channel = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        log.info(''.join(["Send Channel Host: ", server.host, " Port: ", server.port]))
+        log.info(''.join(["Send Channel Host: ", server.host, " Port: ", str(server.port)]))
         self.send_channel.connect((server.host, server.port))
 
     def connect_to_orchestrator(self, server):
         self.send_orchestrator_channel = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        log.info(''.join(["Orchestrator Host: ", server.host, " Port: ", server.port]))
+        log.info(''.join(["Orchestrator Host: ", server.host, " Port: ", str(server.port)]))
         self.send_orchestrator_channel.connect((server.host, server.port))
 
     def connect_to_another_server_virtual(self, server):
@@ -93,7 +93,7 @@ class GenericServer:
     def set_up_receive_channel(self, socket_pkg):
         self.receive_channel = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         self.receive_channel.bind((socket_pkg.host, socket_pkg.port))
-        log.info(''.join(["Self Host: ", socket_pkg.host, " Port: ", socket_pkg.port]))
+        log.info(''.join(["Self Host: ", socket_pkg.host, " Port: ", str(socket_pkg.port)]))
         self.receive_channel.listen(socket_pkg.max_clients)
 
     def acknowledge_message(self, client: socket, message: str):
