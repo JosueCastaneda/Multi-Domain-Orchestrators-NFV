@@ -13,8 +13,8 @@ class MigrationMessage(AbstractMessage):
         Set up the message
         :param source_vnf_name: The VNF to be migrated
         :param new_in_chain_vnf_name: The VNF that appears in the SFC after the source
-        :param data: Data to check if migration is possible
         """
+        super().__init__(None)
         self.current_server = None
         self.source_vnf_name = source_vnf_name
         self.new_in_chain_vnf_name = new_in_chain_vnf_name

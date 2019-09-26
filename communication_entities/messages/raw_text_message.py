@@ -1,13 +1,16 @@
-from communication_entities.messages.abstract_message import AbstractMessage
 import pickle
+
+from communication_entities.messages.abstract_message import AbstractMessage
+from utilities.logger import log
 
 
 class RawTextMessage(AbstractMessage):
 
     def __init__(self, text):
+        super().__init__(None)
         self.text = text
 
-    def wait_for_R_queue(self):
+    def wait_for_r_queue(self):
         m1 = self.client_socket.recv(4096)
         answer_message = pickle.loads(m1)
         for d in answer_message.data:
@@ -16,6 +19,7 @@ class RawTextMessage(AbstractMessage):
     def wait_for_terminate(self):
         m2 = self.client_socket.recv(4096)
         answer_message = pickle.loads(m2)
+        log.info(answer_message)
 
     def wait_for_all_queues(self):
         m2 = self.client_socket.recv(4096)
@@ -27,6 +31,6 @@ class RawTextMessage(AbstractMessage):
         self.current_server.orchestrator.add_affected_vnf(answer_message.data[2])
 
     def process_message(self):
-        self.wait_for_R_queue()
+        self.wait_for_r_queue()
         self.wait_for_all_queues()
         self.wait_for_terminate()

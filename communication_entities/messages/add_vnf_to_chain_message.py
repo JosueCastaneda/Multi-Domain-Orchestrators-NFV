@@ -4,7 +4,7 @@ from utilities.logger import *
 
 class AddVNFToChainMessage(AbstractMessage):
 
-    def __init__(self, data, server=None):
+    def __init__(self, data):
         super().__init__(data)
         self.current_server = None
 

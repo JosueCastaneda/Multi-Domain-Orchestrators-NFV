@@ -1,4 +1,5 @@
 from entities.parameter_package import ParameterPackage
+from utilities.logger import log
 
 
 class AbstractMessage:
@@ -13,7 +14,7 @@ class AbstractMessage:
         self.source_server = source_server
         self.current_server = None
         self.client_socket = None
-        self.client_addres = None
+        self.client_address = None
         self.test_server = None
 
     def process_message(self):
@@ -37,11 +38,11 @@ class AbstractMessage:
 
     def transcoder_mp4(self, source_clip, name):
         source_clip.write_videofile(name + ".mp4")
-        print("File ", name, " saved!")
+        log.info("File ", name, " saved!")
 
     def transcoder_web(self, source_clip, name):
         source_clip.write_videofile(name + ".webm")
-        print("File ", name, " saved!")
+        log.info("File ", name, " saved!")
 
     def terminate_connections(self):
         self.client_socket.close()

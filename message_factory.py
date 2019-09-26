@@ -1,21 +1,19 @@
 import getopt
-import sys
-import socket
 import pickle
+import socket
+import sys
 
 from communication_entities.messages.add_vnf_message import AddVNF
 from communication_entities.messages.add_vnf_to_chain_message import AddVNFToChainMessage
 from communication_entities.messages.migration_message import MigrationMessage
 from communication_entities.messages.process_data_message import ProcessDataMessage
-from entities.parameter_annotation_package import ParameterAnnotationPackage
-from entities.parameter_package import ParameterPackage
-from entities.parameter_file_package import ParameterFilePackage
 from entities.communication_entity_package import CommunicationEntityPackage
+from entities.parameter_annotation_package import ParameterAnnotationPackage
 from entities.parameter_crop_package import ParameterCropPackage
-
+from entities.parameter_file_package import ParameterFilePackage
+from entities.parameter_package import ParameterPackage
 from entities.vnf_package import VnfPackage
 from utilities.message_type import MessageType
-
 
 help_message = "message_factory.py -t <message_type> -h <host> -p <port> " \
                "-n <name> -m <new_name> -v <vnf_host> -w <vnf_port>"
@@ -23,7 +21,7 @@ debug = False
 
 
 def valid_input(host, port, message_type, vnf_host, vnf_port):
-    all_paremeters_given = host != "" and port != "" and \
+    all_parameters_given = host != "" and port != "" and \
                            message_type != "" and vnf_host != "" and vnf_port != ""
     # TODO: Write function to check the ports are in correct format
     all_parameters_format = True
@@ -34,7 +32,7 @@ def valid_input(host, port, message_type, vnf_host, vnf_port):
         print("VNF host is valid? ", vnf_host != "", " ", vnf_host)
         print("VNF port is valid? ", vnf_port != "", " ", vnf_port)
 
-    return all_paremeters_given and all_parameters_format
+    return all_parameters_given and all_parameters_format
 
 
 def main(argv):
@@ -73,6 +71,7 @@ def main(argv):
     # TODO: Use enum
     if valid_input(host, port, message_type, vnf_host, vnf_port):
         port = int(port)
+        m = None
         if message_type == "add_vnf":
             m = AddVNF(vnf_host, vnf_port, name)
         elif message_type == "add_chain":
@@ -82,8 +81,8 @@ def main(argv):
         elif message_type == "new_pop":
             print("Request new pop")
         elif message_type == "process":
-            number_servers = 2
-            operations = [MessageType.INVERT_COLORS, MessageType.ANNOTATE, MessageType.SPEED_UP]
+            number_servers = 1
+            operations = [MessageType.ANNOTATE, MessageType.SPEED_UP]
             file_name = "videos/small.mp4"
             format_file = ".mp4"
             filename_processed = "small_processed_" + str(operations[0])
@@ -92,8 +91,9 @@ def main(argv):
             crop_p = ParameterCropPackage(initial_time=1, end_time=2)
 
             # host_server = '127.0.0.1'
-            hosts_server_num = ["10.0.0.12", "10.0.0.13", "10.0.0.14"]
-            port_server = 5461
+            # hosts_server_num = ["10.0.0.13", "10.0.0.14"]
+            hosts_server_num = ["127.0.0.1", "127.0.0.1"]
+            port_server = 4435
             speed_factor = 1.5
             servers = list()
 

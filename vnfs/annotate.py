@@ -5,6 +5,7 @@ from moviepy.editor import VideoFileClip, TextClip, CompositeVideoClip
 from communication_entities.messages.abstract_message import AbstractMessage
 from entities.parameter_annotation_package import ParameterAnnotationPackage
 from entities.parameter_package import ParameterPackage
+from utilities.logger import log
 
 
 class Annotate(AbstractMessage):
@@ -13,7 +14,7 @@ class Annotate(AbstractMessage):
         super().__init__(data)
 
     def process_package(self, source: str, parameters: ParameterAnnotationPackage):
-        print("SOURCE: ", source)
+        log.info("SOURCE: ", source)
         main_clip = VideoFileClip(source)
         txt_clip = TextClip(parameters.text, fontsize=parameters.font_size, color=parameters.color)
         txt_clip = txt_clip.set_pos('center').set_duration(parameters.duration)

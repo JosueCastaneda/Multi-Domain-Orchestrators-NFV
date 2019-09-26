@@ -3,8 +3,6 @@ from communication_entities.messages.topology_message import TopologyMessage
 from entities.parameter_package import ParameterPackage
 from entities.topology import Topology
 
-from utilities.logger import *
-
 
 class RequestNewPopMessage(AbstractMessage):
 
@@ -13,7 +11,7 @@ class RequestNewPopMessage(AbstractMessage):
         self.current_server = None
 
     # TODO: Program the new pop request to the orchestrator
-    # FIXME: For now it will send a harcoded vnf
+    # FIXME: For now it will send a hardcoded vnf
     def process_message(self):
         vnf_new_host = "127.0.0.1"
         vnf_new_port = 65445

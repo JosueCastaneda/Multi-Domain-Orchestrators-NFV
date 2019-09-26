@@ -8,14 +8,14 @@ help_message = "vnf_script.py -v <port> -n <vnf_name> -o <orchestrator_ip> -q <o
 
 
 def valid_input(vnf_host, vnf_port, vnf_name, orchestrator_port, orchestrator_host):
-    all_paremeters_given = vnf_host != "" and \
+    all_parameters_given = vnf_host != "" and \
                            vnf_port != "" and \
                            orchestrator_port != "" and \
                            orchestrator_host != "" and \
                            vnf_name != ""
     # TODO: Write function to check the ports are in correct format
     all_parameters_format = True
-    return all_paremeters_given and all_parameters_format
+    return all_parameters_given and all_parameters_format
 
 
 def main(argv):

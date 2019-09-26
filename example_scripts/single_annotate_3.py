@@ -21,6 +21,10 @@ if __name__ == '__main__':
     # VNF
     vnf_host = "127.0.0.1"
     service = ServicePackage(50, 23, 12, 53)
+    vnf_port = 0
+    vnf_name = ""
+    top = None
+
     if orchestrator_port == 65431:
         vnf_port = 65437
         vnf_name = "annotate"

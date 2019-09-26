@@ -4,6 +4,7 @@ from moviepy.editor import VideoFileClip, vfx
 
 from communication_entities.messages.abstract_message import AbstractMessage
 from entities.parameter_package import ParameterPackage
+from utilities.logger import log
 
 
 class InvertColors(AbstractMessage):
@@ -12,7 +13,7 @@ class InvertColors(AbstractMessage):
         super().__init__(data)
 
     def process_package(self, source):
-        print("SOURCE: ", source)
+        log.info("SOURCE: ", source)
         inverted_clip = (VideoFileClip(source).fx(vfx.invert_colors))
         return inverted_clip
 

@@ -1,7 +1,7 @@
 from communication_entities.messages.abstract_message import AbstractMessage
 from communication_entities.messages.vnf_not_found_message import VNFNotFound
 from communication_entities.messages.vnf_found_message import VNFFound
-from utilities.logger import *
+from utilities.logger import log
 
 
 class SearchVNFMessage(AbstractMessage):
@@ -15,7 +15,7 @@ class SearchVNFMessage(AbstractMessage):
         if vnf_local is None:
             log.info("VNF not Found!")
             answer = VNFNotFound(self.data)
-            log.info(''.join(["Sending message to", str(self.client_addres)]))
+            log.info(''.join(["Sending message to", str(self.client_address)]))
             self.current_server.connect_to_another_server(self.test_server)
             self.current_server.send_message(answer)
             self.current_server.get_ack_channel()
@@ -27,7 +27,7 @@ class SearchVNFMessage(AbstractMessage):
             self.data.topology.ip = vnf_local[0]
             self.data.topology.port = vnf_local[1]
             answer = VNFFound(self.data)
-            log.info(''.join(["Sending message to", str(self.client_addres)]))
+            log.info(''.join(["Sending message to", str(self.client_address)]))
             self.current_server.connect_to_another_server(self.test_server)
             self.current_server.send_message(answer)
             self.current_server.get_ack_channel()

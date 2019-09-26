@@ -5,11 +5,11 @@ class MessageType(Enum):
     MIGRATION = 1
     SEARCH_VNF = 2
     ADD_VNF = 3
-    ADD_ORCH = 4
+    ADD_ORCHESTRATOR = 4
     VNF_NOT_FOUND = 5
     VNF_FOUND = 6
     BEGIN = 7
-    MSG_RECIVED = 8
+    MSG_RECEIVED = 8
     MIGRATION_TOPOLOGY = 9
     MP4_FORMAT = 10
     WEB_FORMAT = 11

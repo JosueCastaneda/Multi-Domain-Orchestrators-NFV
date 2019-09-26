@@ -12,5 +12,5 @@ class TopologyMessage(AbstractMessage):
     def process_message(self):
         log.info("Topology message received...")
         self.current_server.orchestrator.check_migration_affected(self)
-        print("Finish processing message")
+        log.info("Finish processing message")
         sys.exit()

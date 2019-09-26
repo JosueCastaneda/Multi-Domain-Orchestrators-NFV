@@ -5,6 +5,7 @@ from moviepy.editor import VideoFileClip
 from communication_entities.messages.abstract_message import AbstractMessage
 from entities.parameter_crop_package import ParameterCropPackage
 from entities.parameter_package import ParameterPackage
+from utilities.logger import log
 
 
 class Crop(AbstractMessage):
@@ -13,7 +14,7 @@ class Crop(AbstractMessage):
         super().__init__(data)
 
     def process_package(self, source: str, parameters: ParameterCropPackage):
-        print("SOURCE: ", source)
+        log.info("SOURCE: ", source)
         clip = VideoFileClip(source)
         clip_cropped = clip.subclip(parameters.initial_time, parameters.end_time)
         return clip_cropped

@@ -33,7 +33,7 @@ class GenericVNF:
         self.server = GenericServer(self, self.server_param)
         self.name = p_name
         self.topology = topology
-        self.affected_vnfs = []
+        self.list_affected_vnf = []
         self.queue_Q = [initial]
         self.queue_P = [initial + 1]
         self.queue_R = [initial + 2]
@@ -64,12 +64,12 @@ class GenericVNF:
 
         :return:
         """
-        print("VNF name: ", self.name)
-        print("Orchestrator: ", self.orchestrator.host, " ", self.orchestrator.port)
-        print("Affected VNFS: ", self.affected_vnfs[0].host, " ", self.affected_vnfs[0].port)
-        print("Queue Q: ")
+        log.info("VNF name: ", self.name)
+        log.info("Orchestrator: ", self.orchestrator.host, " ", self.orchestrator.port)
+        log.info("List Affected: ", self.list_affected_vnf[0].host, " ", self.list_affected_vnf[0].port)
+        log.info("Queue Q: ")
         for d in self.queue_Q:
-            print(d, " ")
+            log.info(d, " ")
 
     # TODO: Use polymorphism to improve this function. Or better, use the queue to do the operation
     # def get_all_data_from_queue(self, queue):
@@ -102,7 +102,7 @@ class GenericVNF:
             self.queue_R.append(state)
 
     def check_migration_recursive(self, new_vnf_topology):
-        if len(self.affected_vnfs) > 0:
+        if len(self.list_affected_vnf) > 0:
             m = RequestNewPopMessage(new_vnf_topology)
             new_vnf = self.server.send_and_receive_message_to_orchestrator(m)
             self.begin_migration(new_vnf)
@@ -116,7 +116,7 @@ class GenericVNF:
         self.send_all_data_from_current_vnf_to_new_vnf(all_data)
 
     def handle_migration_affected(self, new_vnf):
-        for v in self.affected_vnfs:
+        for v in self.list_affected_vnf:
             self.check_if_previous_vnf_must_migrate(v, new_vnf)
             self.handle_queues_from_previous_vnf_in_chain()
             self.migration_switch_message_exchange()
@@ -257,7 +257,7 @@ class GenericVNF:
         return pickle.loads(self.server.send_channel.recv(SocketSize.RECEIVE_BUFFER.value))
 
     def add_affected_vnf(self, vnf_pack):
-        self.affected_vnfs.append(vnf_pack)
+        self.list_affected_vnf.append(vnf_pack)
 
     def serve_clients(self):
         self.server.serve_clients()

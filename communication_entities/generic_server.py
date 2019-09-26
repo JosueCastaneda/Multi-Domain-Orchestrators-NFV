@@ -28,7 +28,7 @@ class GenericServer:
         self.receive_two_communication_channel = None
         self.send_virtual_channel = None
         self.send_orchestrator_channel = None
-        self.sockt_pkg = socket_pkg
+        self.socket_pkg = socket_pkg
         if socket_pkg is not None:
             self.set_up_receive_channel(socket_pkg)
         self.orchestrator = orchestrator
@@ -42,14 +42,14 @@ class GenericServer:
             client_socket, address = self.receive_channel.accept()
             try:
                 message = self.get_message(client_socket)
-                print(type(message))
+                log.info(type(message))
                 message.current_server = self
-                message.client_addres = address
+                message.client_address = address
                 message.client_socket = client_socket
                 message.process_message()
-                print("CONNECTIONS ENDED")
+                log.info("CONNECTIONS ENDED")
                 if isinstance(self.orchestrator, GenericServer):
-                    print("I AM CALLED")
+                    log.info("I AM CALLED")
                     self.orchestrator.print_state_vnf()
             except KeyboardInterrupt:
                 log.exception("Keyboard interruption")
@@ -60,11 +60,12 @@ class GenericServer:
 
     def connect_to_another_server(self, server):
         self.send_channel = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        log.info("Send Channel Host: ", server.host, " Port: ", server.port)
         self.send_channel.connect((server.host, server.port))
 
     def connect_to_orchestrator(self, server):
         self.send_orchestrator_channel = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        print("Orchestrator Host: ", server.host, " Port: ", server.port)
+        log.info("Orchestrator Host: ", server.host, " Port: ", server.port)
         self.send_orchestrator_channel.connect((server.host, server.port))
 
     def connect_to_another_server_virtual(self, server):
@@ -72,10 +73,10 @@ class GenericServer:
         self.send_virtual_channel.connect((server.host, server.port))
 
     def wait_for_reply_two_communication_channel(self):
-        conn, addr = self.receive_two_communication_channel.accept()
+        conn, address = self.receive_two_communication_channel.accept()
         answer_two_channel = conn.recv(SocketSize.RECEIVE_BUFFER.value)
         answer_message = pickle.loads(answer_two_channel)
-        self.acknowledge_message(self.send_channel, str(MessageType.MSG_RECIVED))
+        self.acknowledge_message(self.send_channel, str(MessageType.MSG_RECEIVED))
         return answer_message
 
     def disconnect_send_channel(self):
@@ -92,7 +93,7 @@ class GenericServer:
     def set_up_receive_channel(self, socket_pkg):
         self.receive_channel = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         self.receive_channel.bind((socket_pkg.host, socket_pkg.port))
-        print("Self Host: ", socket_pkg.host, " Port: ", socket_pkg.port)
+        log.info("Self Host: ", socket_pkg.host, " Port: ", socket_pkg.port)
         self.receive_channel.listen(socket_pkg.max_clients)
 
     def acknowledge_message(self, client: socket, message: str):
@@ -165,6 +166,7 @@ class GenericServer:
         parameters.increase_current_vnf()
         parameters.file_pack.name = parameters.file_pack.full_name_processed()
         self.connect_to_another_server(parameters.get_current_vnf_server())
+        new_parameters = None
 
         # FIXME: Use polymorphism
         if len(parameters.operations) > parameters.current_vnf_index:
