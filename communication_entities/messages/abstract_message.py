@@ -38,11 +38,11 @@ class AbstractMessage:
 
     def transcoder_mp4(self, source_clip, name):
         source_clip.write_videofile(name + ".mp4")
-        log.info("File ", name, " saved!")
+        log.info(''.join(["File ", name, " saved!"]))
 
     def transcoder_web(self, source_clip, name):
         source_clip.write_videofile(name + ".webm")
-        log.info("File ", name, " saved!")
+        log.info(''.join(["File ", name, " saved!"]))
 
     def terminate_connections(self):
         self.client_socket.close()

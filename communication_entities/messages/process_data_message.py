@@ -47,7 +47,7 @@ class ProcessDataMessage(AbstractMessage):
 
     # TODO: Working on this
     def send_video_to_next_vnf_in_chain(self, new_file):
-        log.info("LEN SEND: ", len(self.parameters.vnf_servers), " IDX: ", self.current_operation_index)
+        log.info(''.join(["LEN SEND: ", len(self.parameters.vnf_servers), " IDX: ", self.current_operation_index]))
         if len(self.parameters.vnf_servers) > self.current_operation_index:
             vnf_server = self.parameters.vnf_servers[self.current_operation_index]
             self.current_server.connect_to_another_server(CommunicationEntityPackage(vnf_server.host, vnf_server.port))
@@ -69,7 +69,7 @@ class ProcessDataMessage(AbstractMessage):
             l_buffer = f.read(1024)
             while l_buffer:
                 self.current_server.send_virtual_channel.send(l_buffer)
-                log.info('Sent ', repr(l_buffer))
+                log.info(''.join(['Sent ', repr(l_buffer)]))
                 l_buffer = f.read(1024)
             f.close()
 
@@ -83,7 +83,7 @@ class ProcessDataMessage(AbstractMessage):
             self.current_server.disconnect_send_channel()
 
     def process_message(self):
-        log.info("Current index: ", self.current_operation_index)
+        log.info(''.join(["Current index: ", self.current_operation_index]))
         if len(self.parameters.operations) > self.current_operation_index:
             operation = self.parameters.operations[self.current_operation_index]
             m1 = self.create_message_type_by_operation(operation)

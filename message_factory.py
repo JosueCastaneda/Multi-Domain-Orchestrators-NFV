@@ -91,8 +91,8 @@ def main(argv):
             crop_p = ParameterCropPackage(initial_time=1, end_time=2)
 
             # host_server = '127.0.0.1'
-            # hosts_server_num = ["10.0.0.13", "10.0.0.14"]
-            hosts_server_num = ["127.0.0.1", "127.0.0.1"]
+            hosts_server_num = ["10.0.0.13", "10.0.0.14"]
+            #hosts_server_num = ["127.0.0.1", "127.0.0.1"]
             port_server = 4435
             speed_factor = 1.5
             servers = list()

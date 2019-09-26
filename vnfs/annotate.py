@@ -14,7 +14,7 @@ class Annotate(AbstractMessage):
         super().__init__(data)
 
     def process_package(self, source: str, parameters: ParameterAnnotationPackage):
-        log.info("SOURCE: ", source)
+        log.info(''.join(["SOURCE: ", source]))
         main_clip = VideoFileClip(source)
         txt_clip = TextClip(parameters.text, fontsize=parameters.font_size, color=parameters.color)
         txt_clip = txt_clip.set_pos('center').set_duration(parameters.duration)

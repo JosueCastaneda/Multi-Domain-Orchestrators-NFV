@@ -14,7 +14,7 @@ class Crop(AbstractMessage):
         super().__init__(data)
 
     def process_package(self, source: str, parameters: ParameterCropPackage):
-        log.info("SOURCE: ", source)
+        log.info(''.join(["SOURCE: ", source]))
         clip = VideoFileClip(source)
         clip_cropped = clip.subclip(parameters.initial_time, parameters.end_time)
         return clip_cropped

@@ -64,12 +64,12 @@ class GenericVNF:
 
         :return:
         """
-        log.info("VNF name: ", self.name)
-        log.info("Orchestrator: ", self.orchestrator.host, " ", self.orchestrator.port)
-        log.info("List Affected: ", self.list_affected_vnf[0].host, " ", self.list_affected_vnf[0].port)
+        log.info(''.join(["VNF name: ", self.name]))
+        log.info(''.join(["Orchestrator: ", self.orchestrator.host, " ", self.orchestrator.port]))
+        log.info(''.join(["List Affected: ", self.list_affected_vnf[0].host, " ", self.list_affected_vnf[0].port]))
         log.info("Queue Q: ")
         for d in self.queue_Q:
-            log.info(d, " ")
+            log.info(''.join([d, " "]))
 
     # TODO: Use polymorphism to improve this function. Or better, use the queue to do the operation
     # def get_all_data_from_queue(self, queue):
