@@ -41,6 +41,11 @@ class GenericVNF:
         self.orchestrator = orchestrator
         self.set_up_to_orchestrator(orchestrator, p_host, p_port)
         log.info(''.join(["VNF: ", self.name, " is running!"]))
+        log.info(''.join(["Delay: ", str(self.topology.delay)]))
+        log.info(''.join(["Bandwidth: ", str(self.topology.bw)]))
+        log.info(''.join(["Loss: ", str(self.topology.loss)]))
+        log.info(''.join(["Jitter: ", str(self.topology.jitter)]))
+        self.print_state_vnf()
 
     # TODO: Get the topology and possible service working on for migration
     def set_up_to_orchestrator(self, orchestrator, host, port):
@@ -67,10 +72,10 @@ class GenericVNF:
         """
         log.info(''.join(["VNF name: ", self.name]))
         log.info(''.join(["Orchestrator: ", self.orchestrator.host, " ", str(self.orchestrator.port)]))
-        log.info(''.join(["List Affected: ", self.list_affected_vnf[0].host, " ", str(self.list_affected_vnf[0].port)]))
+        # log.info(''.join(["List Affected: ", self.list_affected_vnf[0].host, " ", str(self.list_affected_vnf[0].port)]))
         log.info("Queue Q: ")
         for d in self.queue_Q:
-            log.info(''.join([d, " "]))
+            log.info(''.join([str(d), " "]))
 
     # TODO: Use polymorphism to improve this function. Or better, use the queue to do the operation
     # def get_all_data_from_queue(self, queue):
@@ -146,6 +151,7 @@ class GenericVNF:
         :return:
         """
         virtual_link_new_vnf_socket = CommunicationEntityPackage(new_vnf.ip, new_vnf.port, 1)
+        log.info(''.join(["New IP: ", new_vnf.ip, " New Port ", str(new_vnf.port)]))
         self.server.connect_to_another_server_virtual(virtual_link_new_vnf_socket)
         raw_text_message = RawTextMessage("Ready to migrate")
         self.server.send_message_virtual(raw_text_message)

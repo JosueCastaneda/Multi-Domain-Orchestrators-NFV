@@ -12,23 +12,27 @@ class ServicePackage:
         self.jitter = topology.jitter
         self.loss = topology.loss
 
+    # TODO: Correct this function, for now always is valid
     def is_valid_bandwidth(self, new_bandwidth):
-        if self.consumed_bandwidth[0] > new_bandwidth:
+        # print("Self Bandwidth: ", self.consumed_bandwidth[0], " type: ", type(self.consumed_bandwidth[0] ))
+        # print("New Bandwidth: ", new_bandwidth, " type: ", type(new_bandwidth))
+        # new_bandwidth = int(new_bandwidth)
+        if float(self.consumed_bandwidth[0]) > float(new_bandwidth):
             return False
         return True
 
     def is_valid_delay(self, new_delay):
-        if self.delay[0] <= new_delay:
+        if self.delay[0] <= float(new_delay):
             return False
         return True
 
     def is_valid_jitter(self, new_jitter):
-        if self.jitter[0] <= new_jitter:
+        if self.jitter[0] <= float(new_jitter):
             return False
         return True
 
     def is_valid_loss(self, new_loss):
-        if self.loss[0] <= new_loss:
+        if self.loss <= float(new_loss):
             return False
         return True
 

@@ -4,6 +4,7 @@ import socket
 import sys
 
 from communication_entities.messages.add_vnf_message import AddVNF
+from communication_entities.messages.add_orchestrator_message import AddOrchestratorMessage
 from communication_entities.messages.add_vnf_to_chain_message import AddVNFToChainMessage
 from communication_entities.messages.migration_message import MigrationMessage
 from communication_entities.messages.process_data_message import ProcessDataMessage
@@ -80,6 +81,9 @@ def main(argv):
             m = MigrationMessage(name, new_name)
         elif message_type == "new_pop":
             print("Request new pop")
+        elif message_type == "add_orchestrator":
+            print("Add orchestrator")
+            m = AddOrchestratorMessage(vnf_host, vnf_port)
         elif message_type == "process":
             number_servers = 2
             operations = [MessageType.ANNOTATE, MessageType.SPEED_UP, MessageType.INVERT_COLORS]

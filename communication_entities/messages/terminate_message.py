@@ -10,3 +10,4 @@ class TerminateMessage(AbstractMessage):
 
     def process_message(self):
         log.info("Terminate...")
+        self.current_server.orchestrator.print_state_vnf()

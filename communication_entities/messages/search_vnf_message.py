@@ -11,6 +11,7 @@ class SearchVNFMessage(AbstractMessage):
         self.current_server = server
 
     def process_message(self):
+        log.info(''.join(["Searching for VNF: ", self.data.vnf_name]))
         vnf_local = self.current_server.orchestrator.get_local_vnf(self.data.vnf_name)
         if vnf_local is None:
             log.info("VNF not Found!")

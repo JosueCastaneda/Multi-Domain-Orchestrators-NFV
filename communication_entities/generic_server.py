@@ -19,7 +19,6 @@ from vnfs.resize_video import ResizeVideo
 from utilities.socket_size import SocketSize
 from utilities.logger import *
 
-
 class GenericServer:
 
     def __init__(self, orchestrator, socket_pkg=None):
@@ -48,9 +47,7 @@ class GenericServer:
                 message.client_socket = client_socket
                 message.process_message()
                 log.info("CONNECTIONS ENDED")
-                if isinstance(self.orchestrator, GenericServer):
-                    log.info("I AM CALLED")
-                    self.orchestrator.print_state_vnf()
+                self.orchestrator.print_state_vnf()
             except KeyboardInterrupt:
                 log.exception("Keyboard interruption")
                 if client_socket:
@@ -61,7 +58,7 @@ class GenericServer:
     def connect_to_another_server(self, server):
         self.send_channel = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         log.info(''.join(["Send Channel Host: ", server.host, " Port: ", str(server.port)]))
-        self.send_channel.connect((server.host, server.port))
+        self.send_channel.connect((server.host, int(server.port)))
 
     def connect_to_orchestrator(self, server):
         self.send_orchestrator_channel = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
@@ -87,13 +84,14 @@ class GenericServer:
 
     def set_up_two_communication_channel(self, socket_pkg):
         self.receive_two_communication_channel = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        log.info(''.join(["Self Two Channel: ", socket_pkg.host, " Port: ", str(socket_pkg.port)]))
         self.receive_two_communication_channel.bind((socket_pkg.host, socket_pkg.port))
         self.receive_two_communication_channel.listen(socket_pkg.max_clients)
 
     def set_up_receive_channel(self, socket_pkg):
         self.receive_channel = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        self.receive_channel.bind((socket_pkg.host, socket_pkg.port))
         log.info(''.join(["Self Host: ", socket_pkg.host, " Port: ", str(socket_pkg.port)]))
+        self.receive_channel.bind((socket_pkg.host, socket_pkg.port))
         self.receive_channel.listen(socket_pkg.max_clients)
 
     @staticmethod

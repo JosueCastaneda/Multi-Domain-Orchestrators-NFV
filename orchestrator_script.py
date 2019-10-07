@@ -19,6 +19,12 @@ def main(argv):
     port = ""
     name = ""
 
+    debug = True
+
+    if debug:
+        port = "5463"
+        name = "orch2"
+
     try:
         opts, args = getopt.getopt(argv, "h:p:n:", ["host=", "port=", "name="])
     except getopt.GetoptError:

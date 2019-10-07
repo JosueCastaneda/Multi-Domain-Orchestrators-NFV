@@ -14,7 +14,7 @@ class RequestNewPopMessage(AbstractMessage):
     # FIXME: For now it will send a hardcoded vnf
     def process_message(self):
         vnf_new_host = "127.0.0.1"
-        vnf_new_port = 65445
+        vnf_new_port = 4441
         top = Topology(1, 10, 1, 3)
         top.ip = vnf_new_host
         top.port = vnf_new_port

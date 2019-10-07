@@ -14,6 +14,8 @@ class Orchestrator:
     def __init__(self, server, orchestrator_list=None, topology=None, name=""):
         self.list_vnf = {}
         self.list_orchestrator = orchestrator_list
+        if self.list_orchestrator == None:
+            self.list_orchestrator = []
         self.topology = topology
         self.server = GenericServer(self, server)
         self.name = name
@@ -23,11 +25,14 @@ class Orchestrator:
     def serve_clients(self):
         self.server.serve_clients()
 
+    def print_state_vnf(self):
+        log.info(''.join(["VNF name: ", self.name]))
+
     def get_local_vnf(self, vnf_name):
         return self.list_vnf.get(vnf_name)
 
     # Todo: Implement this function to handle dynamic orchestrator
-    def add_orchestrator(self, o_host, o_port, o_name):
+    def add_orchestrator(self, o_host, o_port, o_name=""):
         self.list_orchestrator.append((o_host, o_port, o_name))
 
     def add_vnf(self, vnf_host, vnf_port, vnf_name, topology):
