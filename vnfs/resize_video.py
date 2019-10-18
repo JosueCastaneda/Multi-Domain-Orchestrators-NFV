@@ -15,7 +15,7 @@ class ResizeVideo(AbstractMessage):
         resized_clip = (VideoFileClip(source).fx(vfx.resize, width=param.width, height=param.height))
         return resized_clip
 
-    def process_message(self):
+    def process_by_command_line(self):
         self.current_server.acknowledge_message(self.client_socket, "OK")
 
         video_file_name = self.current_server.read_video_package(self.data.file_pack, self.client_socket)

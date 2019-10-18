@@ -8,5 +8,5 @@ class VNFFound(AbstractMessage):
         super().__init__(data)
 
     # TODO: Call the server methods to save this
-    def process_message(self):
+    def process_by_command_line(self):
         log.info("VNF found!")

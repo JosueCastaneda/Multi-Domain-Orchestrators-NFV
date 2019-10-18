@@ -20,7 +20,7 @@ class Crop(AbstractMessage):
         clip_cropped = clip.subclip(parameters.initial_time, parameters.end_time)
         return clip_cropped
 
-    def process_with_parameters(self, parameter: ParameterPackage):
+    def process_by_message(self, parameter: ParameterPackage):
         crop_parameter = parameter.crop_parameter
         source = parameter.file_pack.name
         video = self.process_package(source, crop_parameter)
@@ -29,7 +29,7 @@ class Crop(AbstractMessage):
         self.save_video(video, source_no_format, parameter.file_pack.format, operation_name)
         return source_no_format + operation_name + parameter.file_pack.format
 
-    def process_message(self):
+    def process_by_command_line(self):
         self.current_server.acknowledge_message(self.client_socket, "OK")
         video_file_name = self.current_server.read_video_package(self.data.file_pack, self.client_socket)
         video = self.process_package(os.getcwd() + "/" + video_file_name, self.data.crop_parameter)

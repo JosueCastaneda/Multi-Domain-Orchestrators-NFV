@@ -12,7 +12,7 @@ class RequestNewPopMessage(AbstractMessage):
 
     # TODO: Program the new pop request to the orchestrator
     # FIXME: For now it will send a hardcoded vnf
-    def process_message(self):
+    def process_by_command_line(self):
         # vnf_new_host = "127.0.0.1"
         # vnf_new_port = 4441
         vnf_new_host = "10.0.0.15"

@@ -44,7 +44,7 @@ class MigrationDeactivateRecursiveMessage(AbstractMessage):
             recursive_took_place, new_vnf = self.current_server.orchestrator.check_migration_recursive(self.data)
         return recursive_took_place, new_vnf
 
-    def process_message(self):
+    def process_by_command_line(self):
         data_q = self.handle_queue_migration("Q")
         m1 = SendQueueQMessage(data_q)
         self.current_server.send_message_to_socket(self.client_socket, m1)

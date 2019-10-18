@@ -19,7 +19,7 @@ class MigrationMessage(AbstractMessage):
         self.source_vnf_name = source_vnf_name
         self.new_in_chain_vnf_name = new_in_chain_vnf_name
 
-    def process_message(self):
+    def process_by_command_line(self):
         local_vnf = self.current_server.orchestrator.get_local_vnf(self.source_vnf_name)
         new_vnf = self.current_server.orchestrator.get_local_vnf(self.new_in_chain_vnf_name)
         if new_vnf is None:

@@ -46,7 +46,7 @@ class MigrationDeactivateMessage(AbstractMessage):
             recursive_took_place, new_vnf = self.current_server.orchestrator.check_migration_recursive(self.data)
         return recursive_took_place, new_vnf
 
-    def process_message(self):
+    def process_by_command_line(self):
         recursive_migration_took_place, new_vnf = self.check_if_migration_is_needed()
         if recursive_migration_took_place:
             m = MigrationAckMessage(new_vnf)

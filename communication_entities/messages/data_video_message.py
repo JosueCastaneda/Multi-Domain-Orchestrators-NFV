@@ -9,7 +9,7 @@ class DataVideoMessage(AbstractMessage):
         self.current_server = None
         self.video_name = video_name
 
-    def process_message(self):
+    def process_by_command_line(self):
         log.info("Waiting for video from client")
 
         while True:

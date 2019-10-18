@@ -7,5 +7,5 @@ class VNFNotFound(AbstractMessage):
     def __init__(self, data):
         super().__init__(data)
 
-    def process_message(self):
+    def process_by_command_line(self):
         log.info("Not found!")

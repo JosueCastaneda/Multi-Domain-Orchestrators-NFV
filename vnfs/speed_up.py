@@ -17,7 +17,7 @@ class SpeedUp(AbstractMessage):
         speed_clip = (VideoFileClip(source).fx(vfx.speedx, factor=factor))
         return speed_clip
 
-    def process_with_parameters(self, parameter: ParameterPackage):
+    def process_by_message(self, parameter: ParameterPackage):
         source = parameter.file_pack.name
         factor = parameter.speed_factor
         video = self.process_package(source, factor)
@@ -26,7 +26,7 @@ class SpeedUp(AbstractMessage):
         self.save_video(video, source_no_format, parameter.file_pack.format, operation_name)
         return source_no_format + operation_name + parameter.file_pack.format
 
-    def process_message(self):
+    def process_by_command_line(self):
         self.current_server.acknowledge_message(self.client_socket, "OK")
         video_file_name = self.current_server.read_video_package(self.data.file_pack, self.client_socket)
         video = self.process_package(os.getcwd() + "/" + video_file_name, self.data.speed_factor)

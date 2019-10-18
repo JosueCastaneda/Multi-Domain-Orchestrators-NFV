@@ -17,10 +17,10 @@ class AbstractMessage:
         self.client_address = None
         self.test_server = None
 
-    def process_message(self):
+    def process_by_command_line(self):
         pass
 
-    def process_with_parameters(self, parameter: ParameterPackage):
+    def process_by_message(self, parameter: ParameterPackage):
         pass
 
     @staticmethod

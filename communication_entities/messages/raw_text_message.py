@@ -30,7 +30,7 @@ class RawTextMessage(AbstractMessage):
             self.current_server.orchestrator.add_states_to_queue(d, "P")
         self.current_server.orchestrator.add_affected_vnf(answer_message.data[2])
 
-    def process_message(self):
+    def process_by_command_line(self):
         self.wait_for_r_queue()
         self.wait_for_all_queues()
         self.wait_for_terminate()

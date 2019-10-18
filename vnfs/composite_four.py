@@ -7,7 +7,7 @@ from entities.parameter_package import ParameterPackage
 from utilities.logger import log
 
 
-class Annotate(AbstractMessage):
+class CompositeFour(AbstractMessage):
 
     def __init__(self, data):
         super().__init__(data)
@@ -21,6 +21,17 @@ class Annotate(AbstractMessage):
         clip4 = main_clip.resize(0.60)  # downsize 60%
         final_clip = clips_array([[main_clip, clip2],
                                   [clip3, clip4]])
+        final_clip.resize(width=480)
+        return final_clip
+
+    @staticmethod
+    def process_by_script(main_clip):
+        video = main_clip.fx(vfx.rotate, 90).fx(vfx.mirror_y)
+        main_clip = video.margin(10)
+        clip2 = main_clip.fx(vfx.mirror_x)
+        clip3 = main_clip.fx(vfx.mirror_y)
+        clip4 = main_clip.resize(0.60)
+        final_clip = clips_array([[main_clip, clip2], [clip3, clip4]])
         final_clip.resize(width=480)
         return final_clip
 

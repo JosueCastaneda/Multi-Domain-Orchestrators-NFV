@@ -80,10 +80,10 @@ class ProcessDataMessage(AbstractMessage):
             self.current_server.send_message(new_message)
             self.current_server.disconnect_send_channel()
 
-    def process_message(self):
+    def process_by_command_line(self):
         log.info(''.join(["Current index: ", str(self.current_op_index)]))
         if len(self.parameters.operations) > self.current_op_index:
             operation = self.parameters.operations[self.current_op_index]
             m1 = self.create_message_type_by_operation(operation)
-            new_file = m1.process_with_parameters(self.parameters)
+            new_file = m1.process_by_message(self.parameters)
             self.send_video_to_next_vnf_in_chain(new_file)

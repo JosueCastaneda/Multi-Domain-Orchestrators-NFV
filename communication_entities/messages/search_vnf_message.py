@@ -10,7 +10,7 @@ class SearchVNFMessage(AbstractMessage):
         super().__init__(data)
         self.current_server = server
 
-    def process_message(self):
+    def process_by_command_line(self):
         log.info(''.join(["Searching for VNF: ", self.data.vnf_name]))
         vnf_local = self.current_server.orchestrator.get_local_vnf(self.data.vnf_name)
         if vnf_local is None:
