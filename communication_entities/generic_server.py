@@ -19,21 +19,22 @@ from vnfs.resize_video import ResizeVideo
 from utilities.socket_size import SocketSize
 from utilities.logger import *
 
+
 class GenericServer:
 
     def __init__(self, orchestrator, socket_pkg=None):
-        self.send_channel = None
-        self.receive_channel = None
-        self.receive_two_communication_channel = None
-        self.send_virtual_channel = None
-        self.send_orchestrator_channel = None
+        self.send_channel = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        self.receive_channel = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        self.receive_two_communication_channel = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        self.send_virtual_channel = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        self.send_orchestrator_channel = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         self.socket_pkg = socket_pkg
         if socket_pkg is not None:
-            self.set_up_receive_channel(socket_pkg)
+            self.set_up_channel(socket_pkg, self.receive_channel)
         self.orchestrator = orchestrator
         self.current_topology = None
         socket_pkg.port = socket_pkg.port + 1
-        self.set_up_two_communication_channel(socket_pkg)
+        self.set_up_channel(socket_pkg, self.receive_two_communication_channel)
 
     def serve_clients(self):
         while True:
@@ -55,19 +56,27 @@ class GenericServer:
                 break
         client_socket.close()
 
+    # TODO: Use this function in all connect to server
+    def connect_channel_to_server(self, server, channel):
+        log.info(''.join(["Channel connects to Server: Host: ", server.host, " Port: ", str(server.port)]))
+        channel.connect((server.host, int(server.port)))
+
     def connect_to_another_server(self, server):
-        self.send_channel = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        log.info(''.join(["Send Channel Host: ", server.host, " Port: ", str(server.port)]))
-        self.send_channel.connect((server.host, int(server.port)))
+        self.connect_channel_to_server(server, self.send_channel)
+        # self.send_channel = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        # log.info(''.join(["Send Channel Host: ", server.host, " Port: ", str(server.port)]))
+        # self.send_channel.connect((server.host, int(server.port)))
 
     def connect_to_orchestrator(self, server):
-        self.send_orchestrator_channel = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        log.info(''.join(["Orchestrator Host: ", server.host, " Port: ", str(server.port)]))
-        self.send_orchestrator_channel.connect((server.host, server.port))
+        self.connect_channel_to_server(server, self.send_orchestrator_channel)
+        # self.send_orchestrator_channel = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        # log.info(''.join(["Orchestrator Host: ", server.host, " Port: ", str(server.port)]))
+        # self.send_orchestrator_channel.connect((server.host, server.port))
 
     def connect_to_another_server_virtual(self, server):
-        self.send_virtual_channel = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        self.send_virtual_channel.connect((server.host, server.port))
+        self.connect_channel_to_server(server, self.send_virtual_channel)
+        # self.send_virtual_channel = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        # self.send_virtual_channel.connect((server.host, server.port))
 
     def wait_for_reply_two_communication_channel(self):
         conn, address = self.receive_two_communication_channel.accept()
@@ -82,17 +91,13 @@ class GenericServer:
     def disconnect_send_virtual_channel(self):
         self.send_virtual_channel.close()
 
-    def set_up_two_communication_channel(self, socket_pkg):
-        self.receive_two_communication_channel = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        log.info(''.join(["Self Two Channel: ", socket_pkg.host, " Port: ", str(socket_pkg.port)]))
-        self.receive_two_communication_channel.bind((socket_pkg.host, socket_pkg.port))
-        self.receive_two_communication_channel.listen(socket_pkg.max_clients)
-
-    def set_up_receive_channel(self, socket_pkg):
-        self.receive_channel = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+    def set_up_channel(self, socket_pkg, channel):
         log.info(''.join(["Self Host: ", socket_pkg.host, " Port: ", str(socket_pkg.port)]))
-        self.receive_channel.bind((socket_pkg.host, socket_pkg.port))
-        self.receive_channel.listen(socket_pkg.max_clients)
+        try:
+            channel.bind((socket_pkg.host, socket_pkg.port))
+            channel.listen(socket_pkg.max_clients)
+        except OSError as err:
+            log.critical("OS error: {0}".format(err))
 
     @staticmethod
     def acknowledge_message(client: socket, message: str):

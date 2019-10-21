@@ -18,3 +18,4 @@ class MessageType(Enum):
     INVERT_COLORS = -3
     RESIZE = -4
     SPEED_UP = -5
+    MIRROR_X = -6

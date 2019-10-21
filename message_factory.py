@@ -3,6 +3,8 @@ import pickle
 import socket
 import sys
 
+sys.path.append('../')
+
 from communication_entities.messages.add_vnf_message import AddVNF
 from communication_entities.messages.add_orchestrator_message import AddOrchestratorMessage
 from communication_entities.messages.add_vnf_to_chain_message import AddVNFToChainMessage
@@ -94,14 +96,15 @@ def main(argv):
             p = ParameterAnnotationPackage(text="Test", font_size=30, color="white")
             crop_p = ParameterCropPackage(initial_time=1, end_time=2)
 
-            # hosts_server_num = ["10.0.0.13", "10.0.0.14"]
-            hosts_server_num = ["127.0.0.1", "127.0.0.1"]
-            port_server = 4435
+            hosts_server_num = ["10.0.0.14", "10.0.0.21"]
+            port_server_num = [4437, 4451]
+            # hosts_server_num = ["127.0.0.1", "127.0.0.1"]
+            port_server = 4443
             speed_factor = 1.5
             servers = list()
 
             for i in range(number_servers):
-                servers.append(CommunicationEntityPackage(hosts_server_num[i], port_server))
+                servers.append(CommunicationEntityPackage(hosts_server_num[i], port_server_num[i]))
                 port_server += 2
 
             parameters = ParameterPackage(annotation=p,

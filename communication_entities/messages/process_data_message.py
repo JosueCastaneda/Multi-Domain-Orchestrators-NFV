@@ -1,3 +1,6 @@
+import sys
+sys.path.append('../')
+
 from communication_entities.messages.abstract_message import AbstractMessage
 from communication_entities.messages.data_video_message import DataVideoMessage
 from entities.communication_entity_package import CommunicationEntityPackage
@@ -8,6 +11,7 @@ from vnfs.crop import Crop
 from vnfs.invert_colors import InvertColors
 from vnfs.resize_video import ResizeVideo
 from vnfs.speed_up import SpeedUp
+from vnfs.mirror_X import MirrorX
 
 
 class ProcessDataMessage(AbstractMessage):
@@ -28,6 +32,7 @@ class ProcessDataMessage(AbstractMessage):
     def increase_operation_index(self):
         self.current_op_index += 1
 
+    # TODO: Add more Message types to reflect on the new VNFs
     def create_message_type_by_operation(self, operation):
         # TODO: Change to polymorphism
         m1 = AbstractMessage(self.parameters)
@@ -42,6 +47,8 @@ class ProcessDataMessage(AbstractMessage):
             m1 = InvertColors(self.parameters)
         elif operation == MessageType.SPEED_UP:
             m1 = SpeedUp(self.parameters)
+        elif operation == MessageType.MIRROR_X:
+            m1 = MirrorX(self.parameters)
 
         return m1
 
