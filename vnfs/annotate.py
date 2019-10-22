@@ -18,10 +18,12 @@ class Annotate(AbstractMessage):
         log.info(''.join(["SOURCE: ", source]))
         main_clip = VideoFileClip(source)
         log.info(''.join(["Parameters: Font size: ",
-                          parameters.font_size,
+                          str(parameters.font_size),
+                          " Text: ",
+                          parameters.text,
                           " duration: ",
-                          parameters.duration,
-                          "color:",
+                          str(parameters.duration),
+                          " color:",
                           parameters.color]))
         txt_clip = TextClip(parameters.text, fontsize=parameters.font_size, color=parameters.color)
         txt_clip = txt_clip.set_pos('center').set_duration(parameters.duration)
