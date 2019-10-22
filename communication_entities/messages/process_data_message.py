@@ -74,7 +74,7 @@ class ProcessDataMessage(AbstractMessage):
             l_buffer = f.read(1024)
             while l_buffer:
                 self.current_server.send_virtual_channel.send(l_buffer)
-                log.info(''.join(['Sent ', repr(l_buffer)]))
+                # log.info(''.join(['Sent ', repr(l_buffer)]))
                 l_buffer = f.read(1024)
             f.close()
 
@@ -82,10 +82,13 @@ class ProcessDataMessage(AbstractMessage):
             self.current_server.send_virtual_channel.send('Thank you for connecting'.encode())
             self.current_server.send_virtual_channel.close()
 
+            log.info('Disconnecting old send channel')
             self.current_server.disconnect_send_channel()
+            log.info('Connecting to new channel')
             self.current_server.connect_to_another_server(CommunicationEntityPackage(vnf_server.host, vnf_server.port))
             self.current_server.send_message(new_message)
-            self.current_server.disconnect_send_channel()
+            print("We need to wait to get a reply and then close everything")
+            # self.current_server.disconnect_send_channel()
 
     def process_by_command_line(self):
         log.info(''.join(["Current index: ", str(self.current_op_index)]))

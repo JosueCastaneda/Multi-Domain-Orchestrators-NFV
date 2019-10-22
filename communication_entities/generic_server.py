@@ -62,21 +62,21 @@ class GenericServer:
         channel.connect((server.host, int(server.port)))
 
     def connect_to_another_server(self, server):
-        self.connect_channel_to_server(server, self.send_channel)
-        # self.send_channel = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        # log.info(''.join(["Send Channel Host: ", server.host, " Port: ", str(server.port)]))
-        # self.send_channel.connect((server.host, int(server.port)))
+        # self.connect_channel_to_server(server, self.send_channel)
+        self.send_channel = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        log.info(''.join(["Send Channel Host: ", server.host, " Port: ", str(server.port)]))
+        self.send_channel.connect((server.host, int(server.port)))
 
     def connect_to_orchestrator(self, server):
-        self.connect_channel_to_server(server, self.send_orchestrator_channel)
-        # self.send_orchestrator_channel = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        # log.info(''.join(["Orchestrator Host: ", server.host, " Port: ", str(server.port)]))
-        # self.send_orchestrator_channel.connect((server.host, server.port))
+        # self.connect_channel_to_server(server, self.send_orchestrator_channel)
+        self.send_orchestrator_channel = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        log.info(''.join(["Orchestrator Host: ", server.host, " Port: ", str(server.port)]))
+        self.send_orchestrator_channel.connect((server.host, server.port))
 
     def connect_to_another_server_virtual(self, server):
-        self.connect_channel_to_server(server, self.send_virtual_channel)
-        # self.send_virtual_channel = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        # self.send_virtual_channel.connect((server.host, server.port))
+        # self.connect_channel_to_server(server, self.send_virtual_channel)
+        self.send_virtual_channel = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        self.send_virtual_channel.connect((server.host, server.port))
 
     def wait_for_reply_two_communication_channel(self):
         conn, address = self.receive_two_communication_channel.accept()
