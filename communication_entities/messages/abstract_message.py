@@ -40,7 +40,7 @@ class AbstractMessage:
 
     @staticmethod
     def transcoder_mp4(source_clip, name):
-        source_clip.write_videofile(name + ".mp4")
+        source_clip.write_videofile(name + ".mp4", write_logfile=True, remove_temp=True)
         log.info(''.join(["File ", name, " saved!"]))
 
     @staticmethod
