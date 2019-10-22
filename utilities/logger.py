@@ -3,7 +3,7 @@ import logging
 log = logging.getLogger('logger')
 log.setLevel(logging.DEBUG)
 
-formatter = logging.Formatter('%(asctime)s - %(name)s - %(threadName)s -  %(levelname)s - %(message)s')
+formatter = logging.Formatter('%(asctime)s - %(filename)s - %(lineno)s - %(funcName)20s() - %(levelname)s - %(message)s')
 
 fh = logging.FileHandler('test.log', mode='w', encoding='utf-8')
 fh.setLevel(logging.DEBUG)

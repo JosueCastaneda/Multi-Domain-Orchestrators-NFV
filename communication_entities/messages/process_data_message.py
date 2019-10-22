@@ -87,8 +87,7 @@ class ProcessDataMessage(AbstractMessage):
             log.info('Connecting to new channel')
             self.current_server.connect_to_another_server(CommunicationEntityPackage(vnf_server.host, vnf_server.port))
             self.current_server.send_message(new_message)
-            print("We need to wait to get a reply and then close everything")
-            # self.current_server.disconnect_send_channel()
+            self.current_server.disconnect_send_channel()
 
     def process_by_command_line(self):
         log.info(''.join(["Current index: ", str(self.current_op_index)]))
