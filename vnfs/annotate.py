@@ -20,6 +20,7 @@ class Annotate(AbstractMessage):
         txt_clip = TextClip(parameters.text, fontsize=parameters.font_size, color=parameters.color)
         txt_clip = txt_clip.set_pos('center').set_duration(parameters.duration)
         video = CompositeVideoClip([main_clip, txt_clip])
+        log.info(''.join(["Video processed correctly: "]))
         return video
 
     @staticmethod

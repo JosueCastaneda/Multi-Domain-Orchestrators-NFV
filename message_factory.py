@@ -89,7 +89,7 @@ def main(argv):
         elif message_type == "process":
             number_servers = 2
             operations = [MessageType.ANNOTATE, MessageType.SPEED_UP, MessageType.INVERT_COLORS]
-            file_name = "videos/small.mp4"
+            file_name = "videos/small_480.mp4"
             format_file = ".mp4"
             filename_processed = "small_processed_" + str(operations[0])
             file_pack = ParameterFilePackage(file_name, format_file, filename_processed)

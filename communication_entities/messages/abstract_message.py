@@ -32,6 +32,7 @@ class AbstractMessage:
 
     def save_video(self, video, name: str, format_file="", operation=""):
         name = self.parse_name(name)
+        log.info(''.join(["Ready to save file: ", name + operation]))
         if format_file == ".mp4":
             self.transcoder_mp4(video, name + operation)
         elif format_file == ".webm":

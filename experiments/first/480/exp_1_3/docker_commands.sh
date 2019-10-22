@@ -39,7 +39,7 @@ docker exec -it mn.source python message_factory.py -t add_chain -h 10.0.0.17 -p
 docker exec -it mn.source python message_factory.py -t add_chain -h 10.0.0.21 -p 4451 -n none -m none -v 10.0.0.14 --vnf_port 4437
 
 # Add VNFs to service 2
-docker exec -it mn.source python message_factory.py -t add_chain -h 10.0.0.21 -p 4453 -n none -m none -v 10.0.0.16 --vnf_port 4441
+docker exec -it mn.source python message_factory.py -t add_chain -h 10.0.0.100 -p 4453 -n none -m none -v 10.0.0.16 --vnf_port 4441
 docker exec -it mn.source python message_factory.py -t add_chain -h 10.0.0.16 -p 4441 -n none -m none -v 10.0.0.13 --vnf_port 4433
 
 # Add VNFs to service 3
