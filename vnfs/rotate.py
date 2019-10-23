@@ -3,7 +3,6 @@ import os
 from moviepy.editor import VideoFileClip, vfx
 
 from communication_entities.messages.abstract_message import AbstractMessage
-from entities.parameter_fade import ParameterFade
 from entities.parameter_package import ParameterPackage
 from utilities.logger import log
 

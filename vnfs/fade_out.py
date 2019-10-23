@@ -3,7 +3,7 @@ import os
 from moviepy.editor import VideoFileClip, vfx
 
 from communication_entities.messages.abstract_message import AbstractMessage
-from entities.parameter_fade import ParameterFade
+from entities.parameters.fade_in import FadeInParameters
 from entities.parameter_package import ParameterPackage
 from utilities.logger import log
 
@@ -14,7 +14,7 @@ class FadeOut(AbstractMessage):
         super().__init__(data)
 
     @staticmethod
-    def process_package(source: str, parameters: ParameterFade):
+    def process_package(source: str, parameters: FadeInParameters):
         log.info(''.join(["SOURCE: ", source]))
         main_clip = VideoFileClip(source)
         video = main_clip.fx(vfx.fadeout, parameters.duration)

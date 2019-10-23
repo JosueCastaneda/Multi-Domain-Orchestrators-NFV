@@ -1,0 +1,46 @@
+{
+  "operations": ["ANNOTATE", "SPEED_UP", "INVERT_COLORS"],
+  "speed_factor": 1.5,
+  "host_servers": ["10.0.0.14", "10.0.0.21"],
+  "port_servers": [4437, 4451],
+  "parameters":
+  {
+    "annotation":
+      {
+        "text": "Test",
+        "font_size": 30,
+        "color": "white"
+      },
+    "crop":
+      {
+        "initial_time": 1,
+        "end_time": 2
+      },
+    "fade_in":
+      {
+        "duration": 0
+      },
+    "fade_out":
+      {
+        "duration": 0
+      },
+    "file":
+      {
+        "file_name": "videos/small_480.mp4",
+        "format_file": ".mp4",
+        "filename_processed":"small_processed_"
+      },
+    "resize":
+      {
+        "width": 0,
+        "height": 0
+      },
+    "black_white": null,
+    "composite": null,
+    "mirror_x": null,
+    "mirror_y": null,
+    "painting": null,
+    "rotate": null,
+    "speed_up": null
+  }
+}

@@ -3,7 +3,7 @@ import os
 from moviepy.editor import VideoFileClip, TextClip, CompositeVideoClip, vfx
 
 from communication_entities.messages.abstract_message import AbstractMessage
-from entities.parameter_annotation_package import ParameterAnnotationPackage
+from entities.parameters.annotation import AnnotationParameters
 from entities.parameter_package import ParameterPackage
 from utilities.logger import log
 
@@ -14,7 +14,7 @@ class Annotate(AbstractMessage):
         super().__init__(data)
 
     @staticmethod
-    def process_package(source: str, parameters: ParameterAnnotationPackage):
+    def process_package(source: str, parameters: AnnotationParameters):
         log.info(''.join(["SOURCE: ", source]))
         main_clip = VideoFileClip(source)
         log.info(''.join(["Parameters: Font size: ",

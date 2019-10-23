@@ -1,4 +1,4 @@
-class ParameterCropPackage:
+class CropParameters:
 
     def __init__(self, initial_time, end_time):
         self.initial_time = initial_time

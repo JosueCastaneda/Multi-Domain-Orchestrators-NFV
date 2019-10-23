@@ -1,4 +1,4 @@
-class ParameterFilePackage:
+class FileNameParameters:
     """
         A class that packages the required information to work with source videos
 
