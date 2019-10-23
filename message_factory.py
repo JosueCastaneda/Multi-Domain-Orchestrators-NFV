@@ -13,23 +13,25 @@ from utilities.logger import log
 
 def main(argv):
     command = read_parameters(argv)
-    file = 'parameters_complete.json'
+    # file = 'parameters_complete.json'
+    file = 'experiments/first/480/exp_1_3/parameters.json'
     if command.is_valid():
-        m = generate_message(command, file)
-        send_message(command, m)
+        messages = generate_messages(command, file)
+        for m in messages:
+            send_message(command, m)
     else:
         print(command.help_message)
 
 
-def generate_message(command, file):
+def generate_messages(command, file):
     m = MessageGenerator(command, file)
     return m.generate_message()
 
 
 def send_message(command, message):
     send_channel = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-    log.info("Host: ", command.host, " Port: ", command.port)
-    send_channel.connect((command.host, command.port))
+    log.info("Host: ", command.host, " Port: ", int(command.port))
+    send_channel.connect((command.host, int(command.port)))
     data_string = pickle.dumps(message)
     send_channel.send(data_string)
     send_channel.close()

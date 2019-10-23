@@ -50,40 +50,45 @@ class MessageGenerator:
         return AddVNFToChainMessage(VnfPackage(vnf_host, vnf_port))
 
     def generate_process_message(self):
+        messages = list()
         with open(self.json_file, 'r') as json_file:
             data = json.load(json_file)
-            operations = data['operations']
-            # Substract operation from current server
-            number_servers = len(operations) - 1
-            annotation_parameter = data['parameters']['annotation']
-            crop_parameter = data['parameters']['crop']
-            fade_in_parameter = data['parameters']['fade_in']
-            fade_out_parameter = data['parameters']['fade_out']
-            file_parameter = data['parameters']['file']
-            resize_parameter = data['parameters']['resize']
-            host_servers = data['host_servers']
-            port_servers = data['port_servers']
-            speed_factor = data['speed_factor']
-            operations = self.parse_operations(operations)
-            param_gen = ParameterGenerator(annotation_parameter,
-                                           crop_parameter,
-                                           fade_in_parameter,
-                                           fade_out_parameter,
-                                           file_parameter,
-                                           resize_parameter)
-            param_gen.generate_parameters()
+            for service in data['services']:
 
-        servers = list()
-        for i in range(number_servers):
-            servers.append(CommunicationEntityPackage(host_servers[i], int(port_servers[i])))
+                operations = service['operations']
+                # Substract operation from current server
+                number_servers = len(operations) - 1
+                annotation_parameter = service['parameters']['annotation']
+                crop_parameter = service['parameters']['crop']
+                fade_in_parameter = service['parameters']['fade_in']
+                fade_out_parameter = service['parameters']['fade_out']
+                file_parameter = service['parameters']['file']
+                resize_parameter = service['parameters']['resize']
+                host_servers = service['host_servers']
+                port_servers = service['port_servers']
+                speed_factor = service['speed_factor']
+                operations = self.parse_operations(operations)
+                param_gen = ParameterGenerator(annotation_parameter,
+                                               crop_parameter,
+                                               fade_in_parameter,
+                                               fade_out_parameter,
+                                               file_parameter,
+                                               resize_parameter)
+                param_gen.generate_parameters()
 
-        parameters = ParameterPackage(annotation=param_gen.annotation,
-                                      file_pack=param_gen.file,
-                                      vnf_servers=servers,
-                                      operations=operations,
-                                      speed_factor=speed_factor,
-                                      crop=param_gen.crop)
-        return ProcessDataMessage(parameters)
+                servers = list()
+                for i in range(number_servers):
+                    servers.append(CommunicationEntityPackage(host_servers[i], int(port_servers[i])))
+
+                parameters = ParameterPackage(annotation=param_gen.annotation,
+                                              file_pack=param_gen.file,
+                                              vnf_servers=servers,
+                                              operations=operations,
+                                              speed_factor=speed_factor,
+                                              crop=param_gen.crop)
+                m = ProcessDataMessage(parameters)
+                messages.append(m)
+        return messages
 
     def parse_operations(self, operations):
         parsed_operations = list()
