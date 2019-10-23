@@ -14,7 +14,8 @@ class DataVideoMessage(AbstractMessage):
 
         while True:
             conn, address = self.current_server.receive_two_communication_channel.accept()
-            log.info('Got connection from', address)
+            # TODO: Check this address variable because triggers a bug since it contains an integer
+            # log.info('Got connection from', address)
 
             # with open("test_video.mp4", 'wb') as f:
             with open(self.video_name, 'wb') as f:

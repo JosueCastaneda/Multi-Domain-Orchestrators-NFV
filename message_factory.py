@@ -17,8 +17,11 @@ def main(argv):
     file = 'experiments/first/480/exp_1_3/parameters.json'
     if command.is_valid():
         messages = generate_messages(command, file)
-        for m in messages:
-            send_message(command, m)
+        if isinstance(messages, list):
+            for m in messages:
+                send_message(command, m)
+        else:
+            send_message(command, messages)
     else:
         print(command.help_message)
 
@@ -30,8 +33,8 @@ def generate_messages(command, file):
 
 def send_message(command, message):
     send_channel = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-    log.info("Host: ", command.host, " Port: ", int(command.port))
-    send_channel.connect((command.host, int(command.port)))
+    # log.info("Host: ", command.host, " Port: ", str(command.port))
+    send_channel.connect((command.host, command.port))
     data_string = pickle.dumps(message)
     send_channel.send(data_string)
     send_channel.close()
@@ -53,7 +56,7 @@ def read_parameters(argv):
         if opt in ("-h", "--host"):
             command.host = arg
         elif opt in ("-p", "--port"):
-            command.port = arg
+            command.port = int(arg)
         elif opt in ("-n", "--name"):
             command.name = arg
         elif opt in ("-m", "--new_name"):
