@@ -4,10 +4,19 @@ import time
 # TODO: Refactor this class, it has many responsibilities and bloated construction
 class ParameterPackage:
 
-    def __init__(self, file_pack=None, operations=None,
-                 speed_factor=0, second="", audio_file="",
-                 vnf_servers=None, annotation=None, crop=None, resize=None,
-                 vnf_name="", topology=None):
+    def __init__(self, file_pack=None,
+                 operations=None,
+                 speed_factor=0,
+                 second="",
+                 audio_file="",
+                 vnf_servers=None,
+                 annotation=None,
+                 crop=None,
+                 resize=None,
+                 vnf_name="",
+                 topology=None,
+                 fade_in=None,
+                 fade_out=None):
         self.file_pack = file_pack
         self.operations = operations
         self.vnf_servers = vnf_servers
@@ -23,6 +32,8 @@ class ParameterPackage:
         self.processed_time = 0
         self.vnf_name = vnf_name
         self.topology = topology
+        self.fade_in_parameter = fade_in
+        self.fade_out_parameter = fade_out
 
     def increase_time(self):
         new_latest_time = time.time()
@@ -48,3 +59,8 @@ class ParameterPackage:
     def set_resize_parameter(self, resize_pack):
         self.resize_parameter = resize_pack
 
+    def set_fade_in_parameter(self, fade_in_pack):
+        self.fade_in_parameter = fade_in_pack
+
+    def set_fade_out_parameter(self, fade_out_pack):
+        self.fade_out_parameter = fade_out_pack

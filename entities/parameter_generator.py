@@ -20,6 +20,9 @@ class ParameterGenerator:
         self.annotation = self.generate_annotate_parameter()
         self.crop = self.generate_crop_parameter()
         self.file = self.generate_file_parameter()
+        self.fade_in = self.generate_fade_in_parameter()
+        self.fade_out = self.generate_fade_out_parameter()
+        self.resize = self.generate_resize_parameter()
 
     def generate_annotate_parameter(self):
         if self.annotation:

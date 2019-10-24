@@ -20,7 +20,10 @@
       "parameters": {
         "annotation": null,
         "crop": null,
-        "fade_in": 10,
+        "fade_in":
+        {
+          "duration": 10
+        },
         "fade_out": null,
         "file": {
           "file_name": "videos/small_480.mp4",

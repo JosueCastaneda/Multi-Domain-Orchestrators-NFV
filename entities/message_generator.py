@@ -85,7 +85,9 @@ class MessageGenerator:
                                               vnf_servers=servers,
                                               operations=operations,
                                               speed_factor=speed_factor,
-                                              crop=param_gen.crop)
+                                              crop=param_gen.crop,
+                                              fade_in=param_gen.fade_in,
+                                              fade_out=param_gen.fade_out)
                 m = ProcessDataMessage(parameters)
                 messages.append(m)
         return messages
