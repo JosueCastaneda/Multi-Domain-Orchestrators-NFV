@@ -70,13 +70,14 @@ class ProcessDataMessage(AbstractMessage):
         self.current_server.connect_to_another_server_virtual(CommunicationEntityPackage(vnf_server.host,
                                                                                          vnf_server.port + 1))
 
+    # TODO: Check why the enumeration does not work and change the magic number
     def send_message_to_server(self, new_file):
         filename = new_file
         f = open(filename, 'rb')
-        l_buffer = f.read(SocketSize.ACK_BUFFER)
+        l_buffer = f.read(1024)
         while l_buffer:
             self.current_server.send_virtual_channel.send(l_buffer)
-            l_buffer = f.read(SocketSize.ACK_BUFFER)
+            l_buffer = f.read(1024)
         f.close()
         log.info('Done sending')
 
