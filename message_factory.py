@@ -17,9 +17,8 @@ def main(argv):
     file = 'experiments/first/480/exp_1_3/parameters.json'
     if command.is_valid():
         messages = generate_messages(command, file)
-        log.info(''.join(["Number of messages", len(messages)]))
-
         if isinstance(messages, list):
+            log.info(''.join(["Number of messages", str(len(messages))]))
             send_message(command, messages[0])
             # for m in messages:
             #     send_message(command, m)

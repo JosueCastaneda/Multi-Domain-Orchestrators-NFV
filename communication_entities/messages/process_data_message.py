@@ -7,11 +7,19 @@ from entities.communication_entity_package import CommunicationEntityPackage
 from utilities.logger import log
 from utilities.message_type import MessageType
 from vnfs.annotate import Annotate
+from vnfs.black_white import BlackWhite
+from vnfs.composite_four import CompositeFour
 from vnfs.crop import Crop
+from vnfs.fade_in import FadeIn
+from vnfs.fade_out import FadeOut
 from vnfs.invert_colors import InvertColors
-from vnfs.resize_video import ResizeVideo
-from vnfs.speed_up import SpeedUp
 from vnfs.mirror_X import MirrorX
+from vnfs.mirror_Y import MirrorY
+from vnfs.painting import Painting
+from vnfs.resize_video import ResizeVideo
+from vnfs.rotate import Rotate
+from vnfs.speed_up import SpeedUp
+
 
 
 class ProcessDataMessage(AbstractMessage):
@@ -32,30 +40,39 @@ class ProcessDataMessage(AbstractMessage):
     def increase_operation_index(self):
         self.current_op_index += 1
 
-    # TODO: Add more Message types to reflect on the new VNFs
+    # TODO: Create a special class that handles this, so adding new types only changes a single file
     def create_message_type_by_operation(self, operation):
         # TODO: Change to polymorphism
         m1 = AbstractMessage(self.parameters)
 
         if operation == MessageType.ANNOTATE:
-            log.info('ANNOTATE')
             m1 = Annotate(self.parameters)
-        elif operation == MessageType.RESIZE:
-            log.info('RESIZE')
-            m1 = ResizeVideo(self.parameters)
+        elif operation == MessageType.BLACK_WHITE:
+            m1 = BlackWhite(self.parameters)
+        elif operation == MessageType.COMPOSITE:
+            m1 = CompositeFour(self.parameters)
         elif operation == MessageType.CROP:
-            log.info('CROP')
             m1 = Crop(self.parameters)
+        elif operation == MessageType.FADE_IN:
+            m1 = FadeIn(self.parameters)
+        elif operation == MessageType.FADE_OUT:
+            m1 = FadeOut(self.parameters)
         elif operation == MessageType.INVERT_COLORS:
             m1 = InvertColors(self.parameters)
-        elif operation == MessageType.SPEED_UP:
-            log.info('SPEED_UP')
-            m1 = SpeedUp(self.parameters)
         elif operation == MessageType.MIRROR_X:
-            log.info('MIRROR_X')
             m1 = MirrorX(self.parameters)
+        elif operation == MessageType.MIRROR_Y:
+            m1 = MirrorY(self.parameters)
+        elif operation == MessageType.PAINTING:
+            m1 = Painting(self.parameters)
+        elif operation == MessageType.RESIZE:
+            m1 = ResizeVideo(self.parameters)
+        elif operation == MessageType.ROTATE:
+            m1 = Rotate(self.parameters)
+        elif operation == MessageType.SPEED_UP:
+            m1 = SpeedUp(self.parameters)
         else:
-            log.info('Abstract message')
+            raise Exception('Type not supported. The value of operation was:{}'.format(operation))
         return m1
 
     def send_video_to_next_vnf_in_chain(self, new_file):
