@@ -11,13 +11,9 @@ from communication_entities.messages.topology_message import TopologyMessage
 from utilities.message_type import MessageType
 from entities.parameter_package import ParameterPackage
 from entities.topology import Topology
-from vnfs.annotate import Annotate
-from vnfs.speed_up import SpeedUp
-from vnfs.invert_colors import InvertColors
-from vnfs.crop import Crop
-from vnfs.resize_video import ResizeVideo
 from utilities.socket_size import SocketSize
-from utilities.logger import *
+from utilities.logger import log
+from entities.vnf_generator import VNFGenerator
 
 
 class GenericServer:
@@ -169,27 +165,18 @@ class GenericServer:
                 buffer = client_socket.recv(SocketSize.ACK_BUFFER.value)
         return source_file_complete
 
+    # TODO: Implement the time sum to validate network services
     def send_video_to_client(self, parameters):
         log.info("Sending video to client..")
         parameters.increase_time()
         parameters.increase_current_vnf()
         parameters.file_pack.name = parameters.file_pack.full_name_processed()
         self.connect_to_another_server(parameters.get_current_vnf_server())
-        new_parameters = None
 
-        # FIXME: Use polymorphism
         if len(parameters.operations) > parameters.current_vnf_index:
             new_operation = parameters.operations[parameters.current_vnf_index]
-            if new_operation == MessageType.ANNOTATE:
-                new_parameters = Annotate(parameters)
-            elif new_operation == MessageType.SPEED_UP:
-                new_parameters = SpeedUp(parameters)
-            elif new_operation == MessageType.INVERT_COLORS:
-                new_parameters = InvertColors(parameters)
-            elif new_operation == MessageType.CROP:
-                new_parameters = Crop(parameters)
-            elif new_operation == MessageType.RESIZE:
-                new_parameters = ResizeVideo(parameters)
+            vnf_generator = VNFGenerator(new_operation, parameters)
+            new_parameters = vnf_generator.create_message_type_by_operation()
         else:
             new_parameters = parameters
 
@@ -204,7 +191,6 @@ class GenericServer:
             buffer = video.read()
             self.send_channel.sendall(buffer)
 
-    # TODO: Change constants by using polymorphism
     def save_processed_video(self, video, name: str, format_file=""):
         if format_file == ".mp4":
             self.transcoder_mp4(video, name)

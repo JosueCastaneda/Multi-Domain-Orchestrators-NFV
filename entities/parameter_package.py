@@ -35,6 +35,7 @@ class ParameterPackage:
         self.fade_in_parameter = fade_in
         self.fade_out_parameter = fade_out
 
+    # TODO: Save the time in file to validate algorithms
     def increase_time(self):
         new_latest_time = time.time()
         self.processed_time += new_latest_time - self.latest_time

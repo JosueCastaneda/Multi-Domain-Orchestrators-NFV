@@ -7,6 +7,7 @@ from communication_entities.messages.send_queue_Q_message import SendQueueQMessa
 from communication_entities.messages.switch_done_message import SwitchDoneMessage
 from entities.service_package import ServicePackage
 from utilities.logger import log
+from utilities.socket_size import SocketSize
 
 
 class MigrationDeactivateMessage(AbstractMessage):
@@ -16,15 +17,16 @@ class MigrationDeactivateMessage(AbstractMessage):
         self.current_server = None
 
     def handle_switch_exchange(self):
-        m1 = self.client_socket.recv(4096)
+        m1 = self.client_socket.recv(SocketSize.RECEIVE_BUFFER)
         answer_message = pickle.loads(m1)
         log.info(answer_message)
         m2 = SwitchDoneMessage(None)
         self.current_server.send_message_to_socket(self.client_socket, m2)
 
     # TODO: Improve the class by using polymorphism and do not require three ifs
+    # TODO: Duplicated code
     def handle_queue_migration(self, operation):
-        m1 = self.client_socket.recv(4096)
+        m1 = self.client_socket.recv(SocketSize.RECEIVE_BUFFER)
         answer_message = pickle.loads(m1)
         log.info(answer_message)
         if operation == "P":
@@ -51,7 +53,7 @@ class MigrationDeactivateMessage(AbstractMessage):
         if recursive_migration_took_place:
             m = MigrationAckMessage(new_vnf)
             self.current_server.send_message_to_socket(self.client_socket, m)
-            x = self.client_socket.recv(4096)
+            x = self.client_socket.recv(SocketSize.RECEIVE_BUFFER)
             log.info(x)
             return
             # sys.exit()
