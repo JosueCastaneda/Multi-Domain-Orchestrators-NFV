@@ -36,11 +36,11 @@ class ParameterGenerator:
 
     def generate_fade_in_parameter(self):
         if self.fade_in:
-            return FadeInParameters(duration=self.crop['duration'])
+            return FadeInParameters(duration=self.fade_in['duration'])
 
     def generate_fade_out_parameter(self):
         if self.fade_out:
-            return FadeOutParameters(duration=self.crop['duration'])
+            return FadeOutParameters(duration=self.fade_out['duration'])
 
     def generate_file_parameter(self):
         if self.file:
