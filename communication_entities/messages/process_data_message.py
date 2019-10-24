@@ -38,18 +38,24 @@ class ProcessDataMessage(AbstractMessage):
         m1 = AbstractMessage(self.parameters)
 
         if operation == MessageType.ANNOTATE:
+            log.info('ANNOTATE')
             m1 = Annotate(self.parameters)
         elif operation == MessageType.RESIZE:
+            log.info('RESIZE')
             m1 = ResizeVideo(self.parameters)
         elif operation == MessageType.CROP:
+            log.info('CROP')
             m1 = Crop(self.parameters)
         elif operation == MessageType.INVERT_COLORS:
             m1 = InvertColors(self.parameters)
         elif operation == MessageType.SPEED_UP:
+            log.info('SPEED_UP')
             m1 = SpeedUp(self.parameters)
         elif operation == MessageType.MIRROR_X:
+            log.info('MIRROR_X')
             m1 = MirrorX(self.parameters)
-
+        else:
+            log.info('Abstract message')
         return m1
 
     def send_video_to_next_vnf_in_chain(self, new_file):
@@ -93,6 +99,7 @@ class ProcessDataMessage(AbstractMessage):
         log.info(''.join(["Current index: ", str(self.current_op_index)]))
         if len(self.parameters.operations) > self.current_op_index:
             operation = self.parameters.operations[self.current_op_index]
+            log.info(''.join(["Operation of type: ", str(operation)]))
             m1 = self.create_message_type_by_operation(operation)
             new_file = m1.process_by_message(self.parameters)
             self.send_video_to_next_vnf_in_chain(new_file)
