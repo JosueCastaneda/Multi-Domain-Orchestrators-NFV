@@ -98,6 +98,7 @@ class MessageGenerator:
             parsed_operations.append(self.generate_operation(op))
         return parsed_operations
 
+    # TODO: Add this method to the class that holds the all the types of VNFs
     @staticmethod
     def generate_operation(op):
         if op == "ANNOTATE":
