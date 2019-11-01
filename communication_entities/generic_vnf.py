@@ -1,24 +1,20 @@
-import os
 import pickle
-import sys
-
-sys.path.append('../')
 
 from communication_entities.generic_server import GenericServer
-from entities.communication_entity_package import CommunicationEntityPackage
 from communication_entities.messages.add_vnf_message import AddVNF
-from entities.topology import Topology
-from communication_entities.messages.raw_text_message import RawTextMessage
-from communication_entities.messages.send_queue_Q_message import SendQueueQMessage
-from communication_entities.messages.send_queue_P_message import SendQueuePMessage
-from communication_entities.messages.send_queue_R_message import SendQueueRMessage
-from communication_entities.messages.switch_message import SwitchMessage
-from communication_entities.messages.migration_ack_message import MigrationAckMessage
-from communication_entities.messages.terminate_message import TerminateMessage
 from communication_entities.messages.all_queue_information import AllQueueInformation
+from communication_entities.messages.migration_ack_message import MigrationAckMessage
 from communication_entities.messages.migration_deactivate_message import MigrationDeactivateMessage
 from communication_entities.messages.migration_deactivate_recusive_message import MigrationDeactivateRecursiveMessage
+from communication_entities.messages.raw_text_message import RawTextMessage
 from communication_entities.messages.request_new_pop_message import RequestNewPopMessage
+from communication_entities.messages.send_queue_P_message import SendQueuePMessage
+from communication_entities.messages.send_queue_Q_message import SendQueueQMessage
+from communication_entities.messages.send_queue_R_message import SendQueueRMessage
+from communication_entities.messages.switch_message import SwitchMessage
+from communication_entities.messages.terminate_message import TerminateMessage
+from entities.communication_entity_package import CommunicationEntityPackage
+from entities.topology import Topology
 from utilities.logger import log
 from utilities.socket_size import SocketSize
 
@@ -28,10 +24,9 @@ class GenericVNF:
     def __init__(self, host, port, name, service_package=None,
                  clients=5, topology=None, orchestrator=None, initial=0):
 
-        p_host, p_port, p_name = self.parse_parameters(host, port, name)
-        self.server_param = CommunicationEntityPackage(p_host, p_port, clients)
+        self.server_param = CommunicationEntityPackage(host, port, clients)
         self.server = GenericServer(self, self.server_param)
-        self.name = p_name
+        self.name = name
         self.topology = topology
         self.list_affected_vnf = []
         self.queue_Q = [initial]
@@ -39,7 +34,7 @@ class GenericVNF:
         self.queue_R = [initial + 2]
         self.service_package = service_package
         self.orchestrator = orchestrator
-        self.set_up_to_orchestrator(orchestrator, p_host, p_port)
+        self.set_up_to_orchestrator(orchestrator, host, port)
         log.info(''.join(["VNF: ", self.name, " is running!"]))
         log.info(''.join(["Delay: ", str(self.topology.delay)]))
         log.info(''.join(["Bandwidth: ", str(self.topology.bw)]))
@@ -53,15 +48,6 @@ class GenericVNF:
         add_message = AddVNF(host, port, self.name, self.topology)
         self.server.send_message_to_orchestrator(add_message)
 
-    @staticmethod
-    def parse_parameters(host, port, name):
-        if type(host) != str:
-            host = str(host)
-        if type(port) != int:
-            port = int(port)
-        if type(name) != str:
-            name = str(name)
-        return host, port, name
 
     def print_state_vnf(self):
         """
@@ -157,12 +143,6 @@ class GenericVNF:
         self.server.send_message_virtual(raw_text_message)
 
     def terminate_migration(self):
-        """
-            Send terminate message to previous VNF
-            This ends the migration scenario by sending
-            a terminate message from the source_VNF to the previous_VNF
-        :return:
-        """
         m1 = TerminateMessage(None)
         self.server.send_message_virtual(m1)
         self.server.disconnect_send_virtual_channel()
@@ -170,14 +150,6 @@ class GenericVNF:
         self.print_state_vnf()
 
     def process_all_data_in_queues(self, new_vnf):
-        """
-        Process all the data using the function required for each
-        packet in the queues. The messages should contain the required
-        process.
-
-        :param new_vnf: The new VNF represented as a Topology entity
-        :return: all_data: List of parameters that includes two Queues and a Topology
-        """
         x2 = self.process_queue(self.queue_Q)
         x3 = self.process_queue(self.queue_P)
         all_data = [x2, x3, new_vnf]
@@ -195,13 +167,6 @@ class GenericVNF:
         return pickle.loads(self.server.send_channel.recv(SocketSize.RECEIVE_BUFFER.value))
 
     def check_if_previous_vnf_must_migrate(self, v, new_vnf):
-        """
-        Verifies if the previous_VNF must also migrate due to the migration of source_VNF
-
-        :param v: The previous_VNF
-        :param new_vnf: The new_VNF
-        :return:
-        """
         answer_message = self.send_migration_message_to_previous_vnf(v, new_vnf)
         if isinstance(answer_message.data, Topology):
             m_ack = MigrationAckMessage("Ok for delete")
@@ -269,8 +234,3 @@ class GenericVNF:
 
     def serve_clients(self):
         self.server.serve_clients()
-
-    @staticmethod
-    def remove_videos(name_original: str, name_processed: str):
-        os.remove(name_original)
-        os.remove(name_processed)

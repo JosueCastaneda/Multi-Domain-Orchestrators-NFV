@@ -1,0 +1,147 @@
+{
+  "number_of_services": 3,
+  "services":
+  [
+    {
+      "operations": [
+        "BLACK_WHITE",
+        "PAINTING",
+        "CROP",
+        "ANNOTATE"
+      ],
+      "host_servers": [
+        "10.0.0.54",
+        "10.0.0.49",
+        "10.0.0.45",
+        "10.0.0.52"
+      ],
+      "port_servers": [
+        4437,
+        4437,
+        4437,
+        4437
+      ],
+      "speed_factor": null,
+      "parameters": {
+        "annotation":
+        {
+          "text": "Test",
+          "font_size": 30,
+          "color": "white"
+        },
+        "crop":
+        {
+          "initial_time": 0,
+          "end_time": 10
+        },
+        "fade_in": null,
+        "fade_out": null,
+        "file": {
+          "file_name": "videos/small_1280.mp4",
+          "format_file": ".mp4",
+          "filename_processed": "small_processed_"
+        },
+        "resize": null,
+        "black_white": null,
+        "composite": null,
+        "mirror_x": null,
+        "mirror_y": null,
+        "painting": null,
+        "rotate": null,
+        "speed_up": null
+      }
+    },
+
+    {
+      "operations": [
+        "MIRROR_X",
+        "ROTATE",
+        "INVERT_COLORS",
+        "FADE_OUT"
+      ],
+      "host_servers": [
+        "10.0.0.51",
+        "10.0.0.46",
+        "10.0.0.55",
+        "10.0.0.53"
+      ],
+      "port_servers": [
+        4437,
+        4437,
+        4437,
+        4437
+      ],
+      "speed_factor": null,
+      "parameters": {
+        "annotation": null,
+        "crop": null,
+        "fade_in": null,
+        "fade_out":
+        {
+          "duration": 10
+        },
+        "file": {
+          "file_name": "videos/small_1280.mp4",
+          "format_file": ".mp4",
+          "filename_processed": "small_processed_"
+        },
+        "resize": null,
+        "black_white": null,
+        "composite": null,
+        "mirror_x": null,
+        "mirror_y": null,
+        "painting": null,
+        "rotate": null,
+        "speed_up": null
+      }
+    },
+    {
+      "operations": [
+        "ROTATE",
+        "CROP",
+        "PAINTING",
+        "RESIZE"
+      ],
+      "host_servers": [
+        "10.0.0.46",
+        "10.0.0.45",
+        "10.0.0.49",
+        "10.0.0.47"
+      ],
+      "port_servers": [
+        4437,
+        4437,
+        4437,
+        4437
+      ],
+      "speed_factor": null,
+      "parameters": {
+        "annotation": null,
+        "crop":
+        {
+          "initial_time": 0,
+          "end_time": 10
+        },
+        "fade_in": null,
+        "fade_out": null,
+        "file": {
+          "file_name": "videos/small_1280.mp4",
+          "format_file": ".mp4",
+          "filename_processed": "small_processed_"
+        },
+        "resize":
+        {
+          "width": 300,
+          "height": 300
+        },
+        "black_white": null,
+        "composite": null,
+        "mirror_x": null,
+        "mirror_y": null,
+        "painting": null,
+        "rotate": null,
+        "speed_up": null
+      }
+    }
+  ]
+}

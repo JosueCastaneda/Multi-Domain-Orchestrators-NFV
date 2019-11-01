@@ -13,15 +13,14 @@ from utilities.logger import log
 
 def main(argv):
     command = read_parameters(argv)
-    # file = 'parameters_complete.json'
     file = 'experiments/first/480/exp_1_3/parameters.json'
     if command.is_valid():
         messages = generate_messages(command, file)
         if isinstance(messages, list):
             log.info(''.join(["Number of messages", str(len(messages))]))
-            send_message(command, messages[0])
-            # for m in messages:
-            #     send_message(command, m)
+            # send_message(command, messages[0])
+            for m in messages:
+                send_message(command, m)
         else:
             send_message(command, messages)
     else:
@@ -35,7 +34,6 @@ def generate_messages(command, file):
 
 def send_message(command, message):
     send_channel = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-    # log.info("Host: ", command.host, " Port: ", str(command.port))
     print('Host: ', command.host, ' Port: ', command.port)
     send_channel.connect((command.host, command.port))
     data_string = pickle.dumps(message)

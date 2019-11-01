@@ -3,8 +3,8 @@ import os
 from moviepy.editor import VideoFileClip, vfx
 
 from communication_entities.messages.abstract_message import AbstractMessage
-from entities.parameters.fade_out import FadeOutParameters
 from entities.parameter_package import ParameterPackage
+from entities.parameters.fade_out import FadeOutParameters
 from utilities.logger import log
 
 

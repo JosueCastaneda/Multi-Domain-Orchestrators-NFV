@@ -3,8 +3,8 @@ import os
 from moviepy.editor import VideoFileClip
 
 from communication_entities.messages.abstract_message import AbstractMessage
-from entities.parameters.crop import CropParameters
 from entities.parameter_package import ParameterPackage
+from entities.parameters.crop import CropParameters
 from utilities.logger import log
 
 

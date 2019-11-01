@@ -1,18 +1,15 @@
-import sys
 import json
 
-sys.path.append('../')
-
-from communication_entities.messages.add_vnf_message import AddVNF
 from communication_entities.messages.add_orchestrator_message import AddOrchestratorMessage
+from communication_entities.messages.add_vnf_message import AddVNF
 from communication_entities.messages.add_vnf_to_chain_message import AddVNFToChainMessage
 from communication_entities.messages.migration_message import MigrationMessage
 from communication_entities.messages.process_data_message import ProcessDataMessage
 from entities.communication_entity_package import CommunicationEntityPackage
 from entities.parameter_generator import ParameterGenerator
 from entities.parameter_package import ParameterPackage
-from utilities.message_type import MessageType
 from entities.vnf_package import VnfPackage
+from utilities.message_type import MessageType
 
 
 class MessageGenerator:

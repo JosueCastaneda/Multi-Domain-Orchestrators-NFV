@@ -1,12 +1,8 @@
-import sys
-sys.path.append('../')
-
 from communication_entities.messages.abstract_message import AbstractMessage
 from communication_entities.messages.data_video_message import DataVideoMessage
 from entities.communication_entity_package import CommunicationEntityPackage
 from entities.vnf_generator import VNFGenerator
 from utilities.logger import log
-from utilities.socket_size import SocketSize
 
 
 class ProcessDataMessage(AbstractMessage):

@@ -1,19 +1,15 @@
 import os
 import pickle
 import socket
-import sys
-
-
-sys.path.append('../')
 
 from communication_entities.messages.abstract_message import AbstractMessage
 from communication_entities.messages.topology_message import TopologyMessage
-from utilities.message_type import MessageType
 from entities.parameter_package import ParameterPackage
 from entities.topology import Topology
-from utilities.socket_size import SocketSize
-from utilities.logger import log
 from entities.vnf_generator import VNFGenerator
+from utilities.logger import log
+from utilities.message_type import MessageType
+from utilities.socket_size import SocketSize
 
 
 class GenericServer:

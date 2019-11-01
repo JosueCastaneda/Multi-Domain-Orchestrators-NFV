@@ -1,6 +1,7 @@
+import sys
+
 from communication_entities.messages.abstract_message import AbstractMessage
 from utilities.logger import *
-import sys
 
 
 class TopologyMessage(AbstractMessage):

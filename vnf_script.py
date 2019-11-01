@@ -2,9 +2,9 @@ import getopt
 import sys
 
 from communication_entities.generic_vnf import GenericVNF
-from entities.topology import Topology
-from entities.service_package import ServicePackage
 from entities.communication_entity_package import CommunicationEntityPackage
+from entities.service_package import ServicePackage
+from entities.topology import Topology
 
 help_message = "vnf_script.py -v <port> -n <vnf_name> -o <orchestrator_ip> -q <orchestrator_port>"
 
@@ -20,6 +20,15 @@ def valid_input(vnf_host, vnf_port, vnf_name, orchestrator_port, orchestrator_ho
     return all_parameters_given and all_parameters_format
 
 
+def parse_parameters(host, port, name):
+    if type(host) != str:
+        host = str(host)
+    if type(port) != int:
+        port = int(port)
+    if type(name) != str:
+        name = str(name)
+    return host, port, name
+
 def main(argv):
     vnf_host = "127.0.0.1"
     debug = True
@@ -34,7 +43,7 @@ def main(argv):
     if debug:
         vnf_port = "4433"
         orchestrator_host = "127.0.0.1"
-        orchestrator_port = "5465"
+        orchestrator_port = "5463"
         vnf_name = "other"
         service = [50, 23, 12, 53]
         topology = [22, 20, 3.5, 13]
@@ -85,6 +94,9 @@ def main(argv):
         topology_vnf.port = vnf_port
         service_vnf = ServicePackage(service[0], service[1], service[2], service[3])
         orchestrator = CommunicationEntityPackage(orchestrator_host, orchestrator_port)
+
+        vnf_host, vnf_port, vnf_name = parse_parameters(vnf_host, vnf_port, vnf_name)
+
         annotate_vnf = GenericVNF(vnf_host,
                                   vnf_port,
                                   vnf_name,

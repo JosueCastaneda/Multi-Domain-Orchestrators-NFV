@@ -19,7 +19,7 @@ python3 message_factory.py -t add_orchestrator -h 10.0.0.36 -p 5467 -n none -m n
 python3 message_factory.py -t add_orchestrator -h 10.0.0.36 -p 5467 -n none -m none --vnf_host 10.0.0.36 --vnf_port 5467
 
 # Add VNFs to service 4
-python3 message_factory.py -t add_chain -h 10.0.0.13 -p 4435 -n none -m none -v 10.0.0.15 --vnf_port 4439
+python3 message_factory.py -t add_chain -h 10.0.0.101 -p 4435 -n none -m none -v 10.0.0.15 --vnf_port 4439
 python3 message_factory.py -t add_chain -h 10.0.0.15 -p 4439 -n none -m none -v 10.0.0.12 --vnf_port 4431
 python3 message_factory.py -t add_chain -h 10.0.0.12 -p 4431 -n none -m none -v 10.0.0.13 --vnf_port 4433
 
