@@ -161,24 +161,25 @@ class GenericServer:
                 buffer = client_socket.recv(SocketSize.ACK_BUFFER.value)
         return source_file_complete
 
-    # TODO: Implement the time sum to validate network services
-    def send_video_to_client(self, parameters):
-        log.info("Sending video to client..")
-        parameters.increase_time()
-        parameters.increase_current_vnf()
-        parameters.file_pack.name = parameters.file_pack.full_name_processed()
-        self.connect_to_another_server(parameters.get_current_vnf_server())
-
-        if len(parameters.operations) > parameters.current_vnf_index:
-            new_operation = parameters.operations[parameters.current_vnf_index]
-            vnf_generator = VNFGenerator(new_operation, parameters)
-            new_parameters = vnf_generator.create_message_type_by_operation()
-        else:
-            new_parameters = parameters
-
-        self.send_message(new_parameters)
-        self.get_ack(self.send_channel)
-        self.send_video(parameters.file_pack.full_name_processed())
+    # # TODO: Implement the time sum to validate network services
+    # def send_video_to_client(self, parameters):
+    #     log.info("Sending video to client..")
+    #     print('INCREASE TIME')
+    #     parameters.increase_time()
+    #     parameters.increase_current_vnf()
+    #     parameters.file_pack.name = parameters.file_pack.full_name_processed()
+    #     self.connect_to_another_server(parameters.get_current_vnf_server())
+    #
+    #     if len(parameters.operations) > parameters.current_vnf_index:
+    #         new_operation = parameters.operations[parameters.current_vnf_index]
+    #         vnf_generator = VNFGenerator(new_operation, parameters)
+    #         new_parameters = vnf_generator.create_message_type_by_operation()
+    #     else:
+    #         new_parameters = parameters
+    #
+    #     self.send_message(new_parameters)
+    #     self.get_ack(self.send_channel)
+    #     self.send_video(parameters.file_pack.full_name_processed())
 
     def send_video(self, file_name: str):
         log.info("Sending video..")
