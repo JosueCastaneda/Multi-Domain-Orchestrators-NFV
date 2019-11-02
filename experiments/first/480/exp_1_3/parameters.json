@@ -104,7 +104,10 @@
           "end_time": 10
         },
         "fade_in": null,
-        "fade_out": null,
+        "fade_out":
+        {
+          "duration": 10
+        },
         "file": {
           "file_name": "videos/small_480.mp4",
           "format_file": ".mp4",
