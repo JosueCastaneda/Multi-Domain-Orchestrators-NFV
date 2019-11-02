@@ -36,9 +36,13 @@ def send_message(command, message):
     send_channel = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     print('Host: ', command.host, ' Port: ', command.port)
     send_channel.connect((command.host, command.port))
+    log.info('Connected!')
     data_string = pickle.dumps(message)
+    log.info('Data string created!')
     send_channel.send(data_string)
+    log.info('Sent!')
     send_channel.close()
+    log.info('Closing channel!')
 
 
 def read_parameters(argv):
