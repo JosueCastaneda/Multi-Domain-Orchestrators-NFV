@@ -1,3 +1,5 @@
+import pickle
+
 from communication_entities.messages.abstract_message import AbstractMessage
 from communication_entities.messages.data_video_message import DataVideoMessage
 from entities.communication_entity_package import CommunicationEntityPackage
@@ -22,9 +24,12 @@ class ProcessDataMessage(AbstractMessage):
             log.info(''.join(["Operation of type: ", str(operation)]))
             m1 = self.create_message_type_by_operation(operation)
             new_file = m1.process_by_message(self.parameters)
-            # Add the time
-            self.parameters.increase_time()
+            self.update_and_save_processing_time()
             self.send_video_to_next_vnf_in_chain(new_file)
+
+    def update_and_save_processing_time(self):
+        self.parameters.increase_time()
+        pickle.dump(self.parameters.processed_time, open('time_spent.p', 'wb'))
 
     def create_message_type_by_operation(self, operation):
         message_generator = VNFGenerator(operation, self.parameters)

@@ -1,5 +1,3 @@
-import os
-
 from moviepy.editor import VideoFileClip, vfx
 
 from communication_entities.messages.abstract_message import AbstractMessage
@@ -26,11 +24,3 @@ class SpeedUp(AbstractMessage):
         operation_name = "_speed_up"
         self.save_video(video, source_no_format, parameter.file_pack.format, operation_name)
         return source_no_format + operation_name + parameter.file_pack.format
-
-    # def process_by_command_line(self):
-    #     self.current_server.acknowledge_message(self.client_socket, "OK")
-    #     video_file_name = self.current_server.read_video_package(self.data.file_pack, self.client_socket)
-    #     video = self.process_package(os.getcwd() + "/" + video_file_name, self.data.speed_factor)
-    #     self.current_server.save_processed_video(video, self.data.file_pack.process_name, self.data.file_pack.format)
-    #     self.current_server.send_video_to_client(self.data)
-    #     self.terminate_connections()

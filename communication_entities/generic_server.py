@@ -1,4 +1,3 @@
-import os
 import pickle
 import socket
 
@@ -6,7 +5,6 @@ from communication_entities.messages.abstract_message import AbstractMessage
 from communication_entities.messages.topology_message import TopologyMessage
 from entities.parameter_package import ParameterPackage
 from entities.topology import Topology
-from entities.vnf_generator import VNFGenerator
 from utilities.logger import log
 from utilities.message_type import MessageType
 from utilities.socket_size import SocketSize
@@ -106,11 +104,6 @@ class GenericServer:
         return self.send_channel.recv(SocketSize.ACK_BUFFER.value).decode("UTF-8")
 
     @staticmethod
-    def get_ack(client: socket):
-        ans = client.recv(SocketSize.ACK_BUFFER.value).decode("UTF-8")
-        return ans
-
-    @staticmethod
     def get_message(client: socket) -> AbstractMessage:
         parameters = client.recv(SocketSize.RECEIVE_BUFFER.value)
         return pickle.loads(parameters)
@@ -150,54 +143,3 @@ class GenericServer:
         self.send_channel.send(data_string)
         answer_message = self.wait_for_reply_two_communication_channel()
         return answer_message
-
-    @staticmethod
-    def read_video_package(file_pack, client_socket):
-        source_file_complete = ''.join([file_pack.name, "_server", file_pack.format])
-        buffer = client_socket.recv(SocketSize.ACK_BUFFER.value)
-        with open(source_file_complete, "wb") as video:
-            while buffer:
-                video.write(buffer)
-                buffer = client_socket.recv(SocketSize.ACK_BUFFER.value)
-        return source_file_complete
-
-    # # TODO: Implement the time sum to validate network services
-    # def send_video_to_client(self, parameters):
-    #     log.info("Sending video to client..")
-    #     print('INCREASE TIME')
-    #     parameters.increase_time()
-    #     parameters.increase_current_vnf()
-    #     parameters.file_pack.name = parameters.file_pack.full_name_processed()
-    #     self.connect_to_another_server(parameters.get_current_vnf_server())
-    #
-    #     if len(parameters.operations) > parameters.current_vnf_index:
-    #         new_operation = parameters.operations[parameters.current_vnf_index]
-    #         vnf_generator = VNFGenerator(new_operation, parameters)
-    #         new_parameters = vnf_generator.create_message_type_by_operation()
-    #     else:
-    #         new_parameters = parameters
-    #
-    #     self.send_message(new_parameters)
-    #     self.get_ack(self.send_channel)
-    #     self.send_video(parameters.file_pack.full_name_processed())
-
-    def send_video(self, file_name: str):
-        log.info("Sending video..")
-        file_path = ''.join([os.getcwd(), "/", file_name])
-        with open(file_path, "rb") as video:
-            buffer = video.read()
-            self.send_channel.sendall(buffer)
-
-    def save_processed_video(self, video, name: str, format_file=""):
-        if format_file == ".mp4":
-            self.transcoder_mp4(video, name)
-        elif format_file == ".webm":
-            self.transcoder_web(video, name)
-
-    @staticmethod
-    def transcoder_mp4(source_clip, name):
-        source_clip.write_videofile(name + ".mp4")
-
-    @staticmethod
-    def transcoder_web(source_clip, name):
-        source_clip.write_videofile(name + ".webm")
