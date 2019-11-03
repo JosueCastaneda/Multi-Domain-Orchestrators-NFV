@@ -21,7 +21,10 @@ class ProcessDataMessage(AbstractMessage):
         log.info(''.join(["Current index: ", str(self.current_op_index)]))
         if self.is_index_valid():
             operation = self.parameters.operations[self.current_op_index]
-            log.info(''.join(["Operation of type: ", str(operation)]))
+            # Debug for the operation
+            for op in self.parameters.operations:
+                log.info(''.join(["Operation : ", str(op)]))
+            log.info(''.join(["Current operation of type: ", str(operation)]))
             m1 = self.create_message_type_by_operation(operation)
             new_file = m1.process_by_message(self.parameters)
             self.update_and_save_processing_time()
