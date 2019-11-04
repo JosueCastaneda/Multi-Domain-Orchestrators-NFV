@@ -79,6 +79,7 @@ class ProcessDataMessage(AbstractMessage):
         operation = self.parameters.operations[self.current_op_index]
         log.info(''.join(['Increasing current operation index', 'Operation: ', str(operation)]))
         self.current_op_index += 1
+        operation = self.parameters.operations[self.current_op_index]
         log.info(''.join(['New operation index', 'Operation: ', str(operation)]))
 
     def send_video_to_new_vnf(self, new_file):

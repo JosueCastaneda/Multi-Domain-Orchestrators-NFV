@@ -54,7 +54,8 @@ class MessageGenerator:
 
                 operations = service['operations']
                 # Substract operation from current server
-                number_servers = len(operations) - 1
+                # number_servers = len(operations) - 1
+                number_servers = len(operations)
                 annotation_parameter = service['parameters']['annotation']
                 crop_parameter = service['parameters']['crop']
                 fade_in_parameter = service['parameters']['fade_in']
