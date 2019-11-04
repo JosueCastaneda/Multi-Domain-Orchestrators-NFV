@@ -88,7 +88,7 @@ class MessageGenerator:
                                               crop=param_gen.crop,
                                               fade_in=param_gen.fade_in,
                                               fade_out=param_gen.fade_out,
-                                              resize_parameter=param_gen.resize)
+                                              resize=param_gen.resize)
                 m = ProcessDataMessage(parameters)
                 messages.append(m)
         return messages

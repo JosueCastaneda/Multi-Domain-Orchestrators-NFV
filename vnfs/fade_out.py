@@ -25,6 +25,6 @@ class FadeOut(AbstractMessage):
         source = parameter.file_pack.name
         video = self.process_package(source, fade_out_parameter)
         source_no_format = source[:-4]
-        operation_name = "_fadeIn"
+        operation_name = "_fadeOut"
         self.save_video(video, source_no_format, parameter.file_pack.format, operation_name)
         return source_no_format + operation_name + parameter.file_pack.format
