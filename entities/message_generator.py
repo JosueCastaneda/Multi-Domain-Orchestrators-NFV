@@ -54,8 +54,8 @@ class MessageGenerator:
 
                 operations = service['operations']
                 # Substract operation from current server
-                number_servers = len(operations) - 1
-                # number_servers = len(operations)
+                # number_servers = len(operations) - 1
+                number_servers = len(operations)
                 annotation_parameter = service['parameters']['annotation']
                 crop_parameter = service['parameters']['crop']
                 fade_in_parameter = service['parameters']['fade_in']
@@ -76,6 +76,7 @@ class MessageGenerator:
 
                 servers = list()
                 for i in range(number_servers):
+                    print("Index: ", i)
                     servers.append(CommunicationEntityPackage(host_servers[i], int(port_servers[i])))
 
                 parameters = ParameterPackage(annotation=param_gen.annotation,
