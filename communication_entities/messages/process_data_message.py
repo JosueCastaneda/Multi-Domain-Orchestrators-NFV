@@ -42,7 +42,7 @@ class ProcessDataMessage(AbstractMessage):
 
     def update_and_save_processing_time(self):
         self.parameters.increase_time()
-        pickle.dump(self.parameters.processed_time, open('time_spent.p', 'wb'))
+        pickle.dump(self.parameters.processed_time, open(self.parameters.file_pack.name+'_time_spent.p', 'wb'))
 
     def create_message_type_by_operation(self, operation):
         message_generator = VNFGenerator(operation, self.parameters)
