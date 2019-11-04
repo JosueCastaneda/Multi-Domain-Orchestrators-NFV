@@ -21,14 +21,20 @@ class ProcessDataMessage(AbstractMessage):
         log.info(''.join(["Current index: ", str(self.current_op_index)]))
         if self.is_index_valid():
             operation = self.parameters.operations[self.current_op_index]
-            # Debug for the operation
-            for op in self.parameters.operations:
-                log.info(''.join(["Operation : ", str(op)]))
+            # TODO: Deleteme Debugg operation
+            self.debug_operation_ip()
             log.info(''.join(["Current operation of type: ", str(operation)]))
             m1 = self.create_message_type_by_operation(operation)
             new_file = m1.process_by_message(self.parameters)
             self.update_and_save_processing_time()
             self.send_video_to_next_vnf_in_chain(new_file)
+
+    def debug_operation_ip(self):
+        # Debug for the operation
+        ip_index = 0
+        for op in self.parameters.operations:
+            log.info(''.join(["Operation : ", str(op), " IP: ", str(self.parameters.vnf_servers[ip_index])]))
+            ip_index += 1
 
     def update_and_save_processing_time(self):
         self.parameters.increase_time()
@@ -69,6 +75,7 @@ class ProcessDataMessage(AbstractMessage):
         operation = self.parameters.operations[self.current_op_index]
         log.info(''.join(['Increasing current operation index', 'Operation: ', str(operation)]))
         self.current_op_index += 1
+        log.info(''.join(['New operation index', 'Operation: ', str(operation)]))
 
     def send_video_to_new_vnf(self, new_file):
         message_prepare_data_transfer = DataVideoMessage(new_file)
