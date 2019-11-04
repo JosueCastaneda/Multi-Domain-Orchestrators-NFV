@@ -62,6 +62,7 @@ class MessageGenerator:
                 fade_out_parameter = service['parameters']['fade_out']
                 file_parameter = service['parameters']['file']
                 resize_parameter = service['parameters']['resize']
+                # print("Width: ", str(resize_parameter.width), "Height: ", str(resize_parameter.height))
                 host_servers = service['host_servers']
                 port_servers = service['port_servers']
                 speed_factor = service['speed_factor']
@@ -86,7 +87,8 @@ class MessageGenerator:
                                               speed_factor=speed_factor,
                                               crop=param_gen.crop,
                                               fade_in=param_gen.fade_in,
-                                              fade_out=param_gen.fade_out)
+                                              fade_out=param_gen.fade_out,
+                                              resize_parameter=param_gen.resize)
                 m = ProcessDataMessage(parameters)
                 messages.append(m)
         return messages
