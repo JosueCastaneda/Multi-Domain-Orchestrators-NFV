@@ -21,24 +21,15 @@ class ProcessDataMessage(AbstractMessage):
         log.info(''.join(["Current index: ", str(self.current_op_index)]))
         if self.is_index_valid():
             operation = self.parameters.operations[self.current_op_index]
-            # TODO: Deleteme Debugg operation
+            # TODO: Delete debugging operation
             self.debug_operation_ip()
             log.info(''.join(["Current operation of type: ", str(operation)]))
             m1 = self.create_message_type_by_operation(operation)
             new_file = m1.process_by_message(self.parameters)
             self.update_and_save_processing_time()
-            self.send_video_to_next_vnf_in_chain(new_file)
-
-    def debug_operation_ip(self):
-        # Debug for the operation
-        log.info(''.join(["# Operations : ", str(len(self.parameters.operations))]))
-        for op in self.parameters.operations:
-            log.info(''.join(["Operation : ", str(op)]))
-
-        log.info(''.join(["# Servers : ", str(len(self.parameters.vnf_servers))]))
-        for vnf in self.parameters.vnf_servers:
-            log.info(''.join(['IP: ', str(vnf.host)]))
-
+            self.increase_operation_index()
+            if self.still_need_to_process():
+                self.send_video_to_next_vnf_in_chain(new_file)
 
     def update_and_save_processing_time(self):
         self.parameters.increase_time()
@@ -51,17 +42,16 @@ class ProcessDataMessage(AbstractMessage):
 
     def send_video_to_next_vnf_in_chain(self, new_file):
         log.info(''.join(["LEN SEND: ", str(len(self.parameters.vnf_servers)), " IDX: ", str(self.current_op_index)]))
-        if self.still_need_to_process():
-            vnf_server = self.get_new_vnf_in_chain()
-            self.process_by_current_index(new_file, vnf_server)
-            self.send_video_to_new_vnf(new_file)
-            self.connect_to_virtual_channel_from_vnf(vnf_server)
-            self.send_message_to_server(new_file)
-            self.disconnect_current_channel()
-            self.connect_to_new_channel(vnf_server, self.new_message)
+        vnf_server = self.get_new_vnf_in_chain()
+        self.generate_new_message(new_file, vnf_server)
+        self.send_video_to_new_vnf(new_file)
+        self.connect_to_virtual_channel_from_vnf(vnf_server)
+        self.send_message_to_server(new_file)
+        self.disconnect_current_channel()
+        self.connect_to_new_channel(vnf_server, self.new_message)
 
     def is_index_valid(self):
-        return len(self.parameters.operations) > self.current_op_index
+        return len(self.parameters.operations) >= self.current_op_index
 
     def still_need_to_process(self):
         return len(self.parameters.vnf_servers) > self.current_op_index
@@ -69,19 +59,24 @@ class ProcessDataMessage(AbstractMessage):
     def get_new_vnf_in_chain(self):
         return self.parameters.vnf_servers[self.current_op_index]
 
-    def process_by_current_index(self, new_file, vnf_server):
+    def connect_to_new_server(self, vnf_server):
         self.current_server.connect_to_another_server(CommunicationEntityPackage(vnf_server.host, vnf_server.port))
-        self.increase_operation_index()
+
+    def generate_new_message(self, new_file, vnf_server):
+        self.connect_to_new_server(vnf_server)
         self.new_message = ProcessDataMessage(self.parameters)
         self.new_message.current_op_index = self.current_op_index
         self.new_message.parameters.file_pack.name = new_file
 
     def increase_operation_index(self):
+        # TODO: Remove, only for debugging purposes
         operation = self.parameters.operations[self.current_op_index]
         log.info(''.join(['Increasing current operation index', 'Operation: ', str(operation)]))
         self.current_op_index += 1
-        operation = self.parameters.operations[self.current_op_index]
-        log.info(''.join(['New operation index', 'Operation: ', str(operation)]))
+        # TODO: Remove, only for debugging purposes
+        if len(self.parameters.operations) > self.current_op_index:
+            operation = self.parameters.operations[self.current_op_index]
+            log.info(''.join(['New operation index', 'Operation: ', str(operation)]))
 
     def send_video_to_new_vnf(self, new_file):
         message_prepare_data_transfer = DataVideoMessage(new_file)
@@ -113,3 +108,13 @@ class ProcessDataMessage(AbstractMessage):
         self.current_server.connect_to_another_server(CommunicationEntityPackage(vnf_server.host, vnf_server.port))
         self.current_server.send_message(new_message)
         self.current_server.disconnect_send_channel()
+
+    def debug_operation_ip(self):
+        # Debug for the operation
+        log.info(''.join(["# Operations : ", str(len(self.parameters.operations))]))
+        for op in self.parameters.operations:
+            log.info(''.join(["Operation : ", str(op)]))
+
+        log.info(''.join(["# Servers : ", str(len(self.parameters.vnf_servers))]))
+        for vnf in self.parameters.vnf_servers:
+            log.info(''.join(['IP: ', str(vnf.host)]))
