@@ -31,10 +31,14 @@ class ProcessDataMessage(AbstractMessage):
 
     def debug_operation_ip(self):
         # Debug for the operation
-        ip_index = 0
+        log.info(''.join(["# Operations : ", str(len(self.parameters.operations))]))
         for op in self.parameters.operations:
-            log.info(''.join(["Operation : ", str(op), " IP: ", str(self.parameters.vnf_servers[ip_index])]))
-            ip_index += 1
+            log.info(''.join(["Operation : ", str(op)]))
+
+        log.info(''.join(["# Servers : ", str(len(self.parameters.vnf_servers))]))
+        for vnf in self.parameters.vnf_servers:
+            log.info(''.join(['IP: ', str(vnf.host)]))
+
 
     def update_and_save_processing_time(self):
         self.parameters.increase_time()
