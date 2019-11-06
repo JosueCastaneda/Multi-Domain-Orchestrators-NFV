@@ -5,7 +5,7 @@
     {
       "operations": [
         "FADE_OUT",
-        "SPEED",
+        "SPEED_UP",
         "BLACK_WHITE",
         "ANNOTATE",
         "MIRROR_X"
@@ -89,7 +89,7 @@
           "duration": 10
         },
         "file": {
-          "file_name": "videos/small_480.mp4",
+          "file_name": "videos/small_640.mp4",
           "format_file": ".mp4",
           "filename_processed": "small_processed_"
         },
@@ -109,7 +109,7 @@
         "ANNOTATE",
         "INVERT_COLORS",
         "PAINTING",
-        "SPEED"
+        "SPEED_UP"
       ],
       "host_servers": [
         "10.0.0.28",

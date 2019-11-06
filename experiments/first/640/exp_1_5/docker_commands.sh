@@ -26,11 +26,25 @@ docker exec -it mn.source python message_factory.py -t add_orchestrator -h 10.0.
 
 # ============================== VNFS ===============================
 # Run all VNFs from containers
-docker exec -it mn.vnf20_fade_out python vnf_script.py -h 10.0.0.41 -v 4437 -o 10.0.0.34 -q 5465 -n fade_out --topology 0.0841,0,0,0 --initial 63 &
-docker exec -it mn.vnf24_speed python vnf_script.py -h 10.0.0.103 -v 4437 -o 10.0.0.36 -q 5467 -n speed --topology 0.1043,0,0,0 --initial 75 &
-docker exec -it mn.vnf21_black_white python vnf_script.py -h 10.0.0.42 -v 4437 -o 10.0.0.36 -q 5467 -n black_white --topology 0.1132,0,0,0 --initial 66 &
-docker exec -it mn.vnf19_annotate python vnf_script.py -h 10.0.0.40 -v 4437 -o 10.0.0.34 -q 5465 -n annotate --topology 0.2608,0,0,0 --initial 60 &
-docker exec -it mn.vnf18_mirror_x python vnf_script.py -h 10.0.0.29 -v 4437 -o 10.0.0.34 -q 5465 -n mirror_x --topology 0.1112,0,0,0 --initial 57 &
+#docker exec -it mn.vnf20_fade_out python vnf_script.py -h 10.0.0.41 -v 4437 -o 10.0.0.34 -q 5465 -n fade_out --topology 0.0841,0,0,0 --initial 63 &
+docker exec -it mn.vnf20_fade_out /bin/bash
+python vnf_script.py -h 10.0.0.41 -v 4437 -o 10.0.0.34 -q 5465 -n fade_out --topology 0.0841,0,0,0 --initial 63
+
+#docker exec -it mn.vnf24_speed python vnf_script.py -h 10.0.0.103 -v 4437 -o 10.0.0.36 -q 5467 -n speed --topology 0.1043,0,0,0 --initial 75 &
+docker exec -it mn.vnf24_speed /bin/bash
+python vnf_script.py -h 10.0.0.103 -v 4437 -o 10.0.0.36 -q 5467 -n speed --topology 0.1043,0,0,0 --initial 75
+
+#docker exec -it mn.vnf21_black_white python vnf_script.py -h 10.0.0.42 -v 4437 -o 10.0.0.36 -q 5467 -n black_white --topology 0.1132,0,0,0 --initial 66 &
+docker exec -it mn.vnf21_black_white /bin/bash
+python vnf_script.py -h 10.0.0.42 -v 4437 -o 10.0.0.36 -q 5467 -n black_white --topology 0.1132,0,0,0 --initial 66
+
+#docker exec -it mn.vnf19_annotate python vnf_script.py -h 10.0.0.40 -v 4437 -o 10.0.0.34 -q 5465 -n annotate --topology 0.2608,0,0,0 --initial 60 &
+docker exec -it mn.vnf19_annotate /bin/bash
+python vnf_script.py -h 10.0.0.40 -v 4437 -o 10.0.0.34 -q 5465 -n annotate --topology 0.2608,0,0,0 --initial 60
+
+#docker exec -it mn.vnf18_mirror_x python vnf_script.py -h 10.0.0.29 -v 4437 -o 10.0.0.34 -q 5465 -n mirror_x --topology 0.1112,0,0,0 --initial 57 &
+docker exec -it mn.vnf18_mirror_x /bin/bash
+python vnf_script.py -h 10.0.0.29 -v 4437 -o 10.0.0.34 -q 5465 -n mirror_x --topology 0.1112,0,0,0 --initial 57
 
 docker exec -it mn.vnf16_painting python vnf_script.py -h 10.0.0.27 -v 4437 -o 10.0.0.32 -q 5463 -n fade_in --topology 0.1259,0,0,0 --initial 51 &
 docker exec -it mn.vnf15_fade_in python vnf_script.py -h 10.0.0.26 -v 4437 -o 10.0.0.32 -q 5463 -n fade_in --topology 0.1128,0,0,0 --initial 48 &
