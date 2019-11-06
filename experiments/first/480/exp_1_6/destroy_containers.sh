@@ -21,17 +21,17 @@ vim-emu compute stop -d dc2 -n orch_4
 #vim-emu compute stop -d dc3 -n vnf8_fade_out
 
 
-vim-emu compute start -d dc1 -n source
-vim-emu compute start -d dc2 -n vnf4_fade_in
-vim-emu compute start -d dc1 -n vnf6_mirror_x
-vim-emu compute start -d dc2 -n vnf9_black_white
-vim-emu compute start -d dc2 -n vnf5_painting
-vim-emu compute start -d dc2 -n vnf11_speed
-vim-emu compute start -d dc1 -n vnf10_composite_stadium
-vim-emu compute start -d dc1 -n vnf2_rotate
-vim-emu compute start -d dc2 -n vnf6_mirror_y
-vim-emu compute start -d dc2 -n vnf7_annotate
-vim-emu compute start -d dc1 -n vnf1_crop
-vim-emu compute start -d dc1 -n vnf10_invert_colors
-vim-emu compute start -d dc2 -n vnf8_fade_out
+vim-emu compute stop -d dc1 -n source
+vim-emu compute stop -d dc2 -n vnf4_fade_in
+vim-emu compute stop -d dc1 -n vnf6_mirror_x
+vim-emu compute stop -d dc2 -n vnf9_black_white
+vim-emu compute stop -d dc2 -n vnf5_painting
+vim-emu compute stop -d dc2 -n vnf11_speed
+vim-emu compute stop -d dc1 -n vnf10_composite_stadium
+vim-emu compute stop -d dc1 -n vnf2_rotate
+vim-emu compute stop -d dc2 -n vnf6_mirror_y
+vim-emu compute stop -d dc2 -n vnf7_annotate
+vim-emu compute stop -d dc1 -n vnf1_crop
+vim-emu compute stop -d dc1 -n vnf10_invert_colors
+vim-emu compute stop -d dc2 -n vnf8_fade_out
 

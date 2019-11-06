@@ -13,7 +13,7 @@ from utilities.logger import log
 
 def main(argv):
     command = read_parameters(argv)
-    file = 'experiments/first/480/exp_1_6/parameters.json'
+    file = 'experiments/first/640/exp_1_3/parameters.json'
     if command.is_valid():
         messages = generate_messages(command, file)
         if isinstance(messages, list):
