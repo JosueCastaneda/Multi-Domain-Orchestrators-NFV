@@ -5,7 +5,7 @@
     {
       "operations": [
         "FADE_OUT",
-        "SPEED",
+        "SPEED_UP",
         "BLACK_WHITE",
         "ANNOTATE",
         "MIRROR_X"
@@ -109,7 +109,7 @@
         "ANNOTATE",
         "INVERT_COLORS",
         "PAINTING",
-        "SPEED"
+        "SPEED_UP"
       ],
       "speed_factor": 2,
       "host_servers": [
