@@ -9,6 +9,7 @@ from entities.communication_entity_package import CommunicationEntityPackage
 from entities.parameter_generator import ParameterGenerator
 from entities.parameter_package import ParameterPackage
 from entities.vnf_package import VnfPackage
+from utilities.logger import log
 from utilities.message_type import MessageType
 
 
@@ -102,6 +103,7 @@ class MessageGenerator:
     # TODO: Add this method to the class that holds the all the types of VNFs
     @staticmethod
     def generate_operation(op):
+        log.info(op)
         if op == "ANNOTATE":
             return MessageType.ANNOTATE
         if op == "BLACK_WHITE":
