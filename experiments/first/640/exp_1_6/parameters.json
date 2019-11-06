@@ -148,7 +148,7 @@
           "duration": 10
         },
         "file": {
-          "file_name": "videos/small_480.mp4",
+          "file_name": "videos/small_640.mp4",
           "format_file": ".mp4",
           "filename_processed": "small_processed_"
         },
