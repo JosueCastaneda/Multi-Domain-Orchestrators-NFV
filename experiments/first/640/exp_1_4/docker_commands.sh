@@ -26,10 +26,22 @@ docker exec -it mn.source python message_factory.py -t add_orchestrator -h 10.0.
 
 # ============================== VNFS ===============================
 # Run all VNFs from containers
-docker exec -it mn.vnf21_black_white python vnf_script.py -h 10.0.0.42 -v 4437 -o 10.0.0.36 -q 5467 -n black_white --topology 0.1132,0,0,0 --initial 66 &
-docker exec -it mn.vnf16_painting python vnf_script.py -h 10.0.0.27 -v 4437 -o 10.0.0.32 -q 5463 -n fade_in --topology 0.1259,0,0,0 --initial 51 &
-docker exec -it mn.vnf12_crop python vnf_script.py -h 10.0.0.23 -v 4437 -o 10.0.0.30 -q 5461 -n crop --topology 0.1051,0,0,0 --initial 39 &
-docker exec -it mn.vnf19_annotate python vnf_script.py -h 10.0.0.40 -v 4437 -o 10.0.0.34 -q 5465 -n annotate --topology 0.2608,0,0,0 --initial 60 &
+#docker exec -it mn.vnf21_black_white python vnf_script.py -h 10.0.0.42 -v 4437 -o 10.0.0.36 -q 5467 -n black_white --topology 0.1132,0,0,0 --initial 66 &
+docker exec -it mn.vnf21_black_white /bin/bash
+python vnf_script.py -h 10.0.0.42 -v 4437 -o 10.0.0.36 -q 5467 -n black_white --topology 0.1132,0,0,0 --initial 66
+
+#docker exec -it mn.vnf16_painting python vnf_script.py -h 10.0.0.27 -v 4437 -o 10.0.0.32 -q 5463 -n fade_in --topology 0.1259,0,0,0 --initial 51 &
+docker exec -it mn.vnf16_painting /bin/bash
+python vnf_script.py -h 10.0.0.27 -v 4437 -o 10.0.0.32 -q 5463 -n fade_in --topology 0.1259,0,0,0 --initial 51
+
+#docker exec -it mn.vnf12_crop python vnf_script.py -h 10.0.0.23 -v 4437 -o 10.0.0.30 -q 5461 -n crop --topology 0.1051,0,0,0 --initial 39 &
+docker exec -it mn.vnf12_crop /bin/bash
+python vnf_script.py -h 10.0.0.23 -v 4437 -o 10.0.0.30 -q 5461 -n crop --topology 0.1051,0,0,0 --initial 39
+
+#docker exec -it mn.vnf19_annotate python vnf_script.py -h 10.0.0.40 -v 4437 -o 10.0.0.34 -q 5465 -n annotate --topology 0.2608,0,0,0 --initial 60 &
+docker exec -it mn.vnf19_annotate /bin/bash
+python vnf_script.py -h 10.0.0.40 -v 4437 -o 10.0.0.34 -q 5465 -n annotate --topology 0.2608,0,0,0 --initial 60
+
 
 docker exec -it mn.vnf13_rotate python vnf_script.py -h 10.0.0.24 -v 4437 -o 10.0.0.30 -q 5461 -n rotate --topology 0.1065,0,0,0 --initial 42
 docker exec -it mn.vnf14_resize python vnf_script.py -h 10.0.0.25 -v 4437 -o 10.0.0.30 -q 5461 -n resize --topology 0.1146,0,0,0 --initial 45 &

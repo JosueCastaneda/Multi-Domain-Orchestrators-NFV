@@ -121,12 +121,7 @@
       ],
       "speed_factor": null,
       "parameters": {
-        "annotation":
-        {
-          "text": "Test",
-          "font_size": 30,
-          "color": "white"
-        },
+        "annotation":null,
         "crop":null,
         "fade_in":null,
         "fade_out":

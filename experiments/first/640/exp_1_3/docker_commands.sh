@@ -26,7 +26,7 @@ docker exec -it mn.source python message_factory.py -t add_orchestrator -h 10.0.
 
 # ============================== VNFS ===============================
 # Run all VNFs from containers
-docker exec -it mn.vnf4_fade_in python vnf_script.py -h 10.0.0.26 -v 4437 -o 10.0.0.32 -q 5463 -n fade_in --topology 0.1128,0,0,0 --initial 48 &
+docker exec -it mn.vnf15_fade_in python vnf_script.py -h 10.0.0.26 -v 4437 -o 10.0.0.32 -q 5463 -n fade_in --topology 0.1128,0,0,0 --initial 48 &
 docker exec -it mn.vnf22_invert_colors python vnf_script.py -h 10.0.0.43 -v 4437 -o 10.0.0.36 -q 5467 -n invert_colors --topology 0.1087,0,0,0 --initial 69 &
 docker exec -it mn.vnf18_mirror_x python vnf_script.py -h 10.0.0.29 -v 4437 -o 10.0.0.34 -q 5465 -n mirror_x --topology 0.1112,0,0,0 --initial 57 &
 docker exec -it mn.vnf13_rotate python vnf_script.py -h 10.0.0.24 -v 4437 -o 10.0.0.30 -q 5461 -n rotate --topology 0.1065,0,0,0 --initial 42 &
