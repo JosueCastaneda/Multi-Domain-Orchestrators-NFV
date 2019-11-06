@@ -117,7 +117,7 @@
         "MIRROR_X",
         "FADE_IN",
         "FADE_OUT",
-        "COMPOSITION"
+        "COMPOSITE"
       ],
       "speed_factor": null,
       "host_servers": [
