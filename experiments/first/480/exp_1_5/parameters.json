@@ -10,7 +10,7 @@
         "ANNOTATE",
         "MIRROR_X"
       ],
-      "speed_factor": null,
+      "speed_factor": 2,
       "host_servers": [
         "10.0.0.19",
         "10.0.0.68",
@@ -34,7 +34,10 @@
         },
         "crop": null,
         "fade_in": null,
-        "fade_out": null,
+        "fade_out":
+        {
+          "duration": 10
+        },
         "file": {
           "file_name": "videos/small_480.mp4",
           "format_file": ".mp4",

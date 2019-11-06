@@ -77,7 +77,7 @@ class MessageGenerator:
 
                 servers = list()
                 for i in range(number_servers):
-                    print("Index: ", i)
+                    # print("Index: ", i)
                     servers.append(CommunicationEntityPackage(host_servers[i], int(port_servers[i])))
 
                 parameters = ParameterPackage(annotation=param_gen.annotation,
