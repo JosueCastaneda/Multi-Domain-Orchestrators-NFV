@@ -26,7 +26,7 @@ vim-emu compute start -d dc2 -n orch_4 --image vnf_experiment --net '(id=output,
 vim-emu compute start -d dc1 -n source --image vnf_experiment --net '(id=input,ip=10.0.0.3/24)'
 vim-emu compute start -d dc2 -n vnf8_fade_out --image vnf_experiment --net '(id=input,ip=10.0.0.19/24)'
 vim-emu compute start -d dc2 -n vnf11_speed --image vnf_experiment --net '(id=input,ip=10.0.0.68/24)'
-vim-emu compute start -d dc2 -n vnf9_black_white --image vnf_experiment --net '(id=input,ip=10.0.0.20/24'
+vim-emu compute start -d dc2 -n vnf9_black_white --image vnf_experiment --net '(id=input,ip=10.0.0.20/24)'
 vim-emu compute start -d dc1 -n vnf7_annotate --image vnf_experiment --net '(id=input,ip=10.0.0.18/24)'
 vim-emu compute start -d dc1 -n vnf6_mirror_x --image vnf_experiment --net '(id=input,ip=10.0.0.17/24)'
 vim-emu compute start -d dc2 -n vnf5_painting --image vnf_experiment --net '(id=input,ip=10.0.0.15/24)'

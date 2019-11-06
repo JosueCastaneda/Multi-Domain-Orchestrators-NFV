@@ -8,7 +8,7 @@
         "MIRROR_X",
         "BLACK_WHITE",
         "PAINTING",
-        "SPEED",
+        "SPEED_UP",
         "COMPOSITE"
       ],
       "speed_factor": 2,
