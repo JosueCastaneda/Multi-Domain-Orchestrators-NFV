@@ -5,7 +5,7 @@
     {
       "operations": [
         "FADE_OUT",
-        "SPEED",
+        "SPEED_UP",
         "BLACK_WHITE",
         "ANNOTATE",
         "MIRROR_X"
@@ -39,11 +39,11 @@
           "duration": 10
         },
         "file": {
-          "file_name": "videos/small_480.mp4",
+          "file_name": "videos/small_1280.mp4",
           "format_file": ".mp4",
           "filename_processed": "small_processed_"
         },
-        "resize": null
+        "resize": null,
         "black_white": null,
         "composite": null,
         "mirror_x": null,
@@ -89,7 +89,7 @@
           "duration": 10
         },
         "file": {
-          "file_name": "videos/small_480.mp4",
+          "file_name": "videos/small_1280.mp4",
           "format_file": ".mp4",
           "filename_processed": "small_processed_"
         },
@@ -125,7 +125,7 @@
         4437,
         4437
       ],
-      "speed_factor": 2,
+      "speed_factor": null,
       "parameters": {
         "annotation":
         {
@@ -135,9 +135,12 @@
         },
         "crop": null,
         "fade_in": null,
-        "fade_out": null,
+        "fade_out":
+        {
+          "duration": 10
+        },
         "file": {
-          "file_name": "videos/small_480.mp4",
+          "file_name": "videos/small_1280.mp4",
           "format_file": ".mp4",
           "filename_processed": "small_processed_"
         },

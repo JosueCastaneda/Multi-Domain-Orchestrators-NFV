@@ -28,7 +28,7 @@ docker exec -it mn.source python message_factory.py -t add_orchestrator -h 10.0.
 # Run all VNFs from containers
 docker exec -it mn.vnf34_black_white python vnf_script.py -h 10.0.0.54 -v 4437 -o 10.0.0.36 -q 5467 -n black_white --topology 0.2047,0,0,0 --initial 105 &
 docker exec -it mn.vnf29_painting python vnf_script.py -h 10.0.0.49 -v 4437 -o 10.0.0.32 -q 5463 -n painting --topology 0.2500,0,0,0 --initial 90 &
-docker exec -it mn.vnf25_crop python vnf_script.py -h 10.0.0.45 -v 4479 -o 10.0.0.30 -q 5461 -n crop --topology 0.1752,0,0,0 --initial 78 &
+docker exec -it mn.vnf25_crop python vnf_script.py -h 10.0.0.45 -v 4437 -o 10.0.0.30 -q 5461 -n crop --topology 0.1752,0,0,0 --initial 78 &
 docker exec -it mn.vnf32_annotate python vnf_script.py -h 10.0.0.52 -v 4437 -o 10.0.0.34 -q 5465 -n annotate --topology 0.6488,0,0,0 --initial 99 &
 
 docker exec -it mn.vnf31_mirror_x python vnf_script.py -h 10.0.0.51 -v 4437 -o 10.0.0.34 -q 5465 -n mirror_x --topology 0.1728,0,0,0 --initial 96 &
