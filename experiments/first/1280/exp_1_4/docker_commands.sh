@@ -54,4 +54,6 @@ docker exec -it mn.source python message_factory.py -t add_chain -h 10.0.0.49 -p
 docker exec -it mn.source python message_factory.py -t add_chain -h 10.0.0.45 -p 4437 -n none -m none -v 10.0.0.46 --vnf_port 4437
 
 # Run command to be sure its working
-docker exec -it mn.source python message_factory.py -t process -h 10.0.0.13 -p 4437 -n none -m none -v none --vnf_port none
+#docker exec -it mn.source python message_factory.py -t process -h 10.0.0.13 -p 4437 -n none -m none -v none --vnf_port none
+docker exec -it mn.source /bin/bash
+python message_factory.py -t process -h 10.0.0.13 -p 4437 -n none -m none -v none --vnf_port none

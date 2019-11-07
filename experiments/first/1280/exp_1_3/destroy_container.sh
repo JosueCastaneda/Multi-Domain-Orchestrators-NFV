@@ -1,9 +1,9 @@
 ##Destroy all
-#vim-emu compute stop -d dc1 -n orch_1
-#vim-emu compute stop -d dc2 -n orch_2
-#vim-emu compute stop -d dc1 -n orch_3
-#vim-emu compute stop -d dc2 -n orch_4
-#
+vim-emu compute stop -d dc1 -n orch_1
+vim-emu compute stop -d dc2 -n orch_2
+vim-emu compute stop -d dc1 -n orch_3
+vim-emu compute stop -d dc2 -n orch_4
+
 #vim-emu compute stop -d dc1 -n source
 #
 #vim-emu compute stop -d dc1 -n vnf26_rotate
