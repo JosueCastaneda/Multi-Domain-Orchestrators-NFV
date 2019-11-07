@@ -4,7 +4,7 @@ vim-emu compute stop -d dc2 -n orch_2
 vim-emu compute stop -d dc1 -n orch_3
 vim-emu compute stop -d dc2 -n orch_4
 
-#vim-emu compute stop -d dc1 -n source
+vim-emu compute stop -d dc1 -n source
 #
 #vim-emu compute start -d dc2 -n vnf15_fade_in
 #vim-emu compute start -d dc3 -n vnf18_mirror_x
