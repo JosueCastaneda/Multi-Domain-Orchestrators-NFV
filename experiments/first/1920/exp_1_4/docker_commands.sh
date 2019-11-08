@@ -39,9 +39,17 @@ docker exec -it mn.vnf46_fade_out python vnf_script.py -h 10.0.0.64 -v 4515 -o 1
 docker exec -it mn.vnf40_resize python vnf_script.py -h 10.0.0.58 -v 4503 -o 10.0.0.30 -q 5461 -n resize --topology 0.2947,0,0,0 --initial 123 &
 
 # Add VNFs to service 1
-docker exec -it mn.source python message_factory.py -t add_chain -h 10.0.0.63 -p 4437 -n none -m none -v 10.0.0.56 --vnf_port 4437
-docker exec -it mn.source python message_factory.py -t add_chain -h 10.0.0.56 -p 4437 -n none -m none -v 10.0.0.60 --vnf_port 4437
-docker exec -it mn.source python message_factory.py -t add_chain -h 10.0.0.60 -p 4437 -n none -m none -v 10.0.0.65 --vnf_port 4437
+#docker exec -it mn.source python message_factory.py -t add_chain -h 10.0.0.63 -p 4437 -n none -m none -v 10.0.0.56 --vnf_port 4437
+docker exec -it mn.source /bin/bash
+python message_factory.py -t add_chain -h 10.0.0.63 -p 4437 -n none -m none -v 10.0.0.56 --vnf_port 4437
+
+#docker exec -it mn.source python message_factory.py -t add_chain -h 10.0.0.56 -p 4437 -n none -m none -v 10.0.0.60 --vnf_port 4437
+docker exec -it mn.source /bin/bash
+python message_factory.py -t add_chain -h 10.0.0.56 -p 4437 -n none -m none -v 10.0.0.60 --vnf_port 4437
+
+#docker exec -it mn.source python message_factory.py -t add_chain -h 10.0.0.60 -p 4437 -n none -m none -v 10.0.0.65 --vnf_port 4437
+docker exec -it mn.source /bin/bash
+python message_factory.py -t add_chain -h 10.0.0.60 -p 4437 -n none -m none -v 10.0.0.65 --vnf_port 4437
 
 # Add VNFs to service 2
 docker exec -it mn.source python message_factory.py -t add_chain -h 10.0.0.64 -p 4437 -n none -m none -v 10.0.0.66 --vnf_port 4437
@@ -54,4 +62,5 @@ docker exec -it mn.source python message_factory.py -t add_chain -h 10.0.0.60 -p
 docker exec -it mn.source python message_factory.py -t add_chain -h 10.0.0.56 -p 4437 -n none -m none -v 10.0.0.57 --vnf_port 4437
 
 # Run command to be sure its working
-docker exec -it mn.source python message_factory.py -t process -h 10.0.0.13 -p 4437 -n none -m none -v none --vnf_port none
+docker exec -it mn.source /bin/bash
+python message_factory.py -t process -h 10.0.0.65 -p 4437 -n none -m none -v none --vnf_port none

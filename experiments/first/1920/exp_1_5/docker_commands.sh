@@ -26,11 +26,28 @@ docker exec -it mn.source python message_factory.py -t add_orchestrator -h 10.0.
 
 # ============================== VNFS ===============================
 # Run all VNFs from containers
-docker exec -it mn.vnf43_mirror_y python vnf_script.py -h 10.0.0.61 -v 4509 -o 10.0.0.32 -q 5463 -n mirror_y --topology 0.2507,0,0,0 --initial 132 &
-docker exec -it mn.vnf45_annotate python vnf_script.py -h 10.0.0.63 -v 4513 -o 10.0.0.34 -q 5465 -n annotate --topology 1.1528,0,0,0 --initial 138 &
-docker exec -it mn.vnf48_invert_colors python vnf_script.py -h 10.0.0.66 -v 4519 -o 10.0.0.36 -q 5467 -n invert_colors --topology 0.2680,0,0,0 --initial 147 &
-docker exec -it mn.vnf42_painting python vnf_script.py -h 10.0.0.60 -v 4507 -o 10.0.0.32 -q 5463 -n painting --topology 0.4008,0,0,0 --initial 129 &
-docker exec -it mn.vnf50_speed python vnf_script.py -h 10.0.0.71 -v 4529 -o 10.0.0.107 -q 5467 -n composite_stadium -- topology 0.2608,0,0,0 --initial 153 &
+#docker exec -it mn.vnf43_mirror_y python vnf_script.py -h 10.0.0.61 -v 4509 -o 10.0.0.32 -q 5463 -n mirror_y --topology 0.2507,0,0,0 --initial 132 &
+#docker exec -it mn.vnf45_annotate python vnf_script.py -h 10.0.0.63 -v 4513 -o 10.0.0.34 -q 5465 -n annotate --topology 1.1528,0,0,0 --initial 138 &
+#docker exec -it mn.vnf48_invert_colors python vnf_script.py -h 10.0.0.66 -v 4519 -o 10.0.0.36 -q 5467 -n invert_colors --topology 0.2680,0,0,0 --initial 147 &
+#docker exec -it mn.vnf42_painting python vnf_script.py -h 10.0.0.60 -v 4507 -o 10.0.0.32 -q 5463 -n painting --topology 0.4008,0,0,0 --initial 129 &
+#docker exec -it mn.vnf50_speed python vnf_script.py -h 10.0.0.71 -v 4529 -o 10.0.0.107 -q 5467 -n composite_stadium -- topology 0.2608,0,0,0 --initial 153 &
+
+
+docker exec -it mn.vnf43_mirror_y /bin/bash
+python vnf_script.py -h 10.0.0.61 -v 4509 -o 10.0.0.32 -q 5463 -n mirror_y --topology 0.2507,0,0,0 --initial 132
+
+docker exec -it mn.vnf45_annotate /bin/bash
+python vnf_script.py -h 10.0.0.63 -v 4513 -o 10.0.0.34 -q 5465 -n annotate --topology 1.1528,0,0,0 --initial 138
+
+docker exec -it mn.vnf48_invert_colors /bin/bash
+python vnf_script.py -h 10.0.0.66 -v 4519 -o 10.0.0.36 -q 5467 -n invert_colors --topology 0.2680,0,0,0 --initial 147
+
+docker exec -it mn.vnf42_painting /bin/bash
+python vnf_script.py -h 10.0.0.60 -v 4507 -o 10.0.0.32 -q 5463 -n painting --topology 0.4008,0,0,0 --initial 129
+
+docker exec -it mn.vnf50_speed /bin/bash
+python vnf_script.py -h 10.0.0.71 -v 4529 -o 10.0.0.107 -q 5467 -n composite_stadium -- topology 0.2608,0,0,0 --initial 153
+
 
 docker exec -it mn.vnf41_fade_in python vnf_script.py -h 10.0.0.59 -v 4505 -o 10.0.0.32 -q 5463 -n fade_in --topology 0.2739,0,0,0 --initial 126 &
 docker exec -it mn.vnf39_rotate python vnf_script.py -h 10.0.0.57 -v 4501 -o 10.0.0.30 -q 5461 -n rotate --topology 0.2653,0,0,0 --initial 120 &
@@ -59,4 +76,5 @@ docker exec -it mn.source python message_factory.py -t add_chain -h 10.0.0.65 -p
 docker exec -it mn.source python message_factory.py -t add_chain -h 10.0.0.71 -p 4437 -n none -m none -v 10.0.0.64 --vnf_port 4437
 
 # Run command to be sure its working
-docker exec -it mn.source python message_factory.py -t process -h 10.0.0.13 -p 4437 -n none -m none -v none --vnf_port none
+docker exec -it mn.source /bin/bash
+python message_factory.py -t process -h 10.0.0.13 -p 4437 -n none -m none -v none --vnf_port none

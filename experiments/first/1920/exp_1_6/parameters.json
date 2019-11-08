@@ -119,7 +119,7 @@
         "MIRROR_X",
         "BLACK_WHITE",
         "PAINTING",
-        "SPEED",
+        "SPEED_UP",
         "COMPOSITE"
       ],
       "host_servers": [

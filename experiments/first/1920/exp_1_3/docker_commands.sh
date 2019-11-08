@@ -26,9 +26,19 @@ docker exec -it mn.source python message_factory.py -t add_orchestrator -h 10.0.
 
 # ============================== VNFS ===============================
 # Run all VNFs from containers
-docker exec -it mn.vnf41_fade_in python vnf_script.py -h 10.0.0.59 -v 4505 -o 10.0.0.32 -q 5463 -n fade_in --topology 0.2739,0,0,0 --initial 126 &
-docker exec -it mn.vnf48_invert_colors python vnf_script.py -h 10.0.0.66 -v 4519 -o 10.0.0.36 -q 5467 -n invert_colors --topology 0.2680,0,0,0 --initial 147 &
-docker exec -it mn.vnf44_mirror_x python vnf_script.py -h 10.0.0.62 -v 4511 -o 10.0.0.34 -q 5465 -n mirror_x --topology 0.2493,0,0,0 --initial 135 &
+#docker exec -it mn.vnf41_fade_in python vnf_script.py -h 10.0.0.59 -v 4505 -o 10.0.0.32 -q 5463 -n fade_in --topology 0.2739,0,0,0 --initial 126 &
+#docker exec -it mn.vnf48_invert_colors python vnf_script.py -h 10.0.0.66 -v 4519 -o 10.0.0.36 -q 5467 -n invert_colors --topology 0.2680,0,0,0 --initial 147 &
+#docker exec -it mn.vnf44_mirror_x python vnf_script.py -h 10.0.0.62 -v 4511 -o 10.0.0.34 -q 5465 -n mirror_x --topology 0.2493,0,0,0 --initial 135 &
+
+docker exec -it mn.vnf41_fade_in /bin/bash
+python vnf_script.py -h 10.0.0.59 -v 4505 -o 10.0.0.32 -q 5463 -n fade_in --topology 0.2739,0,0,0 --initial 126 &
+
+docker exec -it mn.vnf48_invert_colors /bin/bash
+python vnf_script.py -h 10.0.0.66 -v 4519 -o 10.0.0.36 -q 5467 -n invert_colors --topology 0.2680,0,0,0 --initial 147 &
+
+docker exec -it mn.vnf44_mirror_x /bin/bash
+python vnf_script.py -h 10.0.0.62 -v 4511 -o 10.0.0.34 -q 5465 -n mirror_x --topology 0.2493,0,0,0 --initial 135 &
+
 
 docker exec -it mn.vnf39_rotate python vnf_script.py -h 10.0.0.57 -v 4501 -o 10.0.0.30 -q 5461 -n rotate --topology 0.2653,0,0,0 --initial 120 &
 docker exec -it mn.vnf43_mirror_y python vnf_script.py -h 10.0.0.61 -v 4509 -o 10.0.0.32 -q 5463 -n mirror_y --topology 0.2507,0,0,0 --initial 132 &
@@ -50,4 +60,5 @@ docker exec -it mn.source python message_factory.py -t add_chain -h 10.0.0.63 -p
 docker exec -it mn.source python message_factory.py -t add_chain -h 10.0.0.64 -p 4437 -n none -m none -v 10.0.0.62 --vnf_port 4437
 
 # Run command to be sure its working
-docker exec -it mn.source python message_factory.py -t process -h 10.0.0.13 -p 4437 -n none -m none -v none --vnf_port none
+docker exec -it mn.source /bin/bash
+python message_factory.py -t process -h 10.0.0.13 -p 4437 -n none -m none -v none --vnf_port none

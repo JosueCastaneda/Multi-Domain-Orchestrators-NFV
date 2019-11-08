@@ -37,7 +37,7 @@
         },
         "fade_out": null,
         "file": {
-          "file_name": "videos/small_1280.mp4",
+          "file_name": "videos/small_1920.mp4",
           "format_file": ".mp4",
           "filename_processed": "small_processed_"
         },
@@ -96,7 +96,7 @@
           "duration": 10
         },
         "file": {
-          "file_name": "videos/small_1280.mp4",
+          "file_name": "videos/small_1920.mp4",
           "format_file": ".mp4",
           "filename_processed": "small_processed_"
         },
@@ -148,7 +148,7 @@
           "duration": 10
         },
         "file": {
-          "file_name": "videos/small_1280.mp4",
+          "file_name": "videos/small_1920.mp4",
           "format_file": ".mp4",
           "filename_processed": "small_processed_"
         },

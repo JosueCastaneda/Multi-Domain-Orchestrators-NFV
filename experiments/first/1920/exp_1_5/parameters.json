@@ -8,7 +8,7 @@
         "ANNOTATE",
         "INVERT_COLORS",
         "PAINTING",
-        "SPEED"
+        "SPEED_UP"
       ],
       "host_servers": [
         "10.0.0.61",
@@ -103,7 +103,7 @@
     {
       "operations": [
         "FADE_OUT",
-        "SPEED",
+        "SPEED_UP",
         "BLACK_WHITE",
         "ANNOTATE",
         "MIRROR_X"
