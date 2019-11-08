@@ -8,7 +8,7 @@
         "MIRROR_X",
         "BLACK_WHITE",
         "PAINTING",
-        "SPEED",
+        "SPEED_UP",
         "COMPOSITE"
       ],
       "host_servers": [
@@ -137,12 +137,7 @@
       ],
       "speed_factor": null,
       "parameters": {
-        "annotation":
-        {
-          "text": "Test",
-          "font_size": 30,
-          "color": "white"
-        },
+        "annotation": null,
         "crop": null,
         "fade_in":
         {
