@@ -6,8 +6,8 @@
 
 vim-emu compute start -d dc1 -n orch_1 --image vnf_experiment --net '(id=output,ip=10.0.0.30/24)'
 vim-emu compute start -d dc2 -n orch_2 --image vnf_experiment --net '(id=output,ip=10.0.0.32/24)'
-vim-emu compute start -d dc3 -n orch_1 --image vnf_experiment --net '(id=output,ip=10.0.0.34/24)'
-vim-emu compute start -d dc4 -n orch_2 --image vnf_experiment --net '(id=output,ip=10.0.0.36/24)'
+vim-emu compute start -d dc1 -n orch_1 --image vnf_experiment --net '(id=output,ip=10.0.0.34/24)'
+vim-emu compute start -d dc2 -n orch_2 --image vnf_experiment --net '(id=output,ip=10.0.0.36/24)'
 
 # Setup VNF
 vim-emu compute start -d dc1 -n source --image vnf_experiment --net '(id=input,ip=10.0.0.3/24)'
@@ -33,7 +33,7 @@ vim-emu compute start -d dc2 -n vnf42_painting --image vnf_experiment --net '(id
 vim-emu compute start -d dc2 -n vnf50_speed --image vnf_experiment --net '(id=input,ip=10.0.0.71/24)'
 
 vim-emu compute start -d dc2 -n vnf41_fade_in --image vnf_experiment --net'(id=input,ip=10.0.0.59/24)'
-vim-emu compute start -d dc1 -n vnf39_rotate --image vnf_experiment --net '(id=input,ip=10.0.0.57/24)'
+vim-emu compute start -d dc1 -n vnf39_rotate --image vnf_experiment --net '(i d=input,ip=10.0.0.57/24)'
 vim-emu compute start -d dc2 -n vnf49_composite_stadium --image vnf_experiment --net '(id=input,ip=10.0.0.67/24)'
 vim-emu compute start -d dc1 -n vnf46_fade_out --image vnf_experiment --net '(id=input,ip=10.0.0.64/24)'
 

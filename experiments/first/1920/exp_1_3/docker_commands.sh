@@ -42,7 +42,7 @@ python vnf_script.py -h 10.0.0.62 -v 4437 -o 10.0.0.34 -q 5465 -n mirror_x --top
 
 docker exec -it mn.vnf39_rotate python vnf_script.py -h 10.0.0.57 -v 4437 -o 10.0.0.30 -q 5461 -n rotate --topology 0.2653,0,0,0 --initial 120 &
 docker exec -it mn.vnf43_mirror_y python vnf_script.py -h 10.0.0.61 -v 4437 -o 10.0.0.32 -q 5463 -n mirror_y --topology 0.2507,0,0,0 --initial 132 &
-docker exec -it mn.vnf49_composite_stadium python vnf_script.py -h 10.0.0.67 -v 4437 -o 10.0.0.106 -q 5467 -n composite_stadium -- topology 1.4645,0,0,0 --initial 150 &
+docker exec -it mn.vnf49_composite_stadium python vnf_script.py -h 10.0.0.67 -v 4437 -o 10.0.0.36 -q 5467 -n composite_stadium -- topology 1.4645,0,0,0 --initial 150 &
 
 docker exec -it mn.vnf46_fade_out python vnf_script.py -h 10.0.0.64 -v 4437 -o 10.0.0.34 -q 5465 -n fade_out --topology 0.2152,0,0,0 --initial 141 &
 docker exec -it mn.vnf45_annotate python vnf_script.py -h 10.0.0.63 -v 4437 -o 10.0.0.34 -q 5465 -n annotate --topology 1.1528,0,0,0 --initial 138 &
@@ -61,4 +61,4 @@ docker exec -it mn.source python message_factory.py -t add_chain -h 10.0.0.64 -p
 
 # Run command to be sure its working
 docker exec -it mn.source /bin/bash
-python message_factory.py -t process -h 10.0.0.13 -p 4437 -n none -m none -v none --vnf_port none
+python message_factory.py -t process -h 10.0.0.59 -p 4437 -n none -m none -v none --vnf_port none

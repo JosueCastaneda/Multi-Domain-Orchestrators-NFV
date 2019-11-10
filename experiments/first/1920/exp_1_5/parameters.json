@@ -53,7 +53,7 @@
 
     {
       "operations": [
-        "PAINT",
+        "PAINTING",
         "FADE_IN",
         "ROTATE",
         "COMPOSITE",

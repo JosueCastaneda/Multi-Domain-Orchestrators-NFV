@@ -13,9 +13,9 @@ from utilities.logger import log
 
 def main(argv):
     command = read_parameters(argv)
-    file = 'experiments/first/1920/exp_1_3/parameters.json'
+    # file = 'experiments/first/1920/exp_1_3/parameters.json'
     #file = 'experiments/first/1920/exp_1_4/parameters.json'
-    #file = 'experiments/first/1920/exp_1_5/parameters.json'
+    file = 'experiments/first/1920/exp_1_5/parameters.json'
     #file = 'experiments/first/1920/exp_1_6/parameters.json'
     if command.is_valid():
         messages = generate_messages(command, file)
