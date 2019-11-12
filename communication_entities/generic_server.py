@@ -1,5 +1,7 @@
 import pickle
+import selectors
 import socket
+import types
 
 from communication_entities.messages.abstract_message import AbstractMessage
 from communication_entities.messages.topology_message import TopologyMessage
@@ -13,6 +15,7 @@ from utilities.socket_size import SocketSize
 class GenericServer:
 
     def __init__(self, orchestrator, socket_pkg=None):
+        self.sel = selectors.DefaultSelector()
         self.send_channel = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         self.receive_channel = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         self.receive_two_communication_channel = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
@@ -29,22 +32,49 @@ class GenericServer:
     def serve_clients(self):
         while True:
             log.info("Listening for connections...")
-            client_socket, address = self.receive_channel.accept()
+            events = self.sel.select(timeout=None)
+            for key, mask in events:
+                if key.data is None:
+                    self.accept_wrapper(key.fileobj)
+                else:
+                    self.service_connection(key, mask)
+
+    def accept_wrapper(self, sock):
+        conn, addr = sock.accept()  # Should be ready to read
+        log.info('accepted connection from', str(addr))
+        conn.setblocking(False)
+        data = types.SimpleNamespace(addr=addr, inb=b'', outb=b'')
+        events = selectors.EVENT_READ | selectors.EVENT_WRITE
+        self.sel.register(conn, events, data=data)
+
+    def service_connection(self, key, mask):
+        sock = key.fileobj
+        data = key.data
+        if mask & selectors.EVENT_READ:
             try:
-                message = self.get_message(client_socket)
-                log.info(type(message))
-                message.current_server = self
-                message.client_address = address
-                message.client_socket = client_socket
-                message.process_by_command_line()
-                log.info("CONNECTIONS ENDED")
-                self.orchestrator.print_state_vnf()
+                message = self.get_message(sock)
+                if message:
+                    log.info(type(message))
+                    message.current_server = self
+                    message.client_address = data.addr
+                    message.client_socket = sock
+                    message.process_by_command_line()
+                    log.info("CONNECTIONS ENDED")
+                    self.orchestrator.print_state_vnf()
+                else:
+                    print('closing connection to', data.addr)
+                    self.sel.unregister(sock)
+                    sock.close()
             except KeyboardInterrupt:
                 log.exception("Keyboard interruption")
-                if client_socket:
-                    client_socket.close()
-                break
-        client_socket.close()
+                if sock:
+                    sock.close()
+
+        if mask & selectors.EVENT_WRITE:
+            if data.outb:
+                print('echoing', repr(data.outb), 'to', data.addr)
+                sent = sock.send(data.outb)  # Should be ready to write
+                data.outb = data.outb[sent:]
 
     # TODO: Use this function in all connect to server
     def connect_channel_to_server(self, server, channel):
@@ -86,6 +116,8 @@ class GenericServer:
         try:
             channel.bind((socket_pkg.host, socket_pkg.port))
             channel.listen(socket_pkg.max_clients)
+            channel.setblocking(False)
+            self.sel.register(channel, selectors.EVENT_READ, data=None)
         except OSError as err:
             log.critical("OS error: {0}".format(err))
 
