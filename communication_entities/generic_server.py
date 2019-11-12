@@ -47,6 +47,36 @@ class GenericServer:
         events = selectors.EVENT_READ | selectors.EVENT_WRITE
         self.sel.register(conn, events, data=data)
 
+    def service_connection_two_channel(self, key, mask):
+        sock = key.fileobj
+        data = key.data
+        if mask & selectors.EVENT_READ:
+            try:
+                with open(self.video_name, 'wb') as f:
+                    log.info('receiving data...')
+                    while True:
+                        data = sock.recv(1024)
+                        if not data:
+                            break
+                        f.write(data)
+
+                    self.sel.unregister(sock)
+                    sock.close()
+                f.close()
+                log.info('Successfully got the file')
+            except KeyboardInterrupt:
+                log.exception("Keyboard interruption")
+                if sock:
+                    self.sel.unregister(sock)
+                    sock.close()
+
+        if mask & selectors.EVENT_WRITE:
+            if data.outb:
+                print('echoing', repr(data.outb), 'to', data.addr)
+                sent = sock.send(data.outb)  # Should be ready to write
+                data.outb = data.outb[sent:]
+
+
     def service_connection(self, key, mask):
         sock = key.fileobj
         data = key.data
