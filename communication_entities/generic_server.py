@@ -61,6 +61,7 @@ class GenericServer:
                     message.process_by_command_line()
                     log.info("CONNECTIONS ENDED")
                     self.orchestrator.print_state_vnf()
+                    self.sel.unregister(sock)
                 else:
                     print('closing connection to', data.addr)
                     self.sel.unregister(sock)
