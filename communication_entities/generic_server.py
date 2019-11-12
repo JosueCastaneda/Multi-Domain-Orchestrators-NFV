@@ -30,8 +30,8 @@ class GenericServer:
         self.set_up_channel(socket_pkg, self.receive_two_communication_channel)
 
     def serve_clients(self):
+        log.info("Listening for connections...")
         while True:
-            log.info("Listening for connections...")
             events = self.sel.select(timeout=None)
             for key, mask in events:
                 if key.data is None:
