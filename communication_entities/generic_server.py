@@ -41,7 +41,7 @@ class GenericServer:
 
     def accept_wrapper(self, sock):
         conn, addr = sock.accept()  # Should be ready to read
-        log.info('accepted connection from', str(addr))
+        print('accepted connection from', str(addr))
         conn.setblocking(False)
         data = types.SimpleNamespace(addr=addr, inb=b'', outb=b'')
         events = selectors.EVENT_READ | selectors.EVENT_WRITE
