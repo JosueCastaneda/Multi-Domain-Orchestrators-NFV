@@ -70,11 +70,11 @@ class GenericServer:
                     self.sel.unregister(sock)
                     sock.close()
 
-        if mask & selectors.EVENT_WRITE:
-            if data.outb:
-                print('echoing', repr(data.outb), 'to', data.addr)
-                sent = sock.send(data.outb)  # Should be ready to write
-                data.outb = data.outb[sent:]
+        # if mask & selectors.EVENT_WRITE:
+        #     if data.outb:
+        #         print('echoing', repr(data.outb), 'to', data.addr)
+        #         sent = sock.send(data.outb)  # Should be ready to write
+        #         data.outb = data.outb[sent:]
 
 
     def service_connection(self, key, mask):
