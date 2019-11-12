@@ -18,7 +18,7 @@ class DataVideoMessage(AbstractMessage):
                 if key.data is None:
                     self.current_server.accept_wrapper(key.fileobj)
                 else:
-                    self.current_server.service_connection_two_channel(key, mask)
+                    self.current_server.service_connection_two_channel(key, mask, self.video_name)
                     break
 
             # conn, address = self.current_server.receive_two_communication_channel.accept()

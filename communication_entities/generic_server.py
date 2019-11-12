@@ -47,12 +47,12 @@ class GenericServer:
         events = selectors.EVENT_READ | selectors.EVENT_WRITE
         self.sel.register(conn, events, data=data)
 
-    def service_connection_two_channel(self, key, mask):
+    def service_connection_two_channel(self, key, mask, video_name):
         sock = key.fileobj
         data = key.data
         if mask & selectors.EVENT_READ:
             try:
-                with open(self.video_name, 'wb') as f:
+                with open(video_name, 'wb') as f:
                     log.info('receiving data...')
                     while True:
                         data = sock.recv(1024)
