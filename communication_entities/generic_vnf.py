@@ -234,3 +234,13 @@ class GenericVNF:
 
     def serve_clients(self):
         self.server.serve_clients()
+
+    def get_all_queue_data(self):
+        data = []
+        while self.queue_P:
+            data.append(self.queue_P.pop(0))
+        while self.queue_Q:
+            data.append(self.queue_Q.pop(0))
+        while self.queue_R:
+            data.append(self.queue_R.pop(0))
+        return data

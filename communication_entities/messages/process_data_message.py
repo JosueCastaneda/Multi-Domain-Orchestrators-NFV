@@ -35,6 +35,9 @@ class ProcessDataMessage(AbstractMessage):
         self.parameters.increase_time()
         name_no_format = self.parameters.file_pack.name[:-4]
         pickle.dump(self.parameters.processed_time, open(name_no_format + '_time_spent.p', 'wb'))
+        # SAVE THE QUEUE INFO
+        data_queue = self.current_server.orchestrator.get_all_queue_data()
+        pickle.dump(data_queue, open(name_no_format + '_queue.p', 'wb'))
 
     def create_message_type_by_operation(self, operation):
         message_generator = VNFGenerator(operation, self.parameters)
