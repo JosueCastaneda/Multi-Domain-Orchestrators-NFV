@@ -33,7 +33,7 @@ docker exec -it mn.vnf3_resize python vnf_script.py -h 10.0.0.101 -v 4437 -o 10.
 docker exec -it mn.vnf9_black_white python vnf_script.py -h 10.0.0.20 -v 4437 -o 10.0.0.36 -q 5467 -n black_white --topology 0.0975,0,0,0 --initial 28 &
 docker exec -it mn.vnf7_annotate python vnf_script.py -h 10.0.0.18 -v 4437 -o 10.0.0.34 -q 5465 -n annotate --topology 0.2070,0,0,0 --initial 22 &
 docker exec -it mn.vnf6_mirror_x python vnf_script.py -h 10.0.0.17 -v 4437 -o 10.0.0.34 -q 5465 -n mirror_x --topology 0.0887,0,0,0 --initial 19 &
-docker exec -it mn.vnf10_invert_colors python vnf_script.py -h 10.0.0.21 -v 4437 -o 10.0.0.36 -q 5467 -n black_white --topology 0.1015,0,0,0 --initial 31 &
+docker exec -it mn.vnf10_invert_colors python vnf_script.py -h 10.0.0.21 -v 4437 -o 10.0.0.36 -q 5467 -n invert_colors --topology 0.1015,0,0,0 --initial 31 &
 docker exec -it mn.vnf8_fade_out python vnf_script.py -h 10.0.0.19 -v 4437 -o 10.0.0.34 -q 5465 -n fade_out --topology 0.0785,0,0,0 --initial 25 &
 
 # Add VNFs to service 1
