@@ -21,6 +21,7 @@ class MigrationDeactivateMessage(AbstractMessage):
         answer_message = pickle.loads(m1)
         log.info(answer_message)
         m2 = SwitchDoneMessage(None)
+        # TODO: This could only be a talk with self.client instead of server.send_socket
         self.current_server.send_message_to_socket(self.client_socket, m2)
 
     # TODO: Improve the class by using polymorphism and do not require three ifs

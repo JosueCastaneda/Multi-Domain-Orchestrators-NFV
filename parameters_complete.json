@@ -16,8 +16,8 @@
         4437,
         4437
       ],
-      "speed_factor": 2,
       "parameters": {
+        "speed_factor": 2,
         "annotation":
         {
           "text": "Test",

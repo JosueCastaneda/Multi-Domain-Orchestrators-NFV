@@ -2,6 +2,7 @@ import pickle
 
 from communication_entities.messages.abstract_message import AbstractMessage
 from communication_entities.messages.data_video_message import DataVideoMessage
+from communication_entities.messages.all_queue_information import AllQueueInformation
 from entities.communication_entity_package import CommunicationEntityPackage
 from entities.vnf_generator import VNFGenerator
 from utilities.logger import log
@@ -26,16 +27,27 @@ class ProcessDataMessage(AbstractMessage):
             log.info(''.join(["Current operation of type: ", str(operation)]))
             m1 = self.create_message_type_by_operation(operation)
             new_file = m1.process_by_message(self.parameters)
-            self.update_and_save_processing_time()
+            self.update_time_and_save_all_queues_and_processing_time()
             self.increase_operation_index()
             if self.still_need_to_process():
-                self.send_video_to_next_vnf_in_chain(new_file)
+                next_vnf_in_chain = self.get_new_vnf_in_chain()
+                self.connect_to_new_server(next_vnf_in_chain)
+                self.connect_to_virtual_channel_from_vnf(next_vnf_in_chain)
+                self.send_information_to_next_vnf_in_chain(new_file)
+                self.disconnect_current_channel()
+                self.connect_to_new_channel(next_vnf_in_chain, self.new_message)
 
-    def update_and_save_processing_time(self):
+    def update_time_and_save_all_queues_and_processing_time(self):
         self.parameters.increase_time()
+        self.save_processing_time()
+        self.save_queue_to_file()
+
+    def save_processing_time(self):
         name_no_format = self.parameters.file_pack.name[:-4]
         pickle.dump(self.parameters.processed_time, open(name_no_format + '_time_spent.p', 'wb'))
-        # SAVE THE QUEUE INFO
+
+    def save_queue_to_file(self):
+        name_no_format = self.parameters.file_pack.name[:-4]
         data_queue = self.current_server.orchestrator.get_all_queue_data()
         pickle.dump(data_queue, open(name_no_format + '_queue.p', 'wb'))
 
@@ -43,15 +55,19 @@ class ProcessDataMessage(AbstractMessage):
         message_generator = VNFGenerator(operation, self.parameters)
         return message_generator.create_message_type_by_operation()
 
-    def send_video_to_next_vnf_in_chain(self, new_file):
+    def send_information_to_next_vnf_in_chain(self, new_file):
         log.info(''.join(["LEN SEND: ", str(len(self.parameters.vnf_servers)), " IDX: ", str(self.current_op_index)]))
-        vnf_server = self.get_new_vnf_in_chain()
-        self.generate_new_message(new_file, vnf_server)
-        self.send_video_to_new_vnf(new_file)
-        self.connect_to_virtual_channel_from_vnf(vnf_server)
-        self.send_message_to_server(new_file)
-        self.disconnect_current_channel()
-        self.connect_to_new_channel(vnf_server, self.new_message)
+        self.generate_new_message(new_file)
+        self.send_all_queues_to_new_vnf()
+        self.send_data_message_video_to_new_vnf(new_file)
+        self.send_video_to_next_vnf_in_chain(new_file)
+
+    def send_all_queues_to_new_vnf(self):
+        log.info('Sending all the queue information to the next VNF in the chain')
+        data_queue = self.current_server.orchestrator.get_all_queue_data()
+        message_all_queue = AllQueueInformation(data_queue)
+        self.current_server.send_message(message_all_queue)
+        log.info('Finish sending all the queue information!')
 
     def is_index_valid(self):
         return len(self.parameters.operations) >= self.current_op_index
@@ -65,8 +81,7 @@ class ProcessDataMessage(AbstractMessage):
     def connect_to_new_server(self, vnf_server):
         self.current_server.connect_to_another_server(CommunicationEntityPackage(vnf_server.host, vnf_server.port))
 
-    def generate_new_message(self, new_file, vnf_server):
-        self.connect_to_new_server(vnf_server)
+    def generate_new_message(self, new_file):
         self.new_message = ProcessDataMessage(self.parameters)
         self.new_message.current_op_index = self.current_op_index
         self.new_message.parameters.file_pack.name = new_file
@@ -81,7 +96,7 @@ class ProcessDataMessage(AbstractMessage):
             operation = self.parameters.operations[self.current_op_index]
             log.info(''.join(['New operation index', 'Operation: ', str(operation)]))
 
-    def send_video_to_new_vnf(self, new_file):
+    def send_data_message_video_to_new_vnf(self, new_file):
         message_prepare_data_transfer = DataVideoMessage(new_file)
         self.current_server.send_message(message_prepare_data_transfer)
 
@@ -90,7 +105,7 @@ class ProcessDataMessage(AbstractMessage):
                                                                                          vnf_server.port + 1))
 
     # TODO: Check why the enumeration does not work and change the magic number
-    def send_message_to_server(self, new_file):
+    def send_video_to_next_vnf_in_chain(self, new_file):
         filename = new_file
         f = open(filename, 'rb')
         l_buffer = f.read(1024)

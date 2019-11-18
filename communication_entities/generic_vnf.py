@@ -93,6 +93,14 @@ class GenericVNF:
         elif operation == "R":
             self.queue_R.append(state)
 
+    def extend_queue(self, queue, extension):
+        if queue == "P":
+            self.queue_P.extend(extension)
+        elif queue == "Q":
+            self.queue_Q.extend(extension)
+        elif queue == "R":
+            self.queue_R.extend(extension)
+
     def check_migration_recursive(self, new_vnf_topology):
         if len(self.list_affected_vnf) > 0:
             m = RequestNewPopMessage(new_vnf_topology)
@@ -112,6 +120,7 @@ class GenericVNF:
             self.check_if_previous_vnf_must_migrate(v, new_vnf)
             self.handle_queues_from_previous_vnf_in_chain()
             self.migration_switch_message_exchange()
+            # TODO: No need to pass the new VNF, add all_data to the new_vnf
             all_data = self.process_all_data_in_queues(new_vnf)
             self.send_all_data_in_queues(all_data)
             self.terminate_migration()
@@ -160,8 +169,8 @@ class GenericVNF:
         self.server.send_message_virtual(m1)
 
     def send_migration_message_to_previous_vnf(self, previous_vnf, new_vnf):
-        v_server = CommunicationEntityPackage(previous_vnf.host, previous_vnf.port)
-        self.server.connect_to_another_server(v_server)
+        previous_vnf_in_chain = CommunicationEntityPackage(previous_vnf.host, previous_vnf.port)
+        self.server.connect_to_another_server(previous_vnf_in_chain)
         m = MigrationDeactivateMessage(new_vnf)
         self.server.send_message(m)
         return pickle.loads(self.server.send_channel.recv(SocketSize.RECEIVE_BUFFER.value))
@@ -237,10 +246,7 @@ class GenericVNF:
 
     def get_all_queue_data(self):
         data = []
-        while self.queue_P:
-            data.append(self.queue_P.pop(0))
-        while self.queue_Q:
-            data.append(self.queue_Q.pop(0))
-        while self.queue_R:
-            data.append(self.queue_R.pop(0))
-        return data
+        queue_p = self.queue_P.copy()
+        queue_q = self.queue_Q.copy()
+        queue_r = self.queue_R.copy()
+        return data[queue_p, queue_q, queue_r]
