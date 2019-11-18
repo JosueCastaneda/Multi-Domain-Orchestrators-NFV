@@ -97,8 +97,10 @@ class ProcessDataMessage(AbstractMessage):
             log.info(''.join(['New operation index', 'Operation: ', str(operation)]))
 
     def send_data_message_video_to_new_vnf(self, new_file):
+        log.info('Sending DataVideoMessage to next VNF in chain')
         message_prepare_data_transfer = DataVideoMessage(new_file)
         self.current_server.send_message(message_prepare_data_transfer)
+        log.info('Finish sending DataVideoMessage to next VNF in chain')
 
     def connect_to_virtual_channel_from_vnf(self, vnf_server):
         self.current_server.connect_to_another_server_virtual(CommunicationEntityPackage(vnf_server.host,
@@ -106,6 +108,7 @@ class ProcessDataMessage(AbstractMessage):
 
     # TODO: Check why the enumeration does not work and change the magic number
     def send_video_to_next_vnf_in_chain(self, new_file):
+        log.info('Sending serialized video as bytes...')
         filename = new_file
         f = open(filename, 'rb')
         l_buffer = f.read(1024)
