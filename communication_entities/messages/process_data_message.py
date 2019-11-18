@@ -67,6 +67,7 @@ class ProcessDataMessage(AbstractMessage):
         data_queue = self.current_server.orchestrator.get_all_queue_data()
         message_all_queue = AllQueueInformation(data_queue)
         self.current_server.send_message(message_all_queue)
+        self.current_server.get_ack_channel()
         log.info('Finish sending all the queue information!')
 
     def is_index_valid(self):
