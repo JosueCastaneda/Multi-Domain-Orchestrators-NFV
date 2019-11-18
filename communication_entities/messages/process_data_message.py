@@ -99,7 +99,8 @@ class ProcessDataMessage(AbstractMessage):
 
     def send_data_message_video_to_new_vnf(self, new_file):
         log.info('Sending DataVideoMessage to next VNF in chain')
-        message_prepare_data_transfer = DataVideoMessage(new_file)
+        data_queue = self.current_server.orchestrator.get_all_queue_data()
+        message_prepare_data_transfer = DataVideoMessage(new_file, data_queue)
         self.current_server.send_message(message_prepare_data_transfer)
         log.info('Finish sending DataVideoMessage to next VNF in chain')
 
