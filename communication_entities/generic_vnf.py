@@ -245,8 +245,8 @@ class GenericVNF:
         self.server.serve_clients()
 
     def get_all_queue_data(self):
-        data = []
-        queue_p = self.queue_P.copy()
-        queue_q = self.queue_Q.copy()
-        queue_r = self.queue_R.copy()
-        return data[queue_p, queue_q, queue_r]
+        data = list()
+        data.append(self.queue_P)
+        data.append(self.queue_Q)
+        data.append(self.queue_R)
+        return data
