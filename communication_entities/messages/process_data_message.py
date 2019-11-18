@@ -58,7 +58,7 @@ class ProcessDataMessage(AbstractMessage):
     def send_information_to_next_vnf_in_chain(self, new_file):
         log.info(''.join(["LEN SEND: ", str(len(self.parameters.vnf_servers)), " IDX: ", str(self.current_op_index)]))
         self.generate_new_message(new_file)
-        self.send_all_queues_to_new_vnf()
+        # self.send_all_queues_to_new_vnf()
         self.send_data_message_video_to_new_vnf(new_file)
         self.send_video_to_next_vnf_in_chain(new_file)
 
