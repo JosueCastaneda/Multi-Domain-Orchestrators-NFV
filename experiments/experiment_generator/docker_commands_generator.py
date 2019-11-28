@@ -39,7 +39,6 @@ class DockerCommandsGenerator:
         self.write_new_line_to_file()
         self.add_vnf_chains()
         self.close_file()
-        print('Begin commands')
 
     def load_all_required_data(self):
         self.load_list_vnf()
@@ -208,14 +207,14 @@ class DockerCommandsGenerator:
             self.vnf_container_list.append(vnf)
         file_container.close()
 
-    # TODO: Create an utility class that handles all of the searches
+    # TODO: Create an utility class that handles all of the searches. Already class, update code
     def parse_for_name_vnf(self, line):
         index = line.find('vnf_')
         index_image = line.find('--image')
         sub_line = line[index:index_image]
         return sub_line
 
-    # TODO: Create an utility class that handles all of the searches
+    # TODO: Create an utility class that handles all of the searches. Already a class, update code
     def parse_for_ip_vnf(self, line):
         index = line.find('ip=')
         index_image = line.find('/24')

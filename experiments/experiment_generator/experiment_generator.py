@@ -5,6 +5,7 @@ import random
 import numpy as np
 
 from experiments.experiment_generator.docker_commands_generator import DockerCommandsGenerator
+from experiments.experiment_generator.migration_message_generator import MigrationMessageGenerator
 from experiments.experiment_generator.update_service_with_migration_generator import UpdateServiceWithMigrationGenerator
 from experiments.experiment_generator.validator_generator import ValidatorGenerator
 from experiments.experiment_generator.update_vnf_information_with_migration_generator import UpdateVnfInformationWithMigrationGenerator
@@ -220,6 +221,13 @@ def main():
                                            length_of_vnfs)
         dock_gen.generate_commands()
         print('End docker commands')
+
+    for experiment_file in list_name_experiments:
+        print('Begin migration message generator')
+        message_gen = MigrationMessageGenerator(path=experiment_path,
+                                                name_of_experiment=experiment_file)
+        message_gen.generate()
+        print('End migration message generator')
 
     with open(experiment_path + 'experiment_0.json') as jsonfile:
         parsed = json.load(jsonfile)

@@ -10,3 +10,4 @@ To deploy experiment, the order of execution is the following
 6) Run update_vnf_information_with_migration_generator.py
 7) Run update_service_with_migration_generator.py
 8) Run validator_generator.py
+9) Run migration_message_generator.py
