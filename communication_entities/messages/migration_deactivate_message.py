@@ -43,8 +43,13 @@ class MigrationDeactivateMessage(AbstractMessage):
         new_requirements = ServicePackage()
         new_requirements.create_from_topology(self.data)
         old_requirements = self.current_server.orchestrator.topology()
-        current_service = self.current_server.orchestrator.service_package
-        is_new_vnf_valid = current_service.is_new_vnf_valid_for_service(new_requirements, old_requirements)
+        current_services = self.current_server.orchestrator.service_package
+        is_new_vnf_valid = True
+        for service in current_services:
+            is_new_vnf_valid = service.is_new_vnf_valid_for_service(new_requirements, old_requirements)
+            if not is_new_vnf_valid:
+                log.info('Recursive migration is necessary')
+                break
         recursive_took_place = False
         new_vnf = None
         if not is_new_vnf_valid:

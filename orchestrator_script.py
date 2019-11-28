@@ -19,7 +19,7 @@ def main(argv):
     port = ""
     name = ""
 
-    debug = True
+    debug = False
 
     if debug:
         port = "5463"

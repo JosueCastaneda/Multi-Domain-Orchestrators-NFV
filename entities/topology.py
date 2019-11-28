@@ -1,12 +1,12 @@
 class Topology:
 
-    def __init__(self, delay, bandwidth, loss, jitter):
+    def __init__(self, delay, bandwidth, loss, jitter, ip=None, port=None):
         self.delay = delay
         self.bw = bandwidth
         self.loss = loss
         self.jitter = jitter
-        self.ip = None
-        self.port = None
+        self.ip = ip
+        self.port = port
 
     def set_delay(self, val):
         self.delay = val

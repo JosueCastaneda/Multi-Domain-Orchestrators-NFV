@@ -39,8 +39,22 @@ class ServicePackage:
             return True
         return False
 
+    # TODO: Use the utilities function, this is repeated
+    def check_constraint(self, constraint, previous, new):
+        return (constraint + new - previous) <= constraint + (constraint * 0.3)
+
+    # TODO: CHANGE TO ACTUALLY USE THE RECURSIVE MIGRATION
     def is_new_vnf_valid_for_service(self, new_vnf, previous_vnf):
-        return self.is_valid_bandwidth(new_vnf.consumed_bandwidth, previous_vnf.consumed_bandwidht) and \
-               self.is_new_delay_less_or_equal_than_previous_delay(new_vnf.delay, previous_vnf.delay) and \
-               self.is_new_jitter_less_or_equal_to_previous_jitter(new_vnf.jitter, previous_vnf.jitter) and \
-               self.is_new_loss_less_or_equal_than_previous_loss(new_vnf.loss, previous_vnf.loss)
+        return True
+        # is_valid_bandwidth = self.check_constraint(self.consumed_bandwidth,
+        #                                            previous_vnf.consumed_bandwidht,
+        #                                            new_vnf.consumed_bandwidth)
+        # is_valid_delay = self.check_constraint(self.delay, previous_vnf.delay, new_vnf.delay)
+        # is_valid_jitter = self.check_constraint(self.jitter, previous_vnf.jitter, new_vnf.jitter)
+        # is_valid_loss = self.check_constraint(self.loss, previous_vnf.loss, new_vnf.loss)
+        # return is_valid_bandwidth and is_valid_loss and is_valid_jitter and is_valid_delay
+
+        # return self.is_valid_bandwidth(new_vnf.consumed_bandwidth, previous_vnf.consumed_bandwidht) and \
+        #        self.is_new_delay_less_or_equal_than_previous_delay(new_vnf.delay, previous_vnf.delay) and \
+        #        self.is_new_jitter_less_or_equal_to_previous_jitter(new_vnf.jitter, previous_vnf.jitter) and \
+        #        self.is_new_loss_less_or_equal_than_previous_loss(new_vnf.loss, previous_vnf.loss)

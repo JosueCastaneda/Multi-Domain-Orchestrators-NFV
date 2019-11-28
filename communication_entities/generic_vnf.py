@@ -22,7 +22,7 @@ from utilities.socket_size import SocketSize
 class GenericVNF:
 
     def __init__(self, host, port, name, service_package=None,
-                 clients=5, topology=None, orchestrator=None, initial=0):
+                 clients=5, topology=None, orchestrator=None, initial=0, migration_vnf=None, topology_migration_vnf=None):
 
         self.server_param = CommunicationEntityPackage(host, port, clients)
         self.server = GenericServer(self, self.server_param)
@@ -34,6 +34,8 @@ class GenericVNF:
         self.queue_R = [initial + 2]
         self.service_package = service_package
         self.orchestrator = orchestrator
+        self.migration_vnf_ip = migration_vnf
+        self.topology_migration_vnf = topology_migration_vnf
         self.set_up_to_orchestrator(orchestrator, host, port)
         log.info(''.join(["VNF: ", self.name, " is running!"]))
         log.info(''.join(["Delay: ", str(self.topology.delay)]))
@@ -45,7 +47,7 @@ class GenericVNF:
     # TODO: Get the topology and possible service working on for migration
     def set_up_to_orchestrator(self, orchestrator, host, port):
         self.server.connect_to_orchestrator(orchestrator)
-        add_message = AddVNF(host, port, self.name, self.topology)
+        add_message = AddVNF(host, port, self.name, self.topology, self.migration_vnf_ip, self.topology_migration_vnf)
         self.server.send_message_to_orchestrator(add_message)
 
 
@@ -124,6 +126,7 @@ class GenericVNF:
             all_data = self.process_all_data_in_queues(new_vnf)
             self.send_all_data_in_queues(all_data)
             self.terminate_migration()
+        log.info('Migration has ended')
 
     def check_migration_affected(self, message):
         new_vnf = message.data.file_pack

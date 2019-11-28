@@ -12,6 +12,8 @@ class DockerCommandsGenerator:
         self.vnf_list_detailed = []
         self.vnf_container_list = []
         self.detailed_services = []
+        self.vnf_list_detailed_migration = []
+        self.list_of_migrating_vnfs_detail = []
         self.delay_low = delay[0]
         self.delay_high = delay[1]
         self.bandwidth_low = bandwidth[0]
@@ -43,6 +45,8 @@ class DockerCommandsGenerator:
         self.load_list_vnf()
         self.load_container_information()
         self.load_services()
+        self.load_list_vnf_migration()
+        self.load_list_of_migrating_vnfs_detail()
 
     def set_up_run_orchestrators(self):
         new_line = '\n'
@@ -84,13 +88,52 @@ class DockerCommandsGenerator:
             operation = vnf['name'][4:]
             detailed_vnf = self.get_vnf_detailed_information(operation)
             vnf_topology = self.generate_topology()
+            migration_ip = self.generate_migration_ip(detailed_vnf['server'])
+            migration_ip_topology = self.generate_migration_ip_topology(migration_ip)
+            services = self.generate_services()
             vnf_initial = str(detailed_vnf['queue_p'][0])
             first_str = 'docker exec -it mn.' + vnf['name'] + ' python vnf_script.py -h ' + vnf['ip'] + ' -v 4437 -o ' + orch_ip
-            second_str = ' -q 5461 -n ' + vnf['name'] + ' --topology ' + vnf_topology + ' --initial ' + vnf_initial +' &'
-            self.file_commands.write(first_str + second_str + new_line)
+            second_str = ' -q 5461 -n ' + vnf['name'] + ' --topology ' + vnf_topology + ' --migration_ip ' + migration_ip
+            third_str = ' --migration_topology ' + migration_ip_topology + ' --services ' + services
+            fourth_str = ' --initial ' + vnf_initial +' &'
+            self.file_commands.write(first_str + second_str + third_str + fourth_str + new_line)
 
     def generate_random_indexes(self):
         return random.randint(1, len(self.list_orchestrator))
+
+    def generate_migration_ip(self, vnf_ip):
+        for vnf in self.vnf_list_detailed_migration:
+            if vnf['server'] == vnf_ip:
+                return vnf['migration_vnf_ip']
+        return None
+
+    def generate_services(self):
+        constraints_of_services = []
+        for service in self.detailed_services:
+            constraints_of_services.append(str(service['constraints']['delay']))
+            constraints_of_services.append(str(service['constraints']['bandwidth']))
+            constraints_of_services.append(str(service['constraints']['loss']))
+            constraints_of_services.append(str(service['constraints']['jitter']))
+        x = ','.join(constraints_of_services)
+        return x
+
+    def generate_migration_ip_topology(self, vnf_ip):
+        vnf_topology = dict()
+        for vnf in self.list_of_migrating_vnfs_detail:
+            if vnf['server'] == vnf_ip:
+                vnf_topology['delay'] = vnf['delay']
+                vnf_topology['loss'] = vnf['loss']
+                vnf_topology['jitter'] = vnf['jitter']
+                vnf_topology['bandwidth'] = vnf['bandwidth']
+                str_topology = str(vnf_topology['delay']) \
+                               + ',' \
+                               + str(vnf_topology['bandwidth']) \
+                               + ',' \
+                               + str(vnf_topology['loss']) \
+                               + ',' \
+                               + str(vnf_topology['jitter'])
+                return str_topology
+        return ''
 
     def add_vnf_chains(self):
         print('Setting chains VNF')
@@ -183,6 +226,17 @@ class DockerCommandsGenerator:
         with open('vnf_info.json') as json_file:
             raw_data = json.load(json_file)
             self.vnf_list_detailed = raw_data['vnf']
+
+    # TODO: Use join to add two strings togehter
+    def load_list_vnf_migration(self):
+        with open(self.path + 'vnf_info_migration.json') as json_file:
+            raw_data = json.load(json_file)
+            self.vnf_list_detailed_migration = raw_data['vnf']
+
+    def load_list_of_migrating_vnfs_detail(self):
+        with open(self.path + 'migration_vnfs.json') as json_file:
+            self.list_of_migrating_vnfs_detail = json.load(json_file)
+
 
     def load_services(self):
         with open(self.path + self.name_experiment + '.json') as json_file:
