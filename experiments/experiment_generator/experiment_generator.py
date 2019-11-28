@@ -102,19 +102,35 @@ class ExperimentGenerator():
             generic_parameter['font_size'] = 30
             generic_parameter['color'] = 'white'
             parameters['annotation'] = generic_parameter
+        else:
+            parameters['annotation'] = None
         if operation == 'CROP':
             generic_parameter['initial_time'] = 0
             generic_parameter['end_time'] = 10
             parameters['crop'] = generic_parameter
+        else:
+            parameters['crop'] = None
         if operation == 'FADE_IN':
             generic_parameter['duration'] = 10
             parameters['fade_in'] = generic_parameter
+        else:
+            parameters['fade_in'] = None
         if operation == 'FADE_OUT':
             generic_parameter['duration'] = 10
             parameters['fade_out'] = generic_parameter
+        else:
+            parameters['fade_out'] = None
         if operation == 'RESIZE':
             generic_parameter['width'] = 300
             generic_parameter['height'] = 300
+            parameters['resize'] = generic_parameter
+        else:
+            parameters['resize'] = None
+        if operation == 'SPEED_UP':
+            # generic_parameter['speed_up'] = 2
+            parameters['speed_up'] = 2
+        else:
+            parameters['speed_up'] = None
         return parameters
 
     def create_file_parameter(self, parameters):
@@ -148,6 +164,11 @@ class ExperimentGenerator():
         service['queue_p'] = []
         service['queue_r'] = []
         service['constraints'] = self.generate_constraints()
+        # TODO: Move this to the parameter
+        if 'SPEED_UP' in operations:
+            service['speed_factor'] = 2
+        else:
+            service['speed_factor'] = None
         return service
 
 

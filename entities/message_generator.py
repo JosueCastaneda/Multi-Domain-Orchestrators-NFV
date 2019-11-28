@@ -57,12 +57,17 @@ class MessageGenerator:
                 # Substract operation from current server
                 # number_servers = len(operations) - 1
                 number_servers = len(operations)
-                annotation_parameter = service['parameters']['annotation']
-                crop_parameter = service['parameters']['crop']
-                fade_in_parameter = service['parameters']['fade_in']
-                fade_out_parameter = service['parameters']['fade_out']
+                if 'annotation' in service['parameters']:
+                    annotation_parameter = service['parameters']['annotation']
+                if 'crop' in service['parameters']:
+                    crop_parameter = service['parameters']['crop']
+                if 'fade_in' in service['parameters']:
+                    fade_in_parameter = service['parameters']['fade_in']
+                if 'fade_out' in service['parameters']:
+                    fade_out_parameter = service['parameters']['fade_out']
                 file_parameter = service['parameters']['file']
-                resize_parameter = service['parameters']['resize']
+                if 'resize' in service['parameters']:
+                    resize_parameter = service['parameters']['resize']
                 # print("Width: ", str(resize_parameter.width), "Height: ", str(resize_parameter.height))
                 host_servers = service['host_servers']
                 port_servers = service['port_servers']

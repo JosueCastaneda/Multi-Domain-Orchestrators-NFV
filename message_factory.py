@@ -17,6 +17,7 @@ def main(argv):
     file = 'experiments/first/480/exp_1_4/experiments/experiment_0.json'
     # file = 'experiments/first/1920/exp_1_5/parameters.json'
     #file = 'experiments/first/1920/exp_1_6/parameters.json'
+    print('Filename:', file)
     if command.is_valid():
         messages = generate_messages(command, file)
         if isinstance(messages, list):
