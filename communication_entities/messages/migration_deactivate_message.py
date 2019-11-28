@@ -42,10 +42,12 @@ class MigrationDeactivateMessage(AbstractMessage):
     def check_if_migration_is_needed(self):
         new_requirements = ServicePackage()
         new_requirements.create_from_topology(self.data)
-        is_valid = self.current_server.orchestrator.service_package.is_new_vnf_valid_for_service(new_requirements)
+        old_requirements = self.current_server.orchestrator.topology()
+        current_service = self.current_server.orchestrator.service_package
+        is_new_vnf_valid = current_service.is_new_vnf_valid_for_service(new_requirements, old_requirements)
         recursive_took_place = False
         new_vnf = None
-        if not is_valid:
+        if not is_new_vnf_valid:
             recursive_took_place, new_vnf = self.current_server.orchestrator.check_migration_recursive(self.data)
         return recursive_took_place, new_vnf
 

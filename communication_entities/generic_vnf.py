@@ -29,8 +29,8 @@ class GenericVNF:
         self.name = name
         self.topology = topology
         self.list_affected_vnf = []
-        self.queue_Q = [initial]
-        self.queue_P = [initial + 1]
+        self.queue_P = [initial]
+        self.queue_Q = [initial + 1]
         self.queue_R = [initial + 2]
         self.service_package = service_package
         self.orchestrator = orchestrator

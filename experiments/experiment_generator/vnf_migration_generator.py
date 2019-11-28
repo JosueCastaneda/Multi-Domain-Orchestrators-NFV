@@ -33,10 +33,10 @@ class VNFMigrationGenerator:
         for i in range(150, 255):
             new_vnf = dict()
             new_vnf['operation'] = "UNKNOWN"
-            new_vnf['sever'] = "10.0.0" + str(i)
-            new_vnf['queue_p'] = running_queue
-            new_vnf['queue_q'] = running_queue + 1
-            new_vnf['queue_r'] = running_queue + 2
+            new_vnf['server'] = "10.0.0." + str(i)
+            new_vnf['queue_p'] = [running_queue]
+            new_vnf['queue_q'] = [running_queue + 1]
+            new_vnf['queue_r'] = [running_queue + 2]
             new_vnf['delay'] =  generate_random_integer(self.delay_low, self.delay_high)
             new_vnf['bandwidth'] = generate_random_integer(self.bandwidth_low, self.bandwidth_high)
             new_vnf['loss'] = generate_random_integer(self.loss_low, self.loss_high)
@@ -47,13 +47,15 @@ class VNFMigrationGenerator:
         with open(self.path + 'migration_vnfs' + '.json', 'w') as json_file:
             json.dump(vnf_list, json_file)
 
+
+# TODO: Put constants instead of magic numbers
 def main():
     delay = [0, 20]
     bandwidth = [0, 70]
     loss = [0, 10]
     jitter = [0, 10]
     orchestrator = [1, 4]
-    length_of_vnfs = 3
+    length_of_vnfs = 4
     video_definition = 480
     experiment_path = '../first/' + str(video_definition) + '/exp_1_' + str(length_of_vnfs) + '/experiments/'
     exp_gen = VNFMigrationGenerator(delay, bandwidth, loss, jitter, orchestrator, experiment_path)
