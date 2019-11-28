@@ -102,35 +102,27 @@ class ExperimentGenerator():
             generic_parameter['font_size'] = 30
             generic_parameter['color'] = 'white'
             parameters['annotation'] = generic_parameter
-        else:
-            parameters['annotation'] = None
+
         if operation == 'CROP':
             generic_parameter['initial_time'] = 0
             generic_parameter['end_time'] = 10
             parameters['crop'] = generic_parameter
-        else:
-            parameters['crop'] = None
+
         if operation == 'FADE_IN':
             generic_parameter['duration'] = 10
             parameters['fade_in'] = generic_parameter
-        else:
-            parameters['fade_in'] = None
+
         if operation == 'FADE_OUT':
             generic_parameter['duration'] = 10
             parameters['fade_out'] = generic_parameter
-        else:
-            parameters['fade_out'] = None
+
         if operation == 'RESIZE':
             generic_parameter['width'] = 300
             generic_parameter['height'] = 300
             parameters['resize'] = generic_parameter
-        else:
-            parameters['resize'] = None
+
         if operation == 'SPEED_UP':
-            # generic_parameter['speed_up'] = 2
             parameters['speed_up'] = 2
-        else:
-            parameters['speed_up'] = None
         return parameters
 
     def create_file_parameter(self, parameters):
@@ -146,6 +138,7 @@ class ExperimentGenerator():
         servers = []
         ports = []
         parameters = dict()
+        parameters = self.initialize_parameters(parameters)
 
         for vnf in vnf_list:
             operation = vnf['operation']
@@ -171,6 +164,14 @@ class ExperimentGenerator():
             service['speed_factor'] = None
         return service
 
+    def initialize_parameters(self, parameters):
+        parameters['annotation'] = None
+        parameters['crop'] = None
+        parameters['fade_in'] = None
+        parameters['fade_out'] = None
+        parameters['resize'] = None
+        parameters['speed_up'] = None
+        return parameters
 
 def main():
     number_of_experiments = 3
