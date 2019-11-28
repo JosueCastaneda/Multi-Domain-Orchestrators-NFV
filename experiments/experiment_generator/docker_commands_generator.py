@@ -2,6 +2,7 @@ import random
 import json
 from utilities.random_integer_generation import generate_random_integer
 
+
 class DockerCommandsGenerator:
 
     # TODO: Update the constructor to use a single object instead of multiple variables

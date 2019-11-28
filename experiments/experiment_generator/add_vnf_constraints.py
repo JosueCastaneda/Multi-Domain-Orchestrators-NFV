@@ -6,7 +6,6 @@ from utilities.random_integer_generation import generate_random_integer
 class AddVNFConstraints:
 
     def __init__(self, experiment_path, delay, bandwidth, loss, jitter):
-        print('Hellos')
         self.experiment_path = experiment_path
         self.list_vnf = []
         self.list_vnf_constraints = []

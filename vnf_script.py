@@ -29,6 +29,7 @@ def parse_parameters(host, port, name):
         name = str(name)
     return host, port, name
 
+
 def main(argv):
     vnf_host = "127.0.0.1"
     debug = True
@@ -75,8 +76,8 @@ def main(argv):
             vnf_name = arg
         elif opt in("-s", "--service"):
             service = arg
-        elif opt in("-x", "--limits"):
-            limits = arg
+        # elif opt in("-x", "--limits"):
+        #     limits = arg
         elif opt in("-t", "--topology"):
             topology = arg
         elif opt in("-i", "--initial"):
@@ -89,15 +90,16 @@ def main(argv):
 
     if isinstance(service, str):
         service = service.split(",")
-    if isinstance(limits, str):
-        limits = limits.split(",")
+    # if isinstance(limits, str):
+    #     limits = limits.split(",")
     if valid_input(vnf_host, vnf_port, vnf_name, orchestrator_host, orchestrator_port):
         orchestrator_port = int(orchestrator_port)
         topology_vnf = Topology(topology[0], topology[1], topology[2], topology[3])
         topology_vnf.ip = vnf_host
         topology_vnf.port = vnf_port
-        service_threshold = limits[0], limits[1], limits[2], limits[3]
-        service_vnf = ServicePackage(service[0], service[1], service[2], service[3], service_threshold)
+        # service_threshold = limits[0], limits[1], limits[2], limits[3]
+        # service_vnf = ServicePackage(service[0], service[1], service[2], service[3], service_threshold)
+        service_vnf = ServicePackage(service[0], service[1], service[2], service[3])
         orchestrator = CommunicationEntityPackage(orchestrator_host, orchestrator_port)
 
         vnf_host, vnf_port, vnf_name = parse_parameters(vnf_host, vnf_port, vnf_name)
