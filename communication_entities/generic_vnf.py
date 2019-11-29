@@ -122,15 +122,16 @@ class GenericVNF:
     def send_all_data_in_queues(self, all_data):
         self.send_all_data_from_current_vnf_to_new_vnf(all_data)
 
+    # TODO: Work on this function, a lot of repeated code
     def handle_migration_affected(self, new_vnf, migrating_vnfs=None):
-        if migrating_vnfs is not None:
+        if migrating_vnfs is None:
+            log.info('No migrating vnfs, first to do so')
+        else:
             for vnf in migrating_vnfs:
                 print('Already trying to migrate', vnf)
-        else:
-            log.info('No migrating vnfs, first to do so')
 
         for v in self.list_affected_vnf:
-            if v not in migrating_vnfs:
+            if migrating_vnfs is None:
                 self.check_if_previous_vnf_must_migrate(v, new_vnf)
                 self.handle_queues_from_previous_vnf_in_chain()
                 self.send_data_from_r_queue_to_new_vnf()
@@ -140,10 +141,20 @@ class GenericVNF:
                 self.send_all_data_in_queues(all_data)
                 self.terminate_migration()
             else:
-                self.send_data_from_r_queue_to_new_vnf()
-                all_data = self.process_all_data_in_queues(new_vnf)
-                self.send_all_data_in_queues(all_data)
-                self.terminate_virtual_migration()
+                if v not in migrating_vnfs:
+                    self.check_if_previous_vnf_must_migrate(v, new_vnf)
+                    self.handle_queues_from_previous_vnf_in_chain()
+                    self.send_data_from_r_queue_to_new_vnf()
+                    self.migration_switch_message_exchange()
+                    # TODO: No need to pass the new VNF, add all_data to the new_vnf
+                    all_data = self.process_all_data_in_queues(new_vnf)
+                    self.send_all_data_in_queues(all_data)
+                    self.terminate_migration()
+                else:
+                    self.send_data_from_r_queue_to_new_vnf()
+                    all_data = self.process_all_data_in_queues(new_vnf)
+                    self.send_all_data_in_queues(all_data)
+                    self.terminate_virtual_migration()
 
 
         log.info('Migration has ended')
