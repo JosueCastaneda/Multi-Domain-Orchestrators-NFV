@@ -15,7 +15,7 @@ class ServicePackage:
             self.loss_threshold = service_threshold.loss
 
     def create_from_topology(self, topology):
-        self.consumed_bandwidth = topology.bw
+        self.consumed_bandwidth = topology.bandwidth
         self.delay = topology.delay
         self.jitter = topology.jitter
         self.loss = topology.loss
