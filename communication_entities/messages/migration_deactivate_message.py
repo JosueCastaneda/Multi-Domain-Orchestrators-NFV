@@ -16,8 +16,9 @@ class MigrationDeactivateMessage(AbstractMessage):
         super().__init__(data)
         self.current_server = None
 
+    # TODO: Use this instead of magic number: RECEIVE_BUFFER = 4096
     def handle_switch_exchange(self):
-        m1 = self.client_socket.recv(SocketSize.RECEIVE_BUFFER)
+        m1 = self.client_socket.recv(4096)
         answer_message = pickle.loads(m1)
         log.info(answer_message)
         m2 = SwitchDoneMessage(None)
@@ -26,8 +27,9 @@ class MigrationDeactivateMessage(AbstractMessage):
 
     # TODO: Improve the class by using polymorphism and do not require three ifs
     # TODO: Duplicated code
+    # TODO: Use this instead of magic number: RECEIVE_BUFFER = 4096
     def handle_queue_migration(self, operation):
-        m1 = self.client_socket.recv(SocketSize.RECEIVE_BUFFER)
+        m1 = self.client_socket.recv(4096)
         answer_message = pickle.loads(m1)
         log.info(answer_message)
         if operation == "P":
