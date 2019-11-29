@@ -23,6 +23,8 @@ class MigrationMessage(AbstractMessage):
     # TODO: Change the magic number to another better representation
     def process_by_command_line(self):
         local_vnf = self.current_server.orchestrator.get_local_vnf(self.source_vnf_name)
+        print('Local VNF')
+        print(local_vnf)
         # new_vnf = self.current_server.orchestrator.get_local_vnf(self.new_in_chain_vnf_name)
         new_topology = Topology(local_vnf[4][0], local_vnf[4][1], local_vnf[4][2], local_vnf[4][3], ip=local_vnf[3], port=4437)
         new_vnf_message = self.current_server.generate_new_message_parameters(new_topology)

@@ -26,8 +26,7 @@ class MigrationMessageGenerator:
 
     def set_up_containers(self):
         new_line = '\n'
-        for mig_vnf in self.migration_vnfs:
-            vnf = self.get_vnf_by_migration(mig_vnf)
+        for vnf in self.list_of_detailed_vnfs:
             new_vnf = self.get_data_center(vnf)
             data_center = new_vnf['datacenter']
             vnf_name = vnf['name'] + '_new'
@@ -50,8 +49,9 @@ class MigrationMessageGenerator:
 
     def set_up_migration_vnfs_docker(self):
         new_line = '\n'
-        for mig_vnf in self.migration_vnfs:
-            vnf = self.get_vnf_by_migration(mig_vnf)
+        for vnf in self.list_of_detailed_vnfs:
+        # for mig_vnf in self.migration_vnfs:
+        #     vnf = self.get_vnf_by_migration(mig_vnf)
             name = vnf['name'] + '_new'
             ip = vnf['migration_vnf_ip']
             new_vnf = self.get_new_vnf_details(ip)
@@ -160,15 +160,15 @@ class MigrationMessageGenerator:
         self.file_commands.close()
 
 
-# def main():
-#     print('Begin')
-#     length_of_vnfs = 4
-#     video_definition = 480
-#     name_of_experiment = 'experiment_0'
-#     experiment_path = '../first/' + str(video_definition) + '/exp_1_' + str(length_of_vnfs) + '/experiments/'
-#     exp = MigrationMessageGenerator(path=experiment_path, name_of_experiment=name_of_experiment)
-#     exp.generate()
-#
-#
-# if __name__ == '__main__':
-#     main()
+def main():
+    print('Begin')
+    length_of_vnfs = 4
+    video_definition = 480
+    name_of_experiment = 'experiment_0'
+    experiment_path = '../first/' + str(video_definition) + '/exp_1_' + str(length_of_vnfs) + '/experiments/'
+    exp = MigrationMessageGenerator(path=experiment_path, name_of_experiment=name_of_experiment)
+    exp.generate()
+
+
+if __name__ == '__main__':
+    main()
