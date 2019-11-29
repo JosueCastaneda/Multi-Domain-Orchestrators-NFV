@@ -61,6 +61,9 @@ class GenericVNF:
         log.info(''.join(["VNF name: ", self.name]))
         log.info(''.join(["Orchestrator: ", self.orchestrator.host, " ", str(self.orchestrator.port)]))
         # log.info(''.join(["List Affected: ", self.list_affected_vnf[0].host, " ", str(self.list_affected_vnf[0].port)]))
+        for vnf in self.list_affected_vnf:
+            log.info(''.join(["Affected VNF Host: ", vnf.host, " Port: ", vnf.port]))
+
         log.info("Queue Q: ")
         for d in self.queue_Q:
             log.info(''.join([str(d), " "]))

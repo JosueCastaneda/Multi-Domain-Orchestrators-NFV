@@ -33,7 +33,7 @@ class MigrationMessageGenerator:
             vnf_name = vnf['name'] + '_new'
             new_ip = vnf['migration_vnf_ip']
             first_str = 'vim-emu compute start -d ' + data_center + ' -n ' + vnf_name + ' --image vnf_experiment'
-            second_str = '--net \'(id=input,ip=' + new_ip + '/24)\''
+            second_str = ' --net \'(id=input,ip=' + new_ip + '/24)\''
             self.file_commands.write(first_str + second_str + new_line)
 
     def get_data_center(self, vnf):
