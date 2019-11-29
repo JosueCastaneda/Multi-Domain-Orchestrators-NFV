@@ -122,7 +122,7 @@ class GenericVNF:
             self.handle_migration_affected(new_vnf, migrating_vnfs)
             log.info("Recursive migration is completed")
             return True, new_vnf
-        log.info("Recursive migration is completed")
+        log.info("Recursive migration is completed no Affected VNFs")
         return False, None
 
     def send_all_data_in_queues(self, all_data):
@@ -213,6 +213,7 @@ class GenericVNF:
     # TODO: Is almost the same, so this can be refactored
     def terminate_virtual_migration(self):
         m1 = TerminateMessage(None)
+        log.info('Sending terminate message to new VNF. Migration has ended')
         self.server.send_message_virtual(m1)
         self.server.disconnect_send_virtual_channel()
         self.print_state_vnf()
@@ -225,6 +226,7 @@ class GenericVNF:
 
     def send_all_data_from_current_vnf_to_new_vnf(self, data):
         m1 = AllQueueInformation(data)
+        log.info('Sending all queues to new VNF')
         self.server.send_message_virtual(m1)
 
     def send_migration_message_to_previous_vnf(self, previous_vnf, new_vnf, migrating_vnfs=None):
@@ -236,17 +238,20 @@ class GenericVNF:
             for vnf_mig in migrating_vnfs:
                 m.migrating_vnfs.append(vnf_mig)
         self.server.send_message(m)
+        log.info('Waiting for previous acknowledge message')
         return pickle.loads(self.server.send_channel.recv(SocketSize.RECEIVE_BUFFER.value))
 
     def check_if_previous_vnf_must_migrate(self, v, new_vnf, migrating_vnfs=None):
         answer_message = self.send_migration_message_to_previous_vnf(v, new_vnf, migrating_vnfs)
         if isinstance(answer_message.data, Topology):
             m_ack = MigrationAckMessage("Ok for delete")
+            log.info('Sending ACK message to previous')
             self.server.send_message(m_ack)
             self.server.disconnect_send_channel()
             v_server = CommunicationEntityPackage(answer_message.data.ip, answer_message.data.port)
             self.server.connect_to_another_server(v_server)
             m_rec_mig = MigrationDeactivateRecursiveMessage("Do it")
+            log.info('Send MigrationDeactivateRecursiveMessage')
             self.server.send_message(m_rec_mig)
 
     def handle_queues_from_previous_vnf_in_chain(self):

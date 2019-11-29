@@ -17,15 +17,18 @@ class MigrationDeactivateRecursiveMessage(AbstractMessage):
 
     # TODO: Use the type RECEIVE_BUFFER = 4096
     def handle_switch_exchange(self):
+        log.info('Waiting for SWITCH MESSAGE?')
         m1 = self.client_socket.recv(4096)
         answer_message = pickle.loads(m1)
         log.info(answer_message)
         m2 = SwitchDoneMessage(None)
+        log.info('Sending SwitchDoneMessage to previous client')
         self.current_server.send_message_to_socket(self.client_socket, m2)
 
     # TODO: Improve the class by using polymorphism and do not require three ifs
     # TODO use the type RECEIVE_BUFFER = 4096
     def handle_queue_migration(self, operation):
+        log.info('Waiting for Q message')
         m1 = self.client_socket.recv(4096)
         answer_message = pickle.loads(m1)
         log.info(answer_message)
@@ -47,14 +50,17 @@ class MigrationDeactivateRecursiveMessage(AbstractMessage):
         new_vnf = None
         if not is_valid:
             recursive_took_place, new_vnf = self.current_server.orchestrator.check_migration_recursive(self.data)
+            log.info('check_if_migration_is_needed recursive - Migration Deactivate Recursive Message')
         return recursive_took_place, new_vnf
 
     def process_by_command_line(self):
         data_q = self.handle_queue_migration("Q")
         m1 = SendQueueQMessage(data_q)
+        log.info('Send SendQueueQMessage to previous VNF')
         self.current_server.send_message_to_socket(self.client_socket, m1)
 
         data_p = self.handle_queue_migration("P")
         m2 = SendQueuePMessage(data_p)
+        log.info('Send SendQueuePMessage to previous VNF')
         self.current_server.send_message_to_socket(self.client_socket, m2)
         self.handle_switch_exchange()

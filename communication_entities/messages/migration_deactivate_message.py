@@ -60,6 +60,7 @@ class MigrationDeactivateMessage(AbstractMessage):
         new_vnf = None
         if not is_new_vnf_valid:
             recursive_took_place, new_vnf = self.current_server.orchestrator.check_migration_recursive(self.data, self.migrating_vnfs)
+            log.info('check_if_migration_is_needed recursive - Migration deactivate message')
         return recursive_took_place, new_vnf
 
     # TODO: Check why the magnc numbers are necessary use RECEIVE_BUFFER = 4096
@@ -70,20 +71,26 @@ class MigrationDeactivateMessage(AbstractMessage):
 
         recursive_migration_took_place, new_vnf = self.check_if_migration_is_needed()
         if recursive_migration_took_place:
+            log.info('Recursive migration took place')
             m = MigrationAckMessage(new_vnf)
             self.current_server.send_message_to_socket(self.client_socket, m)
+            log.info('Waiting for answer')
             x = self.client_socket.recv(4096)
             log.info(x)
             return
             # sys.exit()
+        log.info('No recursive migration took place')
         m = MigrationAckMessage("Ok")
+        log.info('Sending ACK to previous VNF')
         self.current_server.send_message_to_socket(self.client_socket, m)
 
         data_q = self.handle_queue_migration("Q")
         m1 = SendQueueQMessage(data_q)
+        log.info('Send Q message to previous VNF')
         self.current_server.send_message_to_socket(self.client_socket, m1)
 
         data_p = self.handle_queue_migration("P")
         m2 = SendQueuePMessage(data_p)
+        log.info('Send P message to previous VNF')
         self.current_server.send_message_to_socket(self.client_socket, m2)
         self.handle_switch_exchange()
