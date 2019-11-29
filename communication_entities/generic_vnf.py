@@ -149,12 +149,11 @@ class GenericVNF:
                 self.terminate_migration()
             else:
                 log.info('We already have migrating VNFs')
-                if v not in migrating_vnfs:
+                if not self.is_affected_vnf_already_migrating(v, migrating_vnfs):
                     self.check_if_previous_vnf_must_migrate(v, new_vnf, migrating_vnfs)
                     self.handle_queues_from_previous_vnf_in_chain()
                     self.send_data_from_r_queue_to_new_vnf()
                     self.migration_switch_message_exchange()
-                    # TODO: No need to pass the new VNF, add all_data to the new_vnf
                     all_data = self.process_all_data_in_queues(new_vnf)
                     self.send_all_data_in_queues(all_data)
                     self.terminate_migration()
@@ -164,6 +163,14 @@ class GenericVNF:
                     self.send_all_data_in_queues(all_data)
                     self.terminate_virtual_migration()
         log.info('Migration has ended')
+
+    def is_affected_vnf_already_migrating(self, vnf, migrating_vnfs):
+        print('Affected VNF: ', vnf)
+        for mig_vnf in migrating_vnfs:
+            print('Mig: ', mig_vnf)
+            if vnf == mig_vnf:
+                return True
+        return False
 
     def check_migration_affected(self, message):
         new_vnf = message.data.file_pack
