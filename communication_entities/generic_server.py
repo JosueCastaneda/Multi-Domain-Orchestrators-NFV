@@ -110,6 +110,7 @@ class GenericServer:
 
     @staticmethod
     def generate_new_message_parameters(vnf_topology: Topology):
+        print('Topology: ', vnf_topology)
         param = ParameterPackage(vnf_topology)
         new_message = TopologyMessage(data=param)
         return new_message

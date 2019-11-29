@@ -126,6 +126,7 @@ class GenericVNF:
 
     def check_migration_affected(self, message):
         new_vnf = message.data.file_pack
+        print('New VNF: ', new_vnf)
         self.begin_migration(new_vnf)
         self.handle_migration_affected(new_vnf)
 
