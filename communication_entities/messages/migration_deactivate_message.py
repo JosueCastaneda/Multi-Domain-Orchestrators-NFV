@@ -63,6 +63,9 @@ class MigrationDeactivateMessage(AbstractMessage):
         return recursive_took_place, new_vnf
 
     def process_by_command_line(self):
+        for vnf in self.migrating_vnfs:
+            print('Migrating vnf: ', vnf)
+
         recursive_migration_took_place, new_vnf = self.check_if_migration_is_needed()
         if recursive_migration_took_place:
             m = MigrationAckMessage(new_vnf)
