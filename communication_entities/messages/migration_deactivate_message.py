@@ -15,6 +15,7 @@ class MigrationDeactivateMessage(AbstractMessage):
     def __init__(self, data):
         super().__init__(data)
         self.current_server = None
+        self.migrating_vnfs = []
 
     # TODO: Use this instead of magic number: RECEIVE_BUFFER = 4096
     def handle_switch_exchange(self):
@@ -58,7 +59,7 @@ class MigrationDeactivateMessage(AbstractMessage):
         recursive_took_place = False
         new_vnf = None
         if not is_new_vnf_valid:
-            recursive_took_place, new_vnf = self.current_server.orchestrator.check_migration_recursive(self.data)
+            recursive_took_place, new_vnf = self.current_server.orchestrator.check_migration_recursive(self.data, self.migrating_vnfs)
         return recursive_took_place, new_vnf
 
     def process_by_command_line(self):
