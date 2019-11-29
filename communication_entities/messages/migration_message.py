@@ -25,8 +25,14 @@ class MigrationMessage(AbstractMessage):
         local_vnf = self.current_server.orchestrator.get_local_vnf(self.source_vnf_name)
         print('Local VNF')
         print(local_vnf)
+        new_vnf_constraints = local_vnf[4].split(',')
         # new_vnf = self.current_server.orchestrator.get_local_vnf(self.new_in_chain_vnf_name)
-        new_topology = Topology(local_vnf[4][0], local_vnf[4][1], local_vnf[4][2], local_vnf[4][3], ip=local_vnf[3], port=4437)
+        new_topology = Topology(new_vnf_constraints[0],
+                                new_vnf_constraints[1],
+                                new_vnf_constraints[2],
+                                new_vnf_constraints[3],
+                                ip=local_vnf[3],
+                                port=4437)
         new_vnf_message = self.current_server.generate_new_message_parameters(new_topology)
         # if new_vnf is None:
         #     data = ParameterPackage(vnf_name=self.new_in_chain_vnf_name)
