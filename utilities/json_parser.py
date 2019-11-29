@@ -45,3 +45,33 @@ class JsonParser:
         index_image = line.find('-o')
         sub_line = line[index + 3:index_image - 1]
         return sub_line
+
+    @staticmethod
+    def parse_for_datacenter(line):
+        index = line.find('-d')
+        index_image = line.find('-n')
+        sub_line = line[index + 3:index_image - 1]
+        return sub_line
+
+    @staticmethod
+    def parse_for_name_vnf_data_center(line):
+        index = line.find('-n')
+        index_image = line.find('--image')
+        sub_line = line[index + 3:index_image - 1]
+        return sub_line
+
+    @staticmethod
+    def parse_for_ip_vnf_data_center(line):
+        index = line.find('ip=')
+        index_image = line.find('/24')
+        sub_line = line[index + 3:index_image]
+        return sub_line
+
+    # TODO: Use a similar approach for all the other methods, to eliminate magic numbers
+    @staticmethod
+    def parse_for_services(line):
+        index = line.find('--services')
+        index_image = line.find('--initial')
+        initial_index = len('--services') + 1
+        sub_line = line[index + initial_index:index_image - 1]
+        return sub_line
