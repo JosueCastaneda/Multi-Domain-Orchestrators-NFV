@@ -38,6 +38,8 @@ class Orchestrator:
     # TODO: Use a dictionary, is more expressive than using indexes
     def add_vnf(self, vnf_host, vnf_port, vnf_name, topology, migration_ip, topology_migration_vnf):
         self.list_vnf[vnf_name] = [vnf_host, vnf_port, topology, migration_ip, topology_migration_vnf]
+        log.info('Add following VNF: ')
+        print(self.list_vnf[vnf_name])
 
     def remove_vnf(self, vnf_name):
         self.list_vnf.remove(vnf_name)
