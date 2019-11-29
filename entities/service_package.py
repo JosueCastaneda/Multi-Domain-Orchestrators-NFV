@@ -50,7 +50,7 @@ class ServicePackage:
     def is_new_vnf_valid_for_service(self, new_vnf, previous_vnf):
 
         is_valid_bandwidth = self.check_constraint(self.consumed_bandwidth,
-                                                   previous_vnf.consumed_bandwidht,
+                                                   previous_vnf.consumed_bandwidth,
                                                    new_vnf.consumed_bandwidth)
         if not is_valid_bandwidth:
             log.info("Bandwidth is not valid")
