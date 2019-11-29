@@ -62,6 +62,8 @@ class MigrationDeactivateMessage(AbstractMessage):
             recursive_took_place, new_vnf = self.current_server.orchestrator.check_migration_recursive(self.data, self.migrating_vnfs)
         return recursive_took_place, new_vnf
 
+    # TODO: Check why the magnc numbers are necessary use RECEIVE_BUFFER = 4096
+
     def process_by_command_line(self):
         for vnf in self.migrating_vnfs:
             print('Migrating vnf: ', vnf)
@@ -70,7 +72,7 @@ class MigrationDeactivateMessage(AbstractMessage):
         if recursive_migration_took_place:
             m = MigrationAckMessage(new_vnf)
             self.current_server.send_message_to_socket(self.client_socket, m)
-            x = self.client_socket.recv(SocketSize.RECEIVE_BUFFER)
+            x = self.client_socket.recv(4096)
             log.info(x)
             return
             # sys.exit()
