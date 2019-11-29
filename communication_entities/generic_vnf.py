@@ -99,10 +99,19 @@ class GenericVNF:
         elif queue == "R":
             self.queue_R.extend(extension)
 
+    # TODO: Change the magic number by saving the port in the generic VNF
     def check_migration_recursive(self, new_vnf_topology):
         if len(self.list_affected_vnf) > 0:
-            m = RequestNewPopMessage(new_vnf_topology)
-            new_vnf = self.server.send_and_receive_message_to_orchestrator(m)
+            # m = RequestNewPopMessage(new_vnf_topology)
+            # new_vnf = self.server.send_and_receive_message_to_orchestrator(m)
+            new_vnf_topology = self.topology_migration_vnf.split(',')
+            new_vnf_ip = self.migration_vnf_ip
+            new_vnf = Topology(delay=new_vnf_topology[0],
+                               bandwidth=new_vnf_topology[1],
+                               loss=new_vnf_topology[2],
+                               jitter=new_vnf_topology[3],
+                               ip=new_vnf_ip,
+                               port=4437)
             self.begin_migration(new_vnf)
             self.handle_migration_affected(new_vnf)
             log.info("Recursive migration is completed")
