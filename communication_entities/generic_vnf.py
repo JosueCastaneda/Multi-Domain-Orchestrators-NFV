@@ -50,19 +50,12 @@ class GenericVNF:
         add_message = AddVNF(host, port, self.name, self.topology, self.migration_vnf_ip, self.topology_migration_vnf)
         self.server.send_message_to_orchestrator(add_message)
 
-
     def print_state_vnf(self):
-        """
-        This function is for debugging purposes, to check the result of
-        migration.
-
-        :return:
-        """
         log.info(''.join(["VNF name: ", self.name]))
         log.info(''.join(["Orchestrator: ", self.orchestrator.host, " ", str(self.orchestrator.port)]))
-        # log.info(''.join(["List Affected: ", self.list_affected_vnf[0].host, " ", str(self.list_affected_vnf[0].port)]))
         for vnf in self.list_affected_vnf:
-            log.info(''.join(["Affected VNF Host: ", vnf.host, " Port: ", vnf.port]))
+            print(vnf)
+        #     log.info(''.join(["Affected VNF Host: ", vnf.host, " Port: ", vnf.port]))
 
         log.info("Queue Q: ")
         for d in self.queue_Q:
