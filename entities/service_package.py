@@ -51,7 +51,7 @@ class ServicePackage:
 
         is_valid_bandwidth = self.check_constraint(self.consumed_bandwidth,
                                                    previous_vnf.bandwidth,
-                                                   new_vnf.bandwidth)
+                                                   new_vnf.consumed_bandwidth)
         if not is_valid_bandwidth:
             log.info("Bandwidth is not valid")
         is_valid_delay = self.check_constraint(self.delay, previous_vnf.delay, new_vnf.delay)
