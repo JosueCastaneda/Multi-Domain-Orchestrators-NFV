@@ -53,18 +53,24 @@ class ServicePackage:
     # TODO: CHANGE TO ACTUALLY USE THE RECURSIVE MIGRATION
     def is_new_vnf_valid_for_service(self, new_vnf, previous_vnf):
 
-        is_valid_bandwidth = self.check_constraint(self.consumed_bandwidth,
-                                                   previous_vnf.bandwidth,
-                                                   new_vnf.consumed_bandwidth)
+        is_valid_bandwidth = self.check_constraint(float(self.consumed_bandwidth[0]),
+                                                   float(previous_vnf.bandwidth),
+                                                   float(new_vnf.consumed_bandwidth))
         if not is_valid_bandwidth:
             log.info("Bandwidth is not valid")
-        is_valid_delay = self.check_constraint(self.delay, previous_vnf.delay, new_vnf.delay)
+        is_valid_delay = self.check_constraint(float(self.delay[0]),
+                                               float(previous_vnf.delay),
+                                               float(new_vnf.delay))
         if not is_valid_delay:
             log.info("Delay is not valid")
-        is_valid_jitter = self.check_constraint(self.jitter, previous_vnf.jitter, new_vnf.jitter)
+        is_valid_jitter = self.check_constraint(float(self.jitter[0]),
+                                                float(previous_vnf.jitter),
+                                                float(new_vnf.jitter))
         if not is_valid_jitter:
             log.info("Jitter is not valid")
-        is_valid_loss = self.check_constraint(self.loss, previous_vnf.loss, new_vnf.loss)
+        is_valid_loss = self.check_constraint(float(self.loss[0]),
+                                              float(previous_vnf.loss),
+                                              float(new_vnf.loss))
         if not is_valid_loss:
             log.info("Loss is not valid")
         return is_valid_bandwidth and is_valid_loss and is_valid_jitter and is_valid_delay
