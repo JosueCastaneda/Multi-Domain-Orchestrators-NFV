@@ -2,7 +2,7 @@ class Topology:
 
     def __init__(self, delay, bandwidth, loss, jitter, ip=None, port=None):
         self.delay = delay
-        self.bw = bandwidth
+        self.bandwidth = bandwidth
         self.loss = loss
         self.jitter = jitter
         self.ip = ip
@@ -18,13 +18,13 @@ class Topology:
         self.delay -= val
 
     def set_bandwidth(self, val):
-        self.bw = val
+        self.bandwidth = val
 
     def increase_bandwidth(self, val):
-        self.bw += val
+        self.bandwidth += val
 
     def decrease_bandwidth(self, val):
-        self.bw -= val
+        self.bandwidth -= val
 
     def set_loss(self, val):
         self.loss = val
@@ -48,6 +48,6 @@ class Topology:
         return ''.join(["IP: ", self.ip,
                         " Port: ", str(self.port),
                         " Delay: ", str(self.delay),
-                        " Bandwidth: ", str(self.bw),
+                        " Bandwidth: ", str(self.bandwidth),
                         " Loss: ", str(self.loss),
                         " Jitter: ", str(self.jitter)])
