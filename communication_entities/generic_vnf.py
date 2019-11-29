@@ -127,6 +127,10 @@ class GenericVNF:
     def check_migration_affected(self, message):
         new_vnf = message.data.file_pack
         print('New VNF: ', new_vnf)
+        print('New Delay: ', new_vnf.delay)
+        print('New bandwidth: ', new_vnf.bandwidth)
+        print('New loss: ', new_vnf.loss)
+        print('New jitter: ', new_vnf.jitter)
         self.begin_migration(new_vnf)
         self.handle_migration_affected(new_vnf)
 

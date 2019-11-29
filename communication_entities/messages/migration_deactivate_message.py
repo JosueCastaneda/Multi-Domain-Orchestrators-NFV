@@ -42,6 +42,7 @@ class MigrationDeactivateMessage(AbstractMessage):
         return data_queue_tmp
 
     def check_if_migration_is_needed(self):
+        print('Migration Deactivate Message: ', self.data)
         new_requirements = ServicePackage()
         new_requirements.create_from_topology(self.data)
         print('New requirements type: ', type(new_requirements))

@@ -110,7 +110,8 @@ class GenericServer:
 
     @staticmethod
     def generate_new_message_parameters(vnf_topology: Topology):
-        print('Topology: ', vnf_topology)
+        print('Topology: Delay ', str(vnf_topology.delay), ' bandwidth: ', str(vnf_topology.bandwidth))
+        print('Topology: Loss ', str(vnf_topology.loss), ' jitter: ', str(vnf_topology.jitter))
         param = ParameterPackage(vnf_topology)
         new_message = TopologyMessage(data=param)
         return new_message
