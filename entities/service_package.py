@@ -1,3 +1,6 @@
+from utilities.logger import log
+
+
 class ServicePackage:
 
     def __init__(self, bw=None, delay=None, jitter=None, loss=None, service_threshold=None):
@@ -45,14 +48,22 @@ class ServicePackage:
 
     # TODO: CHANGE TO ACTUALLY USE THE RECURSIVE MIGRATION
     def is_new_vnf_valid_for_service(self, new_vnf, previous_vnf):
-        return True
-        # is_valid_bandwidth = self.check_constraint(self.consumed_bandwidth,
-        #                                            previous_vnf.consumed_bandwidht,
-        #                                            new_vnf.consumed_bandwidth)
-        # is_valid_delay = self.check_constraint(self.delay, previous_vnf.delay, new_vnf.delay)
-        # is_valid_jitter = self.check_constraint(self.jitter, previous_vnf.jitter, new_vnf.jitter)
-        # is_valid_loss = self.check_constraint(self.loss, previous_vnf.loss, new_vnf.loss)
-        # return is_valid_bandwidth and is_valid_loss and is_valid_jitter and is_valid_delay
+
+        is_valid_bandwidth = self.check_constraint(self.consumed_bandwidth,
+                                                   previous_vnf.consumed_bandwidht,
+                                                   new_vnf.consumed_bandwidth)
+        if not is_valid_bandwidth:
+            log.info("Bandwidth is not valid")
+        is_valid_delay = self.check_constraint(self.delay, previous_vnf.delay, new_vnf.delay)
+        if not is_valid_delay:
+            log.info("Delay is not valid")
+        is_valid_jitter = self.check_constraint(self.jitter, previous_vnf.jitter, new_vnf.jitter)
+        if not is_valid_jitter:
+            log.info("Jitter is not valid")
+        is_valid_loss = self.check_constraint(self.loss, previous_vnf.loss, new_vnf.loss)
+        if not is_valid_loss:
+            log.info("Loss is not valid")
+        return is_valid_bandwidth and is_valid_loss and is_valid_jitter and is_valid_delay
 
         # return self.is_valid_bandwidth(new_vnf.consumed_bandwidth, previous_vnf.consumed_bandwidht) and \
         #        self.is_new_delay_less_or_equal_than_previous_delay(new_vnf.delay, previous_vnf.delay) and \
