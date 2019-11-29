@@ -42,7 +42,7 @@ class MigrationDeactivateMessage(AbstractMessage):
     def check_if_migration_is_needed(self):
         new_requirements = ServicePackage()
         new_requirements.create_from_topology(self.data)
-        old_requirements = self.current_server.orchestrator.topology()
+        old_requirements = self.current_server.orchestrator.topology
         current_services = self.current_server.orchestrator.service_package
         is_new_vnf_valid = True
         for service in current_services:
