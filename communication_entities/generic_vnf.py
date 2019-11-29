@@ -39,7 +39,7 @@ class GenericVNF:
         self.set_up_to_orchestrator(orchestrator, host, port)
         log.info(''.join(["VNF: ", self.name, " is running!"]))
         log.info(''.join(["Delay: ", str(self.topology.delay)]))
-        log.info(''.join(["Bandwidth: ", str(self.topology.bw)]))
+        log.info(''.join(["Bandwidth: ", str(self.topology.bandwidth)]))
         log.info(''.join(["Loss: ", str(self.topology.loss)]))
         log.info(''.join(["Jitter: ", str(self.topology.jitter)]))
         self.print_state_vnf()
