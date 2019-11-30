@@ -3,6 +3,8 @@ import pickle
 from communication_entities.messages.abstract_message import AbstractMessage
 from communication_entities.messages.migration_ack_message import MigrationAckMessage
 from communication_entities.messages.send_all_states_message import SendAllStatesMessage
+from communication_entities.messages.send_queue_P_message import SendQueuePMessage
+from communication_entities.messages.send_queue_Q_message import SendQueueQMessage
 from communication_entities.messages.terminate_message_without_recursion import TerminateMessageWithoutRecursion
 from utilities.logger import log
 
@@ -41,7 +43,11 @@ class RawTextMessage(AbstractMessage):
         log.info('Waiting for Queues data from source VNF')
         m2 = self.client_socket.recv(4096)
         answer_message = pickle.loads(m2)
-        print('Answer message of type: ', type(answer_message))
+        while not isinstance(answer_message, SendQueueQMessage) or isinstance(answer_message, SendQueuePMessage) :
+            print('Answer message of type: ', type(answer_message))
+            m2 = self.client_socket.recv(4096)
+            answer_message = pickle.loads(m2)
+
         for d in answer_message.data[0]:
             self.current_server.orchestrator.add_states_to_queue(d, "Q")
         for d in answer_message.data[1]:
