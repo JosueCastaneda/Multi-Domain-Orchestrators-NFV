@@ -17,14 +17,14 @@ class RawTextMessage(AbstractMessage):
 
     def wait_for_r_queue(self):
         log.info('Waiting for R data from source VNF')
-        m1 = self.client_socket.recv(4096)
+        m1 = self.client_socket.recv(8192)
         answer_message = pickle.loads(m1)
         for d in answer_message.data:
             self.current_server.orchestrator.add_states_to_queue(d, "R")
 
     def wait_for_terminate(self):
         log.info('Waiting for terminate message from current VNF')
-        m2 = self.client_socket.recv(4096)
+        m2 = self.client_socket.recv(8192)
         answer_message = pickle.loads(m2)
         log.info('Received answer: ')
         if isinstance(answer_message, TerminateMessageWithoutRecursion):
@@ -41,7 +41,7 @@ class RawTextMessage(AbstractMessage):
 
     def wait_for_all_queues(self):
         log.info('Waiting for Queues data from source VNF')
-        m2 = self.client_socket.recv(4096)
+        m2 = self.client_socket.recv(8192)
         answer_message = pickle.loads(m2)
         # while not isinstance(answer_message, SendQueueQMessage) or isinstance(answer_message, SendQueuePMessage) :
         #     print('Answer message of type: ', type(answer_message))
