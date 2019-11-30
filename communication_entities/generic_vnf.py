@@ -105,7 +105,7 @@ class GenericVNF:
             log.info('No previous VNF being migrated')
         else:
             for vnf in migrating_vnfs:
-                print('Migrating VNF: ', vnf)
+                print('Migrating IP vnf: ', vnf['ip'], ' mig_ip: ', vnf['mig_ip'])
 
         if len(self.list_affected_vnf) > 0:
             # m = RequestNewPopMessage(new_vnf_topology)
@@ -134,7 +134,7 @@ class GenericVNF:
             log.info('No migrating vnfs, first to do so')
         else:
             for vnf in migrating_vnfs:
-                print('Already trying to migrate', vnf)
+                print('Already trying to migrate IP vnf: ', vnf['ip'], ' mig_ip: ', vnf['mig_ip'])
 
         for v in self.list_affected_vnf:
             if migrating_vnfs is None:
@@ -167,10 +167,18 @@ class GenericVNF:
     def is_affected_vnf_already_migrating(self, vnf, migrating_vnfs):
         print('Affected VNF: ', vnf, ' type: ', type(vnf))
         for mig_vnf in migrating_vnfs:
-            print('Mig: ', mig_vnf, ' type: ', type(mig_vnf))
-            if vnf == mig_vnf:
+            print('Mig: ', mig_vnf['ip'], ' type: ', type(mig_vnf))
+            if vnf == mig_vnf['ip']:
+                log.info('VNF found, cycle detected!')
+                self.update_affected_vnf(vnf, mig_vnf['mig_ip'])
                 return True
         return False
+
+    def update_affected_vnf(self, vnf, new_vnf_ip):
+        for affected_vnf in self.list_affected_vnf:
+            if affected_vnf.host == vnf:
+                affected_vnf.host = new_vnf_ip
+                break
 
     def check_migration_affected(self, message):
         new_vnf = message.data.file_pack
@@ -233,7 +241,11 @@ class GenericVNF:
         previous_vnf_in_chain = CommunicationEntityPackage(previous_vnf.host, previous_vnf.port)
         self.server.connect_to_another_server(previous_vnf_in_chain)
         m = MigrationDeactivateMessage(new_vnf)
-        m.migrating_vnfs.append(self.server_param.host)
+        migration_vnf = dict()
+        migration_vnf['ip'] = self.server_param.host
+        migration_vnf['mig_ip'] = self.migration_vnf_ip
+        # TODO: Changes done to
+        m.migrating_vnfs.append(migration_vnf)
         if migrating_vnfs is not None:
             for vnf_mig in migrating_vnfs:
                 m.migrating_vnfs.append(vnf_mig)
@@ -283,6 +295,7 @@ class GenericVNF:
 
     def send_data_from_r_queue_to_new_vnf(self):
         data = self.get_all_data_from_queue("R")
+        log.info('Sending R to new VNF')
         m3 = SendQueueRMessage(data)
         self.server.send_message_virtual(m3)
 

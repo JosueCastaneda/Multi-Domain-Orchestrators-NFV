@@ -98,7 +98,7 @@ class GenericServer:
     def send_message_to_socket(client: socket, message):
         log.info("Sending Message using socket: ")
         data_string = pickle.dumps(message)
-        print(client)
+        print('Socket: ', client)
         client.send(data_string)
 
     def get_ack_channel(self):

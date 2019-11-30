@@ -67,7 +67,7 @@ class MigrationDeactivateMessage(AbstractMessage):
 
     def process_by_command_line(self):
         for vnf in self.migrating_vnfs:
-            print('Migrating vnf: ', vnf)
+            print('Migrating IP vnf: ', vnf['ip'], ' mig_ip: ', vnf['mig_ip'])
 
         recursive_migration_took_place, new_vnf = self.check_if_migration_is_needed()
         if recursive_migration_took_place:
