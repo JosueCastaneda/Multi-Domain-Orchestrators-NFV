@@ -152,7 +152,7 @@ class GenericVNF:
                 log.info('We already have migrating VNFs')
                 if not self.is_affected_vnf_already_migrating(v.host, migrating_vnfs):
                     self.check_if_previous_vnf_must_migrate(v, new_vnf, migrating_vnfs)
-                    log.info('Cycle in the migrating')
+                    log.info('No cycle in the migrating list')
                     self.handle_queues_from_previous_vnf_in_chain()
                     self.send_data_from_r_queue_to_new_vnf()
                     self.migration_switch_message_exchange()
@@ -254,7 +254,7 @@ class GenericVNF:
             for vnf_mig in migrating_vnfs:
                 m.migrating_vnfs.append(vnf_mig)
         self.server.send_message(m)
-        log.info('Waiting for previous acknowledge message')
+        log.info('Waiting for ACK previous acknowledge message')
         return pickle.loads(self.server.send_channel.recv(SocketSize.RECEIVE_BUFFER.value))
 
     def check_if_previous_vnf_must_migrate(self, v, new_vnf, migrating_vnfs=None):
@@ -264,10 +264,13 @@ class GenericVNF:
             log.info('Sending ACK message to previous')
             self.server.send_message(m_ack)
             self.server.disconnect_send_channel()
-            v_server = CommunicationEntityPackage(answer_message.data.ip, answer_message.data.port)
-            self.server.connect_to_another_server(v_server)
+            # TODO: This connects to the new vnf server
+            new_previous_vnf = CommunicationEntityPackage(answer_message.data.ip, answer_message.data.port)
+            str_ip = str(answer_message.data.ip)
+            log.info('Connecting to new host: IP', str_ip)
+            self.server.connect_to_another_server(new_previous_vnf)
             m_rec_mig = MigrationDeactivateRecursiveMessage("Do it")
-            log.info('Send MigrationDeactivateRecursiveMessage')
+            log.info('Send MigrationDeactivateRecursiveMessage to new VNF')
             self.server.send_message(m_rec_mig)
 
     def handle_queues_from_previous_vnf_in_chain(self):
@@ -289,12 +292,12 @@ class GenericVNF:
         # FIXME: For now we suppose that there is no transit traffic between coordination
         # FIXME: Since the time is not asynchronous, thus we can take what is stored in previous_VNF.
         m1 = SendQueueQMessage(None)
-        log.info('Sending SendQueueQMessage to previous')
+        log.info('Sending SendQueueQMessage to previous VNF')
         self.server.send_message(m1)
         self.collect_data_to_queue(self.queue_Q)
 
         m2 = SendQueuePMessage(None)
-        log.info('Sending SendQueuePMessage to previous')
+        log.info('Sending SendQueuePMessage to previous VNF')
         self.server.send_message(m2)
         self.collect_data_to_queue(self.queue_P)
 
@@ -312,7 +315,7 @@ class GenericVNF:
         :param queue: Current queue to append data to
         :return:
         """
-        log.info('Waiting for answer from new nfv')
+        log.info('Waiting for answer from previous nfv')
         x = self.server.send_channel.recv(SocketSize.RECEIVE_BUFFER.value)
         answer_message = pickle.loads(x)
         for d in answer_message.data:
