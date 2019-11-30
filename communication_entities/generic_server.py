@@ -92,14 +92,14 @@ class GenericServer:
     @staticmethod
     def acknowledge_message(client: socket, message: str):
         message_encoded = message.encode("UTF-8")
-        client.send(message_encoded)
+        client.sendall(message_encoded)
 
     @staticmethod
     def send_message_to_socket(client: socket, message):
         log.info("Sending Message using socket: ")
         data_string = pickle.dumps(message)
         print('Socket: ', client)
-        client.send(data_string)
+        client.sendall(data_string)
 
     def get_ack_channel(self):
         return self.send_channel.recv(SocketSize.ACK_BUFFER.value).decode("UTF-8")
@@ -122,7 +122,7 @@ class GenericServer:
         str_log = 'Sending Message using send_channel of type:' + str(type(message))
         log.info(str_log)
         data_string = pickle.dumps(message)
-        self.send_channel.send(data_string)
+        self.send_channel.sendall(data_string)
 
     def send_and_receive_message_to_orchestrator(self, message):
         log.info("Sending Message using send_channel_orchestrator")
@@ -135,13 +135,13 @@ class GenericServer:
     def send_message_to_orchestrator(self, message):
         log.info("Sending Message using send_channel_orchestrator")
         data_string = pickle.dumps(message)
-        self.send_orchestrator_channel.send(data_string)
+        self.send_orchestrator_channel.sendall(data_string)
 
     def send_message_virtual(self, message):
         str_log = 'Sending Message using send_virtual_channel of type: ' + str(type(message))
         log.info(str_log)
         data_string = pickle.dumps(message)
-        self.send_virtual_channel.send(data_string)
+        self.send_virtual_channel.sendall(data_string)
 
     def send_message_query_vnf(self, message):
         # log.info("Sending Message using send_channel")
