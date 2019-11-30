@@ -32,9 +32,12 @@ class MigrationDeactivateRecursiveMessage(AbstractMessage):
         log.info('Send ACK message to current VNF')
         ack_msg = MigrationAckMessage(None)
         self.current_server.send_message_to_socket(self.client_socket, ack_msg)
-        log.info('Waiting for Q message')
+        str_log = 'Waiting for ' + operation + ' message'
+        log.info(str_log)
         m1 = self.client_socket.recv(4096)
         answer_message = pickle.loads(m1)
+        str_log = 'Received message of type: ' + str(type(answer_message))
+        log.info(str_log)
         log.info(answer_message)
         if operation == "P":
             data_queue_tmp = self.current_server.orchestrator.get_all_data_from_queue("P")
@@ -42,6 +45,10 @@ class MigrationDeactivateRecursiveMessage(AbstractMessage):
             data_queue_tmp = self.current_server.orchestrator.get_all_data_from_queue("Q")
         else:
             data_queue_tmp = self.current_server.orchestrator.get_all_data_from_queue("R")
+        if data_queue_tmp is None:
+            log.info('Data is None!')
+        else:
+            print('Data is: ', data_queue_tmp)
         return data_queue_tmp
 
     def check_if_migration_is_needed(self):

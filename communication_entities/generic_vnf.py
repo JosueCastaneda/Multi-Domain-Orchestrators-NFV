@@ -67,13 +67,9 @@ class GenericVNF:
     # TODO: Use polymorphism to improve this function. Or better, use the queue to do the operation
     # def get_all_data_from_queue(self, queue):
     def get_all_data_from_queue(self, operation):
-        """
-        :param operation: The type of queue
-        :return: A list of data in the queue
-        """
+        str_log = 'Collecting data from queue:' + str(operation)
+        log.info(str_log)
         data = []
-        # while queue:
-        #     data.append(queue.pop(0))
         if operation == "P":
             while self.queue_P:
                 data.append(self.queue_P.pop(0))
@@ -146,6 +142,7 @@ class GenericVNF:
             self.send_data_from_r_queue_to_new_vnf()
             if not is_cycle_found:
                 self.migration_switch_message_exchange()
+            log.info('Finished with previous VNF now is the NEW VNF')
             all_data = self.process_all_data_in_queues(new_vnf)
             self.send_all_data_in_queues(all_data)
             self.terminate_migration()
@@ -306,6 +303,7 @@ class GenericVNF:
             m_rec_mig = MigrationDeactivateRecursiveMessage("Do it")
             log.info('Send MigrationDeactivateRecursiveMessage to new VNF')
             self.server.send_message(m_rec_mig)
+            log.info('Wait for ACK from new NVF')
             # TODO: THis is the correct way to use the constant types
             x = self.server.send_channel.recv(SocketSize.RECEIVE_BUFFER.value)
             answer_message = pickle.loads(x)
@@ -314,21 +312,6 @@ class GenericVNF:
 
     # TODO: Use a more fine approach to prevent deadlocks by blocking operation
     def handle_queues_from_previous_vnf_in_chain(self):
-        """
-        Send request to coordinate the state exchange in the queues of the VNF ensuring
-        the order of messages sent. First ones sent, first ones processed.
-
-        First sends a Q_message to the previous_VNF catching all the messages
-        being sent from previous_VNF and source_VNF.
-
-        Then, sends a P_message to the previous_VNF catching all the stored messages
-        in previous_VNF that have not been processed.
-
-        Finally, sends a R_message catching all the current messages stored in
-        source_VNF and sends it to the new_VNF so they will be the first ones to be processed.
-
-        :return:
-        """
         # FIXME: For now we suppose that there is no transit traffic between coordination
         # FIXME: Since the time is not asynchronous, thus we can take what is stored in previous_VNF.
         m1 = SendQueueQMessage(None)
@@ -350,7 +333,7 @@ class GenericVNF:
         log.info('Waiting for reply to R message from new VNF')
         x = self.server.send_virtual_channel.recv(SocketSize.RECEIVE_BUFFER.value)
         answer_message = pickle.loads(x)
-        str_log = 'Message recived of type: ' + str(type(answer_message))
+        str_log = 'Message received of type: ' + str(type(answer_message))
         log.info(str_log)
     #     WAIT FOR ANSWER
 
@@ -364,6 +347,8 @@ class GenericVNF:
         log.info('Waiting for answer from previous nfv')
         x = self.server.send_channel.recv(SocketSize.RECEIVE_BUFFER.value)
         answer_message = pickle.loads(x)
+        str_log = 'Message received of type: ' + str(type(answer_message))
+        log.info(str_log)
         for d in answer_message.data:
             queue.append(d)
 
@@ -374,9 +359,9 @@ class GenericVNF:
         :return:
         """
         m1 = SwitchMessage(None)
-        log.info('Sending Switch message to previous')
+        log.info('Sending Switch message to previous VNF')
         self.server.send_message(m1)
-        log.info('Waiting for an answer of previous')
+        log.info('Waiting for ACK from previous VNF')
         return pickle.loads(self.server.send_channel.recv(SocketSize.RECEIVE_BUFFER.value))
 
     def add_affected_vnf(self, vnf_pack):
