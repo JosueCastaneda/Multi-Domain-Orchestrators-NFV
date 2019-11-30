@@ -165,6 +165,7 @@ class GenericVNF:
                     self.terminate_migration()
                     log.info('Recursive migration')
                 else:
+                    log.info('Cycle detected!')
                     self.send_data_from_r_queue_to_new_vnf()
                     all_data = self.process_all_data_in_queues(new_vnf)
                     self.send_all_data_in_queues(all_data)
@@ -276,6 +277,10 @@ class GenericVNF:
         m1 = AllQueueInformation(data)
         log.info('Sending all queues to new VNF')
         self.server.send_message_virtual(m1)
+        log.info('Waiting for answer from new VNF')
+        x = self.server.send_virtual_channel.recv(SocketSize.RECEIVE_BUFFER.value)
+        answer_message = pickle.loads(x)
+        log.info('Recieved answer from new VNF ')
 
     def send_migration_message_to_previous_vnf(self, previous_vnf, new_vnf, migrating_vnfs=None):
         previous_vnf_in_chain = CommunicationEntityPackage(previous_vnf.host, previous_vnf.port)

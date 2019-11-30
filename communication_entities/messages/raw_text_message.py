@@ -1,6 +1,7 @@
 import pickle
 
 from communication_entities.messages.abstract_message import AbstractMessage
+from communication_entities.messages.migration_ack_message import MigrationAckMessage
 from communication_entities.messages.send_all_states_message import SendAllStatesMessage
 from communication_entities.messages.terminate_message_without_recursion import TerminateMessageWithoutRecursion
 from utilities.logger import log
@@ -45,6 +46,9 @@ class RawTextMessage(AbstractMessage):
         for d in answer_message.data[1]:
             self.current_server.orchestrator.add_states_to_queue(d, "P")
         self.current_server.orchestrator.add_affected_vnf(answer_message.data[2])
+        m = MigrationAckMessage(None)
+        log.info('Sending ACK to current VNF so he can terminate the connection')
+        self.current_server.send_message_to_socket(self.client_socket, m)
 
     def process_by_command_line(self):
         self.wait_for_r_queue()
