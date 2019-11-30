@@ -134,30 +134,31 @@ class GenericVNF:
     # TODO: Work on this function, a lot of repeated code
     def handle_migration_affected(self, new_vnf, migrating_vnfs=None):
         for v in self.list_affected_vnf:
+            is_cycle_found = False
             if migrating_vnfs is None:
                 log.info('First VNF, no migrating VNFS to check')
                 self.check_if_previous_vnf_must_migrate(v, new_vnf)
                 log.info('No migrating VNFs')
             else:
                 log.info('We already have migrating VNFs')
-                is_cycle_found = False
                 if not self.is_affected_vnf_already_migrating(v.host, migrating_vnfs):
                     self.check_if_previous_vnf_must_migrate(v, new_vnf, migrating_vnfs)
                     log.info('No cycle in the migrating list')
-                    self.handle_queues_from_previous_vnf_in_chain()
                 else:
                     log.info('Cycle detected!')
                     is_cycle_found = True
-                self.send_data_from_r_queue_to_new_vnf()
-                if not is_cycle_found:
-                    self.migration_switch_message_exchange()
-                all_data = self.process_all_data_in_queues(new_vnf)
-                self.send_all_data_in_queues(all_data)
-                self.terminate_migration()
-                if is_cycle_found:
-                    log.info('Cycle migration')
-                else:
-                    log.info('Recursive migration')
+            if not is_cycle_found:
+                self.handle_queues_from_previous_vnf_in_chain()
+            self.send_data_from_r_queue_to_new_vnf()
+            if not is_cycle_found:
+                self.migration_switch_message_exchange()
+            all_data = self.process_all_data_in_queues(new_vnf)
+            self.send_all_data_in_queues(all_data)
+            self.terminate_migration()
+            if is_cycle_found:
+                log.info('Cycle migration')
+            else:
+                log.info('Recursive migration')
         log.info('handle_migration_affected has ended')
 
     def is_affected_vnf_already_migrating(self, vnf, migrating_vnfs):
@@ -343,7 +344,7 @@ class GenericVNF:
         m3 = SendQueueRMessage(data)
         self.server.send_message_virtual(m3)
         log.info('Waiting for reply to R message from new VNF')
-        x = self.server.send_channel.recv(SocketSize.RECEIVE_BUFFER.value)
+        x = self.server.send_virtual_channel.recv(SocketSize.RECEIVE_BUFFER.value)
         answer_message = pickle.loads(x)
         str_log = 'Message recived of type: ' + str(type(answer_message))
         log.info(str_log)
