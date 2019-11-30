@@ -103,13 +103,7 @@ class GenericVNF:
             self.queue_R.extend(extension)
 
     # TODO: Change the magic number by saving the port in the generic VNF
-    def check_migration_recursive(self, new_vnf_topology, migrating_vnfs=None):
-        if migrating_vnfs is None:
-            log.info('No previous VNF being migrated')
-        else:
-            for vnf in migrating_vnfs:
-                print('Migrating IP vnf: ', vnf['ip'], ' mig_ip: ', vnf['mig_ip'])
-
+    def handle_recursive_migration(self, new_vnf_topology, migrating_vnfs=None):
         if len(self.list_affected_vnf) > 0:
             # m = RequestNewPopMessage(new_vnf_topology)
             # new_vnf = self.server.send_and_receive_message_to_orchestrator(m)
@@ -162,9 +156,9 @@ class GenericVNF:
         log.info('handle_migration_affected has ended')
 
     def is_affected_vnf_already_migrating(self, vnf, migrating_vnfs):
-        print('Affected VNF: ', vnf, ' type: ', type(vnf))
+        # print('Affected VNF: ', vnf, ' type: ', type(vnf))
         for mig_vnf in migrating_vnfs:
-            print('Mig: ', mig_vnf['ip'], ' type: ', type(mig_vnf))
+            # print('Mig: ', mig_vnf['ip'], ' type: ', type(mig_vnf))
             if vnf == mig_vnf['ip']:
                 log.info('VNF found, cycle detected!')
                 self.update_affected_vnf(vnf, mig_vnf['mig_ip'])
@@ -207,6 +201,11 @@ class GenericVNF:
         self.server.connect_to_another_server_virtual(virtual_link_new_vnf_socket)
         raw_text_message = RawTextMessage("Ready to migrate")
         self.server.send_message_virtual(raw_text_message)
+        log.info('Waiting for ACK from new VNF')
+        x = self.server.send_virtual_channel.recv(SocketSize.RECEIVE_BUFFER.value)
+        answer_message = pickle.loads(x)
+        str_log = 'Received answer from new VNF TYPE: ' + str(type(answer_message))
+        log.info(str_log)
 
     def terminate_migration(self):
         m1 = TerminateMessage(None)
@@ -268,7 +267,8 @@ class GenericVNF:
         log.info('Waiting for answer from new VNF')
         x = self.server.send_virtual_channel.recv(SocketSize.RECEIVE_BUFFER.value)
         answer_message = pickle.loads(x)
-        log.info('Recieved answer from new VNF ')
+        str_log = 'Received answer from new VNF TYPE: ' + str(type(answer_message))
+        log.info(str_log)
 
     def send_migration_message_to_previous_vnf(self, previous_vnf, new_vnf, migrating_vnfs=None):
         previous_vnf_in_chain = CommunicationEntityPackage(previous_vnf.host, previous_vnf.port)

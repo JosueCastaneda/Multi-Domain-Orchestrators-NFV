@@ -16,6 +16,10 @@ class RawTextMessage(AbstractMessage):
         self.text = text
 
     def wait_for_r_queue(self):
+        log.info('Received R message ')
+        m = MigrationAckMessage(None)
+        log.info('Sending ACK to current VNF so he can resend R data connection')
+        self.current_server.send_message_to_socket(self.client_socket, m)
         log.info('Waiting for R data from source VNF')
         m1 = self.client_socket.recv(4096)
         answer_message = pickle.loads(m1)
@@ -61,6 +65,8 @@ class RawTextMessage(AbstractMessage):
         self.current_server.send_message_to_socket(self.client_socket, m)
 
     def process_by_command_line(self):
+        str_log = 'Received message from: ' + str(self.client_socket) + ' address: ' + str(self.client_address)
+        log.info(str_log)
         self.wait_for_r_queue()
         self.wait_for_all_queues()
         self.wait_for_terminate()

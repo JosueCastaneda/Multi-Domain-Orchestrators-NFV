@@ -46,8 +46,8 @@ class MigrationDeactivateMessage(AbstractMessage):
         print('Migration Deactivate Message: ', self.data)
         new_requirements = ServicePackage()
         new_requirements.create_from_topology(self.data)
-        print('New requirements type: ', type(new_requirements))
-        print('New requirements: ', new_requirements)
+        # print('New requirements type: ', type(new_requirements))
+        # print('New requirements: ', new_requirements)
         old_requirements = self.current_server.orchestrator.topology
         current_services = self.current_server.orchestrator.service_package
         is_new_vnf_valid = True
@@ -62,16 +62,17 @@ class MigrationDeactivateMessage(AbstractMessage):
         recursive_took_place = False
         new_vnf = None
         if not is_new_vnf_valid:
-            recursive_took_place, new_vnf = self.current_server.orchestrator.check_migration_recursive(self.data, self.migrating_vnfs)
+            recursive_took_place, new_vnf = self.current_server.orchestrator.handle_recursive_migration(self.data, self.migrating_vnfs)
             log.info('New VNF was not valid - Migration deactivate message')
         return recursive_took_place, new_vnf
 
     # TODO: Check why the magnc numbers are necessary use RECEIVE_BUFFER = 4096
 
     def process_by_command_line(self):
-        for vnf in self.migrating_vnfs:
-            print('Migrating IP vnf: ', vnf['ip'], ' mig_ip: ', vnf['mig_ip'])
-
+        # for vnf in self.migrating_vnfs:
+        #     print('Migrating IP vnf: ', vnf['ip'], ' mig_ip: ', vnf['mig_ip'])
+        str_log = 'Received message from: ' + str(self.client_socket) + ' address: ' + str(self.client_address)
+        log.info(str_log)
         recursive_migration_took_place, new_vnf = self.check_if_migration_is_needed()
         if recursive_migration_took_place:
             log.info('Recursive migration took place')

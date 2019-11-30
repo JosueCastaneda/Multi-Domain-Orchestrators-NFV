@@ -44,9 +44,9 @@ class ServicePackage:
 
     # TODO: Use the utilities function, this is repeated
     def check_constraint(self, constraint, previous, new):
-        print('Constraint: ', type(constraint), constraint)
-        print('Previous: ', type(previous), previous)
-        print('New: ', type(new), new)
+        # print('Constraint: ', type(constraint), constraint)
+        # print('Previous: ', type(previous), previous)
+        # print('New: ', type(new), new)
 
         return (constraint + new - previous) <= constraint + (constraint * 0.3)
 

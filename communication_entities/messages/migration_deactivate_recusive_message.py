@@ -53,11 +53,13 @@ class MigrationDeactivateRecursiveMessage(AbstractMessage):
         recursive_took_place = False
         new_vnf = None
         if not is_valid:
-            recursive_took_place, new_vnf = self.current_server.orchestrator.check_migration_recursive(self.data)
+            recursive_took_place, new_vnf = self.current_server.orchestrator.handle_recursive_migration(self.data)
             log.info('check_if_migration_is_needed recursive - Migration Deactivate Recursive Message')
         return recursive_took_place, new_vnf
 
     def process_by_command_line(self):
+        str_log = 'Received message from: ' + str(self.client_socket) + ' address: ' + str(self.client_address)
+        log.info(str_log)
         log.info('Message received. Now handling queue migration')
         data_q = self.handle_queue_migration("Q")
         m1 = SendQueueQMessage(data_q)
