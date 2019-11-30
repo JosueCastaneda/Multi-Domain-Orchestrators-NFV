@@ -14,4 +14,5 @@ class TopologyMessage(AbstractMessage):
         log.info("Topology message received...")
         self.current_server.orchestrator.check_migration_affected(self)
         log.info("Finish processing message")
-        sys.exit()
+        # TODO: Include this in the recursive migration scenario to elinminate the VNF once is finish
+        # sys.exit()

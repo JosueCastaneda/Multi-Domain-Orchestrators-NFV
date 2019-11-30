@@ -53,7 +53,7 @@ def main(argv):
         services = [50, 23, 12, 53]
         topology = [22, 20, 3.5, 13]
         initial_seed = 4
-        migration_vnf = "127.0.0.1"
+        migration_vnf = "500.0.0.1"
         topology_migration_vnf = [13, 32, 325, 313]
 
     try:

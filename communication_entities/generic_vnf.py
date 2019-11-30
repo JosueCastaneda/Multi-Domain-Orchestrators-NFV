@@ -8,11 +8,14 @@ from communication_entities.messages.migration_deactivate_message import Migrati
 from communication_entities.messages.migration_deactivate_recusive_message import MigrationDeactivateRecursiveMessage
 from communication_entities.messages.raw_text_message import RawTextMessage
 from communication_entities.messages.request_new_pop_message import RequestNewPopMessage
+from communication_entities.messages.send_all_states_message import SendAllStatesMessage
 from communication_entities.messages.send_queue_P_message import SendQueuePMessage
 from communication_entities.messages.send_queue_Q_message import SendQueueQMessage
 from communication_entities.messages.send_queue_R_message import SendQueueRMessage
 from communication_entities.messages.switch_message import SwitchMessage
 from communication_entities.messages.terminate_message import TerminateMessage
+from communication_entities.messages.terminate_message_without_recursion import TerminateMessageWithoutRecursion
+from communication_entities.messages.update_vnf_info_after_migration import UpdateVnfInfoAfterMigration
 from entities.communication_entity_package import CommunicationEntityPackage
 from entities.topology import Topology
 from utilities.logger import log
@@ -147,7 +150,8 @@ class GenericVNF:
                 # TODO: No need to pass the new VNF, add all_data to the new_vnf
                 all_data = self.process_all_data_in_queues(new_vnf)
                 self.send_all_data_in_queues(all_data)
-                self.terminate_migration()
+                self.terminate_migration_without_recursion()
+                log.info('First migration')
             else:
                 log.info('We already have migrating VNFs')
                 if not self.is_affected_vnf_already_migrating(v.host, migrating_vnfs):
@@ -159,11 +163,13 @@ class GenericVNF:
                     all_data = self.process_all_data_in_queues(new_vnf)
                     self.send_all_data_in_queues(all_data)
                     self.terminate_migration()
+                    log.info('Recursive migration')
                 else:
                     self.send_data_from_r_queue_to_new_vnf()
                     all_data = self.process_all_data_in_queues(new_vnf)
                     self.send_all_data_in_queues(all_data)
                     self.terminate_virtual_migration()
+                    log.info('Cycle migration')
         log.info('handle_migration_affected has ended')
 
     def is_affected_vnf_already_migrating(self, vnf, migrating_vnfs):
@@ -220,7 +226,37 @@ class GenericVNF:
         self.server.disconnect_send_virtual_channel()
         self.server.disconnect_send_channel()
         log.info('Finished disconnecting all the channels')
+        self.update_information_after_migration_to_orchestrator()
         self.print_state_vnf()
+
+    def terminate_migration_without_recursion(self):
+        log.info('Send TerminateMessageWithoutRecursion to new VNF')
+        m1 = TerminateMessageWithoutRecursion(None)
+        self.server.send_message_virtual(m1)
+        # Wait for message is power
+        log.info('Waiting for Queues answer')
+        x = self.server.send_channel.recv(SocketSize.RECEIVE_BUFFER.value)
+        answer_message = pickle.loads(x)
+        print(answer_message)
+        if isinstance(answer_message, SendAllStatesMessage):
+            queue_p = answer_message.queue_p
+            queue_q = answer_message.queue_q
+            queue_r = answer_message.queue_r
+            self.exchange_queues(queue_p, queue_q, queue_r)
+        self.server.disconnect_send_virtual_channel()
+        self.server.disconnect_send_channel()
+        log.info('Finished disconnecting all the channels')
+        self.update_information_after_migration_to_orchestrator()
+        self.print_state_vnf()
+
+    def update_information_after_migration_to_orchestrator(self):
+        log.info('Sending update to orchestrator')
+        self.server.connect_to_orchestrator(self.orchestrator)
+        message = UpdateVnfInfoAfterMigration(self.server_param.host,
+                                              self.server_param.host,
+                                              self.migration_vnf_ip,
+                                              self.topology_migration_vnf)
+        self.server.send_message_to_orchestrator(message)
 
     # TODO: Is almost the same, so this can be refactored
     def terminate_virtual_migration(self):
@@ -257,6 +293,11 @@ class GenericVNF:
         log.info('Waiting for ACK previous acknowledge message')
         return pickle.loads(self.server.send_channel.recv(SocketSize.RECEIVE_BUFFER.value))
 
+    def exchange_queues(self, new_queue_p, new_queue_q, new_queue_r):
+        self.queue_P = new_queue_p
+        self.queue_Q = new_queue_q
+        self.queue_R = new_queue_r
+
     def check_if_previous_vnf_must_migrate(self, v, new_vnf, migrating_vnfs=None):
         answer_message = self.send_migration_message_to_previous_vnf(v, new_vnf, migrating_vnfs)
         if isinstance(answer_message.data, Topology):
@@ -267,7 +308,7 @@ class GenericVNF:
             # TODO: This connects to the new vnf server
             new_previous_vnf = CommunicationEntityPackage(answer_message.data.ip, answer_message.data.port)
             str_ip = str(answer_message.data.ip)
-            print('Connecting to new host: IP' + str_ip)
+            print('Connecting to new host: IP'  + str_ip)
             log.info('Connecting to new host: IP'+ str_ip)
             self.server.connect_to_another_server(new_previous_vnf)
             m_rec_mig = MigrationDeactivateRecursiveMessage("Do it")

@@ -12,7 +12,8 @@ from utilities.logger import *
 class Orchestrator:
 
     def __init__(self, server, orchestrator_list=None, topology=None, name=""):
-        self.list_vnf = {}
+        self.list_vnf = dict()
+        self.list_old_vnfs = []
         self.list_orchestrator = orchestrator_list
         if self.list_orchestrator == None:
             self.list_orchestrator = []
@@ -28,7 +29,13 @@ class Orchestrator:
     def print_state_vnf(self):
         log.info(''.join(["VNF name: ", self.name]))
 
+    # TODO: Handle more cases of migration and the orchestrator requires to update his managed vnfs
     def get_local_vnf(self, vnf_name):
+        # # First check if the name is present in old ones to update
+        # for old_vnfs in self.list_old_vnfs:
+        #     if old_vnfs['name'] == vnf_name:
+        # # If not then use the normal list
+
         return self.list_vnf.get(vnf_name)
 
     # Todo: Implement this function to handle dynamic orchestrator
@@ -43,6 +50,18 @@ class Orchestrator:
 
     def remove_vnf(self, vnf_name):
         self.list_vnf.remove(vnf_name)
+
+    # TODO: Add the other information required for this
+    def update_vnf_after_migration(self, vnf_host, new_vnf_host, new_vnf_topolgy):
+        for vnf in self.list_vnf:
+            if self.list_vnf[vnf][0] == vnf_host:
+                self.list_vnf[vnf][0] = new_vnf_host
+                self.list_vnf[vnf][2] = new_vnf_topolgy
+                old_vnf = dict()
+                old_vnf['name'] = vnf
+                old_vnf['ip'] = vnf_host
+                self.list_old_vnfs.append(old_vnf)
+                break
 
     def send_message_to_vnf(self, vnf, message):
         vnf_server = CommunicationEntityPackage(vnf[0], vnf[1])
