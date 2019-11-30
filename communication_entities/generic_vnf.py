@@ -307,9 +307,9 @@ class GenericVNF:
             log.info('Send MigrationDeactivateRecursiveMessage to new VNF')
             self.server.send_message(m_rec_mig)
             # TODO: THis is the correct way to use the constant types
-            x = self.server.send.recv(SocketSize.RECEIVE_BUFFER.value)
+            x = self.server.send_channel.recv(SocketSize.RECEIVE_BUFFER.value)
             answer_message = pickle.loads(x)
-            str_log = 'Message recived of type: ' + str(type(answer_message))
+            str_log = 'Message received of type: ' + str(type(answer_message))
             log.info(str_log)
 
     # TODO: Use a more fine approach to prevent deadlocks by blocking operation
