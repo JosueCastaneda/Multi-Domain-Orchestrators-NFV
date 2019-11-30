@@ -144,33 +144,25 @@ class GenericVNF:
                 log.info('First VNF, no migrating VNFS to check')
                 self.check_if_previous_vnf_must_migrate(v, new_vnf)
                 log.info('No migrating VNFs')
-                self.handle_queues_from_previous_vnf_in_chain()
-                self.send_data_from_r_queue_to_new_vnf()
-                self.migration_switch_message_exchange()
-                # TODO: No need to pass the new VNF, add all_data to the new_vnf
-                all_data = self.process_all_data_in_queues(new_vnf)
-                self.send_all_data_in_queues(all_data)
-                self.terminate_migration_without_recursion()
-                log.info('First migration')
             else:
                 log.info('We already have migrating VNFs')
+                is_cycle_found = False
                 if not self.is_affected_vnf_already_migrating(v.host, migrating_vnfs):
                     self.check_if_previous_vnf_must_migrate(v, new_vnf, migrating_vnfs)
                     log.info('No cycle in the migrating list')
                     self.handle_queues_from_previous_vnf_in_chain()
-                    self.send_data_from_r_queue_to_new_vnf()
-                    self.migration_switch_message_exchange()
-                    all_data = self.process_all_data_in_queues(new_vnf)
-                    self.send_all_data_in_queues(all_data)
-                    self.terminate_migration()
-                    log.info('Recursive migration')
                 else:
                     log.info('Cycle detected!')
-                    self.send_data_from_r_queue_to_new_vnf()
-                    all_data = self.process_all_data_in_queues(new_vnf)
-                    self.send_all_data_in_queues(all_data)
-                    self.terminate_virtual_migration()
+                    is_cycle_found = True
+                self.send_data_from_r_queue_to_new_vnf()
+                self.migration_switch_message_exchange()
+                all_data = self.process_all_data_in_queues(new_vnf)
+                self.send_all_data_in_queues(all_data)
+                self.terminate_migration()
+                if is_cycle_found:
                     log.info('Cycle migration')
+                else:
+                    log.info('Recursive migration')
         log.info('handle_migration_affected has ended')
 
     def is_affected_vnf_already_migrating(self, vnf, migrating_vnfs):

@@ -117,8 +117,10 @@ class GenericServer:
         new_message = TopologyMessage(data=param)
         return new_message
 
-    def send_message(self, message: AbstractMessage):
-        log.info("Sending Message using send_channel")
+    def send_message(self, message):
+        # log.info("Sending Message using send_channel")
+        str_log = 'Sending Message using send_channel of type:' + str(type(message))
+        log.info(str_log)
         data_string = pickle.dumps(message)
         self.send_channel.send(data_string)
 
@@ -136,12 +138,15 @@ class GenericServer:
         self.send_orchestrator_channel.send(data_string)
 
     def send_message_virtual(self, message):
-        log.info("Sending Message using send_virtual_channel")
+        str_log = 'Sending Message using send_virtual_channel of type: ' + str(type(message))
+        log.info(str_log)
         data_string = pickle.dumps(message)
         self.send_virtual_channel.send(data_string)
 
     def send_message_query_vnf(self, message):
-        log.info("Sending Message using send_channel")
+        # log.info("Sending Message using send_channel")
+        str_log = 'Sending Message using send_channel of type: ' + str(type(message))
+        log.info(str_log)
         data_string = pickle.dumps(message)
         self.send_channel.send(data_string)
         answer_message = self.wait_for_reply_two_communication_channel()
