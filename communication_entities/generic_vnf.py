@@ -155,7 +155,8 @@ class GenericVNF:
                     log.info('Cycle detected!')
                     is_cycle_found = True
                 self.send_data_from_r_queue_to_new_vnf()
-                self.migration_switch_message_exchange()
+                if not is_cycle_found:
+                    self.migration_switch_message_exchange()
                 all_data = self.process_all_data_in_queues(new_vnf)
                 self.send_all_data_in_queues(all_data)
                 self.terminate_migration()
