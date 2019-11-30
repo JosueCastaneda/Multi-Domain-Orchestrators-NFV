@@ -41,6 +41,7 @@ class RawTextMessage(AbstractMessage):
         log.info('Waiting for Queues data from source VNF')
         m2 = self.client_socket.recv(4096)
         answer_message = pickle.loads(m2)
+        print('Answer message of type: ', type(answer_message))
         for d in answer_message.data[0]:
             self.current_server.orchestrator.add_states_to_queue(d, "Q")
         for d in answer_message.data[1]:
