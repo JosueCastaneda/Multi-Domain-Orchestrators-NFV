@@ -24,7 +24,7 @@ class RawTextMessage(AbstractMessage):
         log.info('Waiting for terminate message from current VNF')
         m2 = self.client_socket.recv(4096)
         answer_message = pickle.loads(m2)
-        log.info('Answer message type: ' + type(answer_message))
+        log.info('Received answer: ')
         if isinstance(answer_message, TerminateMessageWithoutRecursion):
             log.info('Sending my queues to current VNF')
             queue_p = self.current_server.orchestrator.queue_P
