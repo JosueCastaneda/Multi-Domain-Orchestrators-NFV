@@ -133,12 +133,6 @@ class GenericVNF:
 
     # TODO: Work on this function, a lot of repeated code
     def handle_migration_affected(self, new_vnf, migrating_vnfs=None):
-        if migrating_vnfs is None:
-            log.info('No migrating vnfs, first to do so')
-        else:
-            for vnf in migrating_vnfs:
-                print('Already trying to migrate IP vnf: ', vnf['ip'], ' mig_ip: ', vnf['mig_ip'])
-
         for v in self.list_affected_vnf:
             if migrating_vnfs is None:
                 log.info('First VNF, no migrating VNFS to check')
@@ -348,6 +342,12 @@ class GenericVNF:
         log.info('Sending R to new VNF')
         m3 = SendQueueRMessage(data)
         self.server.send_message_virtual(m3)
+        log.info('Waiting for reply to R message from new VNF')
+        x = self.server.send_channel.recv(SocketSize.RECEIVE_BUFFER.value)
+        answer_message = pickle.loads(x)
+        str_log = 'Message recived of type: ' + str(type(answer_message))
+        log.info(str_log)
+    #     WAIT FOR ANSWER
 
     def collect_data_to_queue(self, queue: list):
         """
