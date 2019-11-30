@@ -140,6 +140,7 @@ class GenericVNF:
             if migrating_vnfs is None:
                 log.info('First VNF, no migrating VNFS to check')
                 self.check_if_previous_vnf_must_migrate(v, new_vnf)
+                log.info('No migrating VNFs')
                 self.handle_queues_from_previous_vnf_in_chain()
                 self.send_data_from_r_queue_to_new_vnf()
                 self.migration_switch_message_exchange()
@@ -151,6 +152,7 @@ class GenericVNF:
                 log.info('We already have migrating VNFs')
                 if not self.is_affected_vnf_already_migrating(v.host, migrating_vnfs):
                     self.check_if_previous_vnf_must_migrate(v, new_vnf, migrating_vnfs)
+                    log.info('Cycle in the migrating')
                     self.handle_queues_from_previous_vnf_in_chain()
                     self.send_data_from_r_queue_to_new_vnf()
                     self.migration_switch_message_exchange()
@@ -162,7 +164,7 @@ class GenericVNF:
                     all_data = self.process_all_data_in_queues(new_vnf)
                     self.send_all_data_in_queues(all_data)
                     self.terminate_virtual_migration()
-        log.info('Migration has ended')
+        log.info('handle_migration_affected has ended')
 
     def is_affected_vnf_already_migrating(self, vnf, migrating_vnfs):
         print('Affected VNF: ', vnf, ' type: ', type(vnf))
@@ -213,9 +215,11 @@ class GenericVNF:
 
     def terminate_migration(self):
         m1 = TerminateMessage(None)
+        log.info('Send TerminateMessage to new VNF')
         self.server.send_message_virtual(m1)
         self.server.disconnect_send_virtual_channel()
         self.server.disconnect_send_channel()
+        log.info('Finished disconnecting all the channels')
         self.print_state_vnf()
 
     # TODO: Is almost the same, so this can be refactored
@@ -285,10 +289,12 @@ class GenericVNF:
         # FIXME: For now we suppose that there is no transit traffic between coordination
         # FIXME: Since the time is not asynchronous, thus we can take what is stored in previous_VNF.
         m1 = SendQueueQMessage(None)
+        log.info('Sending SendQueueQMessage to previous')
         self.server.send_message(m1)
         self.collect_data_to_queue(self.queue_Q)
 
         m2 = SendQueuePMessage(None)
+        log.info('Sending SendQueuePMessage to previous')
         self.server.send_message(m2)
         self.collect_data_to_queue(self.queue_P)
 
@@ -306,6 +312,7 @@ class GenericVNF:
         :param queue: Current queue to append data to
         :return:
         """
+        log.inf('Waiting for answer from new nfv')
         x = self.server.send_channel.recv(SocketSize.RECEIVE_BUFFER.value)
         answer_message = pickle.loads(x)
         for d in answer_message.data:
@@ -318,7 +325,9 @@ class GenericVNF:
         :return:
         """
         m1 = SwitchMessage(None)
+        log.info('Sending Switch message to previous')
         self.server.send_message(m1)
+        log.info('Waiting for an answer of previous')
         return pickle.loads(self.server.send_channel.recv(SocketSize.RECEIVE_BUFFER.value))
 
     def add_affected_vnf(self, vnf_pack):
