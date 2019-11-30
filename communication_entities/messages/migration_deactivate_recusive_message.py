@@ -1,6 +1,7 @@
 import pickle
 
 from communication_entities.messages.abstract_message import AbstractMessage
+from communication_entities.messages.migration_ack_message import MigrationAckMessage
 from communication_entities.messages.send_queue_P_message import SendQueuePMessage
 from communication_entities.messages.send_queue_Q_message import SendQueueQMessage
 from communication_entities.messages.switch_done_message import SwitchDoneMessage
@@ -28,6 +29,9 @@ class MigrationDeactivateRecursiveMessage(AbstractMessage):
     # TODO: Improve the class by using polymorphism and do not require three ifs
     # TODO use the type RECEIVE_BUFFER = 4096
     def handle_queue_migration(self, operation):
+        log.info('Send ACK message to current VNF')
+        ack_msg = MigrationAckMessage(None)
+        self.current_server.send_message_to_socket(self.client_socket, ack_msg)
         log.info('Waiting for Q message')
         m1 = self.client_socket.recv(4096)
         answer_message = pickle.loads(m1)
@@ -54,6 +58,7 @@ class MigrationDeactivateRecursiveMessage(AbstractMessage):
         return recursive_took_place, new_vnf
 
     def process_by_command_line(self):
+        log.info('Message received. Now handling queue migration')
         data_q = self.handle_queue_migration("Q")
         m1 = SendQueueQMessage(data_q)
         log.info('Send SendQueueQMessage to previous VNF')

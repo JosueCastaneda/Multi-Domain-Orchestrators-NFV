@@ -301,12 +301,16 @@ class GenericVNF:
             # TODO: This connects to the new vnf server
             new_previous_vnf = CommunicationEntityPackage(answer_message.data.ip, answer_message.data.port)
             str_ip = str(answer_message.data.ip)
-            print('Connecting to new host: IP'  + str_ip)
-            log.info('Connecting to new host: IP'+ str_ip)
+            log.info('Connecting to new Previous VNF: IP '+ str_ip)
             self.server.connect_to_another_server(new_previous_vnf)
             m_rec_mig = MigrationDeactivateRecursiveMessage("Do it")
             log.info('Send MigrationDeactivateRecursiveMessage to new VNF')
             self.server.send_message(m_rec_mig)
+            # TODO: THis is the correct way to use the constant types
+            x = self.server.send.recv(SocketSize.RECEIVE_BUFFER.value)
+            answer_message = pickle.loads(x)
+            str_log = 'Message recived of type: ' + str(type(answer_message))
+            log.info(str_log)
 
     # TODO: Use a more fine approach to prevent deadlocks by blocking operation
     def handle_queues_from_previous_vnf_in_chain(self):
