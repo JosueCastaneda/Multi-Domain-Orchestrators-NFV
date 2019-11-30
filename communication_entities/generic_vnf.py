@@ -267,7 +267,8 @@ class GenericVNF:
             # TODO: This connects to the new vnf server
             new_previous_vnf = CommunicationEntityPackage(answer_message.data.ip, answer_message.data.port)
             str_ip = str(answer_message.data.ip)
-            log.info('Connecting to new host: IP', str_ip)
+            print('Connecting to new host: IP' + str_ip)
+            log.info('Connecting to new host: IP'+ str_ip)
             self.server.connect_to_another_server(new_previous_vnf)
             m_rec_mig = MigrationDeactivateRecursiveMessage("Do it")
             log.info('Send MigrationDeactivateRecursiveMessage to new VNF')
