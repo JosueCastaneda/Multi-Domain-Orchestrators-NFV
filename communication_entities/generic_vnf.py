@@ -320,6 +320,7 @@ class GenericVNF:
             log.info('Send MigrationDeactivateRecursiveMessage to new VNF')
             self.server.send_message(m_rec_mig)
 
+    # TODO: Use a more fine approach to prevent deadlocks by blocking operation
     def handle_queues_from_previous_vnf_in_chain(self):
         """
         Send request to coordinate the state exchange in the queues of the VNF ensuring
@@ -340,20 +341,27 @@ class GenericVNF:
         # FIXME: Since the time is not asynchronous, thus we can take what is stored in previous_VNF.
         m1 = SendQueueQMessage(None)
         log.info('Sending SendQueueQMessage to previous VNF')
-        self.server.send_message(m1)
+        for i in range(3):
+            self.server.send_message(m1)
+            log.info('Sent message #: ' + str(i))
         self.collect_data_to_queue(self.queue_Q)
 
         m2 = SendQueuePMessage(None)
         log.info('Sending SendQueuePMessage to previous VNF')
-        self.server.send_message(m2)
+        for i in range(3):
+            self.server.send_message(m2)
+            log.info('Sent message #: ' + str(i))
         self.collect_data_to_queue(self.queue_P)
 
-
+    # TODO: Use a more fine approach to prevent deadlocks by blocking operation
     def send_data_from_r_queue_to_new_vnf(self):
         data = self.get_all_data_from_queue("R")
         log.info('Sending R to new VNF')
         m3 = SendQueueRMessage(data)
-        self.server.send_message_virtual(m3)
+        for i in range(3):
+            self.server.send_message_virtual(m3)
+            log.info('Sent message #: ' + str(i))
+
 
     def collect_data_to_queue(self, queue: list):
         """
