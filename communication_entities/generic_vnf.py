@@ -312,7 +312,7 @@ class GenericVNF:
         :param queue: Current queue to append data to
         :return:
         """
-        log.inf('Waiting for answer from new nfv')
+        log.info('Waiting for answer from new nfv')
         x = self.server.send_channel.recv(SocketSize.RECEIVE_BUFFER.value)
         answer_message = pickle.loads(x)
         for d in answer_message.data:
