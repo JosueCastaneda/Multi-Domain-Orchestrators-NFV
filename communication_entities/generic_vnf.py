@@ -122,7 +122,7 @@ class GenericVNF:
     def send_all_data_in_queues(self, all_data):
         self.send_all_data_from_current_vnf_to_new_vnf(all_data)
 
-    # TODO: Work on this function, a lot of repeated code
+    # TODO: Handle multi affected cases
     def handle_migration_affected(self, new_vnf, migrating_vnfs=None):
         for v in self.list_affected_vnf:
             is_cycle_found = False
@@ -158,6 +158,7 @@ class GenericVNF:
                 log.info('Cycle migration')
             else:
                 log.info('Recursive migration')
+            break
         log.info('handle_migration_affected has ended')
 
     def is_affected_vnf_already_migrating(self, vnf, migrating_vnfs):
