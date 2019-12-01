@@ -34,28 +34,30 @@ def compute_errors(experiment, valid):
                 index_result += 1
             else:
                 if is_valid_item(experiment_item):
-                    index_validation += 1
+                    index_result += 1
                 else:
                     errors += 1
                     index_validation += 1
         else:
             errors += 1
             index_validation += 1
-        if index_validation > len(experiment):
-            print('DSD')
-            total_errors = errors + len(valid) - index_validation
-            return total_errors, aciertos
-    return errors, aciertos
-    # return len(valid), 0
+        if index_validation >= len(experiment):
+            break
+            # total_errors = errors + len(valid) - index_validation
+            # return total_errors, aciertos
+    error_score = len(experiment) - aciertos
+    return error_score
 
 
 def main():
-    experiment = [34, 37, 22, 168, 168]
+    experiment = [34, 37, 22, 168, 37]
     valid = [387, 1, 246, 4, 351, 22, 168, 37, 22, 22, 168, 37, 22, 327, 28, 1, 246, 4, 351, 22, 168, 37, 22, 22, 168, 37, 22, 327, 28, 10, 246, 4, 351, 22, 168, 37, 22, 22, 168, 37, 22, 327, 28, 351, 22, 168, 37, 22, 22, 168, 37, 22, 327, 28, 168, 37, 22, 10, 16]
 
-    errores, aciertos = compute_errors(experiment, valid)
-    print('Errores: ', errores)
-    print('Aciertos: ', aciertos)
+    error_score = compute_errors(experiment, valid)
+    # print('Errores: ', errores)
+    # print('Aciertos: ', aciertos)
+    print('Error score: ', error_score)
+    print('Length experiment: ', len(experiment))
 
 if __name__ == main():
     main()

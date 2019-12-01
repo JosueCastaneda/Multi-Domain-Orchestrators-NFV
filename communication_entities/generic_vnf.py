@@ -125,6 +125,7 @@ class GenericVNF:
     # TODO: Handle multi affected cases
     def handle_migration_affected(self, new_vnf, migrating_vnfs=None):
         for v in self.list_affected_vnf:
+            print('Affected VNF: ', v)
             is_cycle_found = False
             is_first_migration = False
             if migrating_vnfs is None:
@@ -186,7 +187,9 @@ class GenericVNF:
         print('New jitter: ', new_vnf.jitter)
         # Start time
         start_migration_time = time.time()
+        log.info('Begin migration')
         self.begin_migration(new_vnf)
+        log.info('Begin handle migration of affected')
         self.handle_migration_affected(new_vnf)
         end_migration_time = time.time()
         total_migration_time = end_migration_time - start_migration_time
