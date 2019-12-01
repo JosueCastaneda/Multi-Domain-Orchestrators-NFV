@@ -227,20 +227,19 @@ class GenericVNF:
         self.server.send_message_virtual(m1)
         # Wait for message is power
         log.info('Waiting for Queues answer')
-        x = self.server.send_channel.recv(SocketSize.RECEIVE_BUFFER.value)
+        x = self.server.send_message_virtual.recv(SocketSize.RECEIVE_BUFFER.value)
         answer_message = pickle.loads(x)
         str_log = 'Received answer from new VNF TYPE: ' + str(type(answer_message))
         log.info(str_log)
-        log.info('Sending ACK message')
-        m_ack = MigrationAckMessage('OK')
-        log.info('Sending ACK message to previous')
-        self.server.send_message(m_ack)
 
         if isinstance(answer_message, SendAllStatesMessage):
             queue_p = answer_message.queue_p
             queue_q = answer_message.queue_q
             queue_r = answer_message.queue_r
             self.exchange_queues(queue_p, queue_q, queue_r)
+        m_ack = MigrationAckMessage('OK')
+        log.info('Sending ACK message to previous')
+        self.server.send_message_virtual(m_ack)
         self.server.disconnect_send_virtual_channel()
         self.server.disconnect_send_channel()
         log.info('Finished disconnecting all the channels')
