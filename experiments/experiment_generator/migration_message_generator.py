@@ -87,7 +87,7 @@ class MigrationMessageGenerator:
         for vnf_migration in self.migration_vnfs:
             for vnf in self.list_of_detailed_vnfs:
                 if vnf['ip'] == vnf_migration:
-                    first_str = 'python message_factory.py -t migration -h ' + vnf['orch_ip'] + ' -p '+ vnf['orch_port']
+                    first_str = 'docker exec -it mn.source python message_factory.py -t migration -h ' + vnf['orch_ip'] + ' -p '+ vnf['orch_port']
                     second_str = ' -n ' + vnf['name'] + ' -m new -v none --vnf_port none'
                     self.file_commands.write(first_str + second_str + new_line)
                     break

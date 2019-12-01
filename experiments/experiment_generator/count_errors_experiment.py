@@ -48,12 +48,20 @@ def compute_errors(experiment, valid):
     error_score = len(experiment) - aciertos
     return error_score
 
+def missin_elements(experiment, valid):
+    missing_elements = 0
+    for elem in valid:
+        if elem not in experiment:
+            missing_elements +=1
+    # Add the error extra
+    if len(experiment) > len(valid):
+        missing_elements += len(experiment) - len(valid)
+    return missing_elements
 
 def main():
-    experiment = [34, 37, 22, 168, 37]
-    valid = [387, 1, 246, 4, 351, 22, 168, 37, 22, 22, 168, 37, 22, 327, 28, 1, 246, 4, 351, 22, 168, 37, 22, 22, 168, 37, 22, 327, 28, 10, 246, 4, 351, 22, 168, 37, 22, 22, 168, 37, 22, 327, 28, 351, 22, 168, 37, 22, 22, 168, 37, 22, 327, 28, 168, 37, 22, 10, 16]
-
-    error_score = compute_errors(experiment, valid)
+    experiment = [387, 1, 10, 28, 327]
+    valid = [387, 1, 285, 10, 327, 28, 4, 285, 10, 327, 28, 4]
+    error_score = missin_elements(experiment, valid)
     # print('Errores: ', errores)
     # print('Aciertos: ', aciertos)
     print('Error score: ', error_score)
