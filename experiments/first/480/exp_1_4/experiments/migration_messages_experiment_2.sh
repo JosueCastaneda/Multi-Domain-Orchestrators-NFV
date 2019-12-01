@@ -28,5 +28,3 @@ docker exec -it mn.vnf_COMPOSITE_new python vnf_script.py -h 10.0.0.181 -v 4437 
 docker exec -it mn.vnf_MIRROR_Y_new python vnf_script.py -h 10.0.0.156 -v 4437 -o 10.0.0.34 -q 5461 -n vnf_MIRROR_Y_new --topology 4,16,0,0 --migration_ip 127.0.0.1 --migration_topology 0,0,0,0 --services 0,236,12,40,60,124,24,32,24,208,16,8 --initial 168 &
 
 python message_factory.py -t migration -h 10.0.0.34 -p 5461 -n vnf_ROTATE -m new -v none --vnf_port none
-python message_factory.py -t migration -h 10.0.0.34 -p 5461 -n vnf_PAINTING -m new -v none --vnf_port none
-python message_factory.py -t migration -h 10.0.0.30 -p 5461 -n vnf_COMPOSITE -m new -v none --vnf_port none

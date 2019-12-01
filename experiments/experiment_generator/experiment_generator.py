@@ -66,6 +66,7 @@ class ExperimentGenerator():
         topology_constraints['jitter'] = self.length_of_vnfs * generate_random_integer(self.jitter_low, self.jitter_high)
         return topology_constraints
 
+    # TODO: Handle multiple migrations, for the moment just one
     def generate_migration_parameter(self, migration_indexes, experiment):
         migration = []
         vnf_index = 0
@@ -75,6 +76,7 @@ class ExperimentGenerator():
                 host_migrating = self.vnf_data[vnf_index]
                 migration.append(host_migrating['server'])
                 number_of_migrations += 1
+                break
             vnf_index += 1
         experiment['migrating_vnfs'] = migration
         experiment['number_of_migrations'] = number_of_migrations
@@ -174,8 +176,9 @@ class ExperimentGenerator():
         parameters['speed_up'] = None
         return parameters
 
+
 def main():
-    number_of_experiments = 3
+    number_of_experiments = 5
     number_of_services = 3
     length_of_vnfs = 4
     video_definition = 480
@@ -199,18 +202,6 @@ def main():
     print('End experiment generation')
 
     for experiment_file in list_name_experiments:
-        print('Begin applying migration information ....')
-        up_service = UpdateServiceWithMigrationGenerator(experiment_path, experiment_file)
-        up_service.add_migration_information_to_services()
-        print('Finish applying migration information ....')
-
-    for experiment_file in list_name_experiments:
-        print('Begin valid generation')
-        val_gen = ValidatorGenerator(experiment_file, experiment_path)
-        val_gen.validate_experiment()
-        print('End valid generation')
-
-    for experiment_file in list_name_experiments:
         print('Begin docker commands')
         dock_gen = DockerCommandsGenerator(experiment_path,
                                            delay,
@@ -223,23 +214,51 @@ def main():
         print('End docker commands')
 
     for experiment_file in list_name_experiments:
+        print('Begin applying migration information ....')
+        up_service = UpdateServiceWithMigrationGenerator(experiment_path, experiment_file)
+        up_service.add_migration_information_to_services()
+        print('Finish applying migration information ....')
+
+    for experiment_file in list_name_experiments:
+        print('Begin valid generation')
+        val_gen = ValidatorGenerator(experiment_file, experiment_path)
+        val_gen.validate_experiment()
+        print('End valid generation')
+
+    # for experiment_file in list_name_experiments:
+    #     print('Begin docker commands')
+    #     dock_gen = DockerCommandsGenerator(experiment_path,
+    #                                        delay,
+    #                                        bandwidth,
+    #                                        loss,
+    #                                        jitter,
+    #                                        experiment_file,
+    #                                        length_of_vnfs)
+    #     dock_gen.generate_commands()
+    #     print('End docker commands')
+
+    for experiment_file in list_name_experiments:
         print('Begin migration message generator')
         message_gen = MigrationMessageGenerator(path=experiment_path,
                                                 name_of_experiment=experiment_file)
         message_gen.generate()
         print('End migration message generator')
 
-    with open(experiment_path + 'experiment_0.json') as jsonfile:
+    # with open(experiment_path + 'experiment_0.json') as jsonfile:
+    #     parsed = json.load(jsonfile)
+    # print(json.dumps(parsed, indent=2, sort_keys=True))
+
+    with open(experiment_path + 'vnf_info.json') as jsonfile:
         parsed = json.load(jsonfile)
     print(json.dumps(parsed, indent=2, sort_keys=True))
 
-    print('------------------------------------------------------------------')
-    print('                      VALIDATION                                  ')
-    print('------------------------------------------------------------------')
-
-    with open(experiment_path + experiment_file + '_validate.json') as jsonfile:
-        parsed = json.load(jsonfile)
-    print(json.dumps(parsed, indent=2, sort_keys=True))
+    # print('------------------------------------------------------------------')
+    # print('                      VALIDATION                                  ')
+    # print('------------------------------------------------------------------')
+    #
+    # with open(experiment_path + experiment_file + '_validate.json') as jsonfile:
+    #     parsed = json.load(jsonfile)
+    # print(json.dumps(parsed, indent=2, sort_keys=True))
 
     print('Finish setting up experiment!')
 
