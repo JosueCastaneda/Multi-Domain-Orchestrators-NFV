@@ -148,8 +148,10 @@ class GenericVNF:
             all_data = self.process_all_data_in_queues(new_vnf)
             self.send_all_data_in_queues(all_data)
             if is_first_migration:
+                log.info('Sending terminate without recursion')
                 self.terminate_migration_without_recursion()
             else:
+                log.info('Sending terminate with recursion')
                 self.terminate_migration()
             if is_cycle_found:
                 log.info('Cycle migration')

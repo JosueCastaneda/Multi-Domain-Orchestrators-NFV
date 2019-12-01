@@ -39,7 +39,8 @@ class RawTextMessage(AbstractMessage):
             queue_p = self.current_server.orchestrator.queue_P
             queue_q = self.current_server.orchestrator.queue_Q
             queue_r = self.current_server.orchestrator.queue_R
-            exchange_queue_message = SendAllStatesMessage(queue_p,
+            exchange_queue_message = SendAllStatesMessage(None,
+                                                          queue_p,
                                                           queue_q,
                                                           queue_r)
             log.info('Sending exchange queues to my current VNF')
