@@ -14,12 +14,12 @@ from utilities.logger import log
 def main(argv):
     command = read_parameters(argv)
     # file = 'experiments/first/1920/exp_1_3/parameters.json'
-    file = 'experiments/first/480/exp_1_4/experiments/experiment_0.json'
+    # file = 'experiments/first/480/exp_1_4/experiments/experiment_0.json'
     # file = 'experiments/first/1920/exp_1_5/parameters.json'
     #file = 'experiments/first/1920/exp_1_6/parameters.json'
-    print('Filename:', file)
+    # print('Filename:', file)
     if command.is_valid():
-        messages = generate_messages(command, file)
+        messages = generate_messages(command)
         if isinstance(messages, list):
             log.info(''.join(["Number of messages", str(len(messages))]))
             # send_message(command, messages[0])
@@ -31,8 +31,8 @@ def main(argv):
         print(command.help_message)
 
 
-def generate_messages(command, file):
-    m = MessageGenerator(command, file)
+def generate_messages(command):
+    m = MessageGenerator(command, command.experiment)
     return m.generate_message()
 
 
@@ -54,8 +54,15 @@ def read_parameters(argv):
     debug = False
 
     try:
-        opts, args = getopt.getopt(argv, "t:h:p:n:m:v:w",
-                                   ["type=", "host=", "port=", "name=", "new_name=", "vnf_host=", "vnf_port="])
+        opts, args = getopt.getopt(argv, "t:h:p:n:m:v:w:e",
+                                   ["type=",
+                                    "host=",
+                                    "port=",
+                                    "name=",
+                                    "new_name=",
+                                    "vnf_host=",
+                                    "vnf_port=",
+                                    "experiment="])
     except getopt.GetoptError:
         print(command.help_message)
         sys.exit(2)
@@ -76,6 +83,9 @@ def read_parameters(argv):
             command.vnf_host = arg
         elif opt in ("-w", "--vnf_port"):
             command.vnf_port = arg
+        elif opt in ("-e", "--experiment"):
+            str_exp = 'experiments/first/480/exp_1_4/experiments/experiment_' + arg +'.json'
+            command.experiment = str_exp
     return command
 
 

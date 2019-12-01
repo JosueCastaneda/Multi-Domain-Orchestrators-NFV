@@ -16,6 +16,7 @@ class CommandPackage:
         self.message_type = "migration"
         self.vnf_host = None
         self.vnf_port = None
+        self.experiment = ''
         self.help_message = "message_factory.py -t <message_type> -h <host> -p <port>" \
                             " -n <name> -m <new_name> -v <vnf_host> -w <vnf_port>"
 
