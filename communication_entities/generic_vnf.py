@@ -227,7 +227,7 @@ class GenericVNF:
         self.server.send_message_virtual(m1)
         # Wait for message is power
         log.info('Waiting for Queues answer')
-        x = self.server.send_message_virtual.recv(SocketSize.RECEIVE_BUFFER.value)
+        x = self.server.send_virtual_channel.recv(SocketSize.RECEIVE_BUFFER.value)
         answer_message = pickle.loads(x)
         str_log = 'Received answer from new VNF TYPE: ' + str(type(answer_message))
         log.info(str_log)
