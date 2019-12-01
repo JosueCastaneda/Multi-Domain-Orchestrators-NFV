@@ -14,7 +14,16 @@ from utilities.random_integer_generation import generate_random_integer
 
 class ExperimentGenerator():
 
-    def __init__(self, number_experiments, number_services, length_vnf, experiment_path, delay, bandwidth, loss, jitter):
+    def __init__(self, number_experiments,
+                 number_services,
+                 length_vnf,
+                 experiment_path,
+                 delay,
+                 bandwidth,
+                 loss,
+                 jitter,
+                 random_seed_list,
+                 random_np_seed_list):
         self.number_of_experiments = number_experiments
         self.number_of_services = number_services
         self.length_of_vnfs = length_vnf
@@ -29,14 +38,19 @@ class ExperimentGenerator():
         self.loss_high = loss[1]
         self.jitter_low = jitter[0]
         self.jitter_high = jitter[1]
-        random.seed(5)
+        self.random_seed_list = random_seed_list
+        self.random_np_seed_list = random_np_seed_list
 
         with open(self.path + 'vnf_info.json') as json_file:
             raw_data = json.load(json_file)
             self.vnf_data = raw_data['vnf']
 
     def generate_experiment(self):
+
         for experiment in range(self.number_of_experiments):
+            random.seed(self.random_seed_list[experiment])
+            np.random.seed(self.random_np_seed_list[experiment])
+
             if not os.path.exists(self.path):
                 os.makedirs(self.path)
 
@@ -90,8 +104,6 @@ class ExperimentGenerator():
         standard_deviation = 0
         variance = 1
         # TODO: CHANGE FOR CLASS PARAMETER
-        random.seed(5)
-        np.random.seed(10)
         x = np.random.normal(standard_deviation, variance, self.number_of_vnf)
         return x
 
@@ -186,8 +198,10 @@ def main():
     bandwidth = [0, 70]
     loss = [0, 10]
     jitter = [0, 10]
+    random_seed_list = [5, 1234, 12424, 282812, 239423]
+    random_np_seed_list = [10, 2939, 104739, 14, 297573]
     experiment_path = '../first/' + str(video_definition) +'/exp_1_' + str(length_of_vnfs) + '/experiments/'
-    experiment_file = 'experiment_0'
+
 
     print('Begin experiment generator')
     exp_gen = ExperimentGenerator(number_of_experiments,
@@ -197,7 +211,9 @@ def main():
                                   delay,
                                   bandwidth,
                                   loss,
-                                  jitter)
+                                  jitter,
+                                  random_seed_list,
+                                  random_np_seed_list)
     list_name_experiments = exp_gen.generate_experiment()
     print('End experiment generation')
 

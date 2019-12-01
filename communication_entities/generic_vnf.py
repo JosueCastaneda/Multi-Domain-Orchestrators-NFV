@@ -189,6 +189,7 @@ class GenericVNF:
         self.handle_migration_affected(new_vnf)
         end_migration_time = time.time()
         total_migration_time = end_migration_time - start_migration_time
+        log.info('Saving migration time')
         pickle.dump(total_migration_time, open('migration_time.p', 'wb'))
     #     end time
 
