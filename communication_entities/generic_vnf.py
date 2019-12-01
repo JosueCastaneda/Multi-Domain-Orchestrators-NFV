@@ -125,10 +125,12 @@ class GenericVNF:
     def handle_migration_affected(self, new_vnf, migrating_vnfs=None):
         for v in self.list_affected_vnf:
             is_cycle_found = False
+            is_first_migration = False
             if migrating_vnfs is None:
                 log.info('First VNF, no migrating VNFS to check')
                 self.check_if_previous_vnf_must_migrate(v, new_vnf)
                 log.info('No migrating VNFs')
+                is_first_migration = True
             else:
                 log.info('We already have migrating VNFs')
                 if not self.is_affected_vnf_already_migrating(v.host, migrating_vnfs):
@@ -145,7 +147,10 @@ class GenericVNF:
             log.info('Finished with previous VNF now is the NEW VNF')
             all_data = self.process_all_data_in_queues(new_vnf)
             self.send_all_data_in_queues(all_data)
-            self.terminate_migration()
+            if is_first_migration:
+                self.terminate_migration_without_recursion()
+            else:
+                self.terminate_migration()
             if is_cycle_found:
                 log.info('Cycle migration')
             else:
@@ -222,7 +227,8 @@ class GenericVNF:
         log.info('Waiting for Queues answer')
         x = self.server.send_channel.recv(SocketSize.RECEIVE_BUFFER.value)
         answer_message = pickle.loads(x)
-        print(answer_message)
+        str_log = 'Received answer from new VNF TYPE: ' + str(type(answer_message))
+        log.info(str_log)
         if isinstance(answer_message, SendAllStatesMessage):
             queue_p = answer_message.queue_p
             queue_q = answer_message.queue_q
