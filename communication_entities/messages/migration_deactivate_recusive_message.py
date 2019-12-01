@@ -29,9 +29,6 @@ class MigrationDeactivateRecursiveMessage(AbstractMessage):
     # TODO: Improve the class by using polymorphism and do not require three ifs
     # TODO use the type RECEIVE_BUFFER = 4096
     def handle_queue_migration(self, operation):
-        log.info('Send ACK message to current VNF')
-        ack_msg = MigrationAckMessage(None)
-        self.current_server.send_message_to_socket(self.client_socket, ack_msg)
         str_log = 'Waiting for ' + operation + ' message'
         log.info(str_log)
         m1 = self.client_socket.recv(4096)
@@ -67,7 +64,9 @@ class MigrationDeactivateRecursiveMessage(AbstractMessage):
     def process_by_command_line(self):
         str_log = 'Received message from: ' + str(self.client_socket) + ' address: ' + str(self.client_address)
         log.info(str_log)
-        log.info('Message received. Now handling queue migration')
+        log.info('Send ACK message to current VNF')
+        ack_msg = MigrationAckMessage(None)
+        self.current_server.send_message_to_socket(self.client_socket, ack_msg)
         data_q = self.handle_queue_migration("Q")
         m1 = SendQueueQMessage(data_q)
         log.info('Send SendQueueQMessage to previous VNF')
