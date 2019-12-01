@@ -23,30 +23,36 @@ def compute_errors(experiment, valid):
     index_validation = 0
     errors = 0
     aciertos = 0
-    if is_experiment_valid(len(experiment), len(valid)):
-        while index_validation < len(valid):
-            validation_item = valid[index_validation]
-            experiment_item = experiment[index_validation]
-            if is_present(validation_item, experiment):
-                if are_equal(validation_item, experiment_item):
-                    aciertos += 1
-                    index_validation += 1
-                    index_result += 1
-                else:
-                    if is_valid_item(experiment_item):
-                        index_validation += 1
-                    else:
-                        errors += 1
-                        index_validation += 1
-            else:
-                errors += 1
+    # if is_experiment_valid(len(experiment), len(valid)):
+    while index_validation < len(valid) :
+        validation_item = valid[index_validation]
+        experiment_item = experiment[index_result]
+        if is_present(validation_item, experiment):
+            if are_equal(validation_item, experiment_item):
+                aciertos += 1
                 index_validation += 1
-        return errors, aciertos
-    return len(valid), 0
+                index_result += 1
+            else:
+                if is_valid_item(experiment_item):
+                    index_validation += 1
+                else:
+                    errors += 1
+                    index_validation += 1
+        else:
+            errors += 1
+            index_validation += 1
+        if index_validation > len(experiment):
+            print('DSD')
+            total_errors = errors + len(valid) - index_validation
+            return total_errors, aciertos
+    return errors, aciertos
+    # return len(valid), 0
+
 
 def main():
-    experiment = [387, 1, 285, 10, 327, 28, 246, 4, 432, 7, 10, 327, 28, 246, 4, 432, 7, 28, 246, 4, 432, 7, 28, 246, 4, 432, 7]
-    valid = [387, 1, 285, 10, 327, 28, 4, 285, 10, 327, 28, 4]
+    experiment =  [387, 1, 10, 28, 28]
+    valid =   [387, 1, 285, 10, 327, 28, 4, 285, 10, 327, 28, 4]
+
     errores, aciertos = compute_errors(experiment, valid)
     print('Errores: ', errores)
     print('Aciertos: ', aciertos)

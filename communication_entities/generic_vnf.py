@@ -1,4 +1,5 @@
 import pickle
+import time
 
 from communication_entities.generic_server import GenericServer
 from communication_entities.messages.add_vnf_message import AddVNF
@@ -182,8 +183,14 @@ class GenericVNF:
         print('New bandwidth: ', new_vnf.bandwidth)
         print('New loss: ', new_vnf.loss)
         print('New jitter: ', new_vnf.jitter)
+        # Start time
+        start_migration_time = time.time()
         self.begin_migration(new_vnf)
         self.handle_migration_affected(new_vnf)
+        end_migration_time = time.time()
+        total_migration_time = end_migration_time - start_migration_time
+        pickle.dump(total_migration_time, open('migration_time.p', 'wb'))
+    #     end time
 
     # TODO: Implement this to fit the VNF usage...
     @staticmethod
