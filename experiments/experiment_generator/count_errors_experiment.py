@@ -50,8 +50,8 @@ def compute_errors(experiment, valid):
 
 
 def main():
-    experiment =  [387, 1, 10, 28, 28]
-    valid =   [387, 1, 285, 10, 327, 28, 4, 285, 10, 327, 28, 4]
+    experiment = [34, 37, 22, 168, 168]
+    valid = [34, 168, 37, 22, 351, 22, 168, 37, 22, 22, 168, 37, 22, 327, 28, 168, 37, 22, 327, 28]
 
     errores, aciertos = compute_errors(experiment, valid)
     print('Errores: ', errores)
