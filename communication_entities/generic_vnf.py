@@ -231,6 +231,11 @@ class GenericVNF:
         answer_message = pickle.loads(x)
         str_log = 'Received answer from new VNF TYPE: ' + str(type(answer_message))
         log.info(str_log)
+        log.info('Sending ACK message')
+        m_ack = MigrationAckMessage('OK')
+        log.info('Sending ACK message to previous')
+        self.server.send_message(m_ack)
+
         if isinstance(answer_message, SendAllStatesMessage):
             queue_p = answer_message.queue_p
             queue_q = answer_message.queue_q

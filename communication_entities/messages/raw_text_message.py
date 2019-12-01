@@ -45,6 +45,16 @@ class RawTextMessage(AbstractMessage):
                                                           queue_r)
             log.info('Sending exchange queues to my current VNF')
             self.current_server.send_message_to_socket(self.client_socket, exchange_queue_message)
+            log.info('Waiting for ACK from current VNF')
+            m3 = self.client_socket.recv(4096)
+            answer_message = pickle.loads(m3)
+            str_log = 'Received message from: ' \
+                      + str(self.client_socket) \
+                      + ' address: ' \
+                      + str(self.client_address) \
+                      + 'type: ' \
+                      + str(type(answer_message))
+            log.info(str_log)
         log.info('Finish migration procedure from new vnf')
 
     def wait_for_all_queues(self):
