@@ -84,7 +84,7 @@ def read_parameters(argv):
         elif opt in ("-w", "--vnf_port"):
             command.vnf_port = arg
         elif opt in ("-e", "--experiment"):
-            str_exp = 'experiments/first/480/exp_1_4/experiments/experiment_' + arg +'.json'
+            str_exp = 'experiments/first/480/exp_1_8/experiments/experiment_' + arg +'.json'
             command.experiment = str_exp
     return command
 
