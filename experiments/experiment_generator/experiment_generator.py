@@ -192,14 +192,20 @@ class ExperimentGenerator():
 def main():
     number_of_experiments = 5
     number_of_services = 3
-    length_of_vnfs = 4
+    length_of_vnfs = 8
     video_definition = 480
     delay = [0, 20]
     bandwidth = [0, 70]
     loss = [0, 10]
     jitter = [0, 10]
-    random_seed_list = [5, 1234, 12424, 282812, 239423]
-    random_np_seed_list = [10, 2939, 104739, 14, 297573]
+    # FOR the 4th SIZE
+    # random_seed_list = [5, 1234, 12424, 282812, 239423]
+    # random_np_seed_list = [10, 2939, 104739, 14, 297573]
+
+    # FOR THE 8 Size
+    random_seed_list = [2940627, 3717510, 4651201, 5211310, 8760564]
+    random_np_seed_list = [3060307, 3953270, 5291516, 7353312, 8607401]
+
     experiment_path = '../first/' + str(video_definition) +'/exp_1_' + str(length_of_vnfs) + '/experiments/'
 
 

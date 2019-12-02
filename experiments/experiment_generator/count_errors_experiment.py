@@ -49,18 +49,19 @@ def compute_errors(experiment, valid):
     return error_score
 
 def missin_elements(experiment, valid):
+    repeated_missing_elements = []
     missing_elements = 0
     for elem in valid:
         if elem not in experiment:
-            missing_elements +=1
-    # Add the error extra
-    if len(experiment) > len(valid):
-        missing_elements += len(experiment) - len(valid)
+            if elem not in repeated_missing_elements:
+                missing_elements +=1
+                repeated_missing_elements.append(elem)
     return missing_elements
 
 def main():
-    experiment = [387, 1, 10, 28, 327]
-    valid = [387, 1, 285, 10, 327, 28, 4, 285, 10, 327, 28, 4]
+    experiment = [22, 19, 16]
+    valid = [25, 28, 37, 22]
+
     error_score = missin_elements(experiment, valid)
     # print('Errores: ', errores)
     # print('Aciertos: ', aciertos)
