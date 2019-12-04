@@ -4,11 +4,14 @@ def is_present(item, experiment_list):
             return True
     return False
 
+
 def are_equal(item_val, item_exp):
     return item_val == item_exp
 
+
 def is_valid_item(item):
     return item >= 50
+
 
 # TODO: Work on this code, it could be simplified
 def is_experiment_valid(experiment_size, valid_size):
@@ -17,6 +20,7 @@ def is_experiment_valid(experiment_size, valid_size):
     if experiment_size < valid_size:
         return False
     return True
+
 
 def compute_errors(experiment, valid):
     index_result = 0
@@ -48,7 +52,8 @@ def compute_errors(experiment, valid):
     error_score = len(experiment) - aciertos
     return error_score
 
-def missin_elements(experiment, valid):
+
+def missing_elements(experiment, valid):
     repeated_missing_elements = []
     missing_elements = 0
     for elem in valid:
@@ -58,15 +63,16 @@ def missin_elements(experiment, valid):
                 repeated_missing_elements.append(elem)
     return missing_elements
 
-def main():
-    experiment = [22, 19, 16]
-    valid = [25, 28, 37, 22]
 
-    error_score = missin_elements(experiment, valid)
-    # print('Errores: ', errores)
+def main():
+    experiment = [387, 1, 285, 10, 327, 28, 246, 4, 432, 7, 10, 327, 28, 246, 4, 432, 7, 28, 246, 4, 432, 7]
+    valid = [387, 1, 285, 10, 327, 28, 4, 285, 10, 327, 28, 4]
+
+    error_score = missing_elements(experiment, valid)
     # print('Aciertos: ', aciertos)
-    print('Error score: ', error_score)
+    print('Missing score: ', error_score)
     print('Length experiment: ', len(experiment))
+
 
 if __name__ == main():
     main()
