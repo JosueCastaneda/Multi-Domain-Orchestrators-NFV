@@ -3,6 +3,7 @@ import json
 from communication_entities.messages.add_orchestrator_message import AddOrchestratorMessage
 from communication_entities.messages.add_vnf_message import AddVNF
 from communication_entities.messages.add_vnf_to_chain_message import AddVNFToChainMessage
+from communication_entities.messages.initiate_vnffg_updates_message import InitiateVNFFGUpdatesMessage
 from communication_entities.messages.migration_message import MigrationMessage
 from communication_entities.messages.process_data_message import ProcessDataMessage
 from entities.communication_entity_package import CommunicationEntityPackage
@@ -33,6 +34,8 @@ class MessageGenerator:
             m = AddOrchestratorMessage(self.command.vnf_host, self.command.vnf_port)
         elif self.command.message_type == "process":
             m = self.generate_process_message()
+        elif self.command.message_type == "update_vnf_fg":
+            m = InitiateVNFFGUpdatesMessage()
         return m
 
     @staticmethod

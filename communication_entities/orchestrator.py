@@ -55,7 +55,7 @@ class Orchestrator:
     def add_service_information(self):
         self.load_services_information()
         self.add_virtual_network_function_forwarding_graph_information()
-        self.send_forwarding_path_updates_to_other_orchestrators()
+        # self.send_forwarding_path_updates_to_other_orchestrators()
 
     def hello(self, service_index, vnf_index_to_change, value_to_change, new_value):
         print("Changes: ", vnf_index_to_change, ' ', value_to_change, ' ', new_value)

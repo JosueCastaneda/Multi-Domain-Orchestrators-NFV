@@ -55,7 +55,7 @@ class DockerCommandsGenerator:
                 orch_ip = self.parse_for_ip_orchestrator(line)
                 self.list_orchestrator.append([name_orchestrator, orch_ip])
                 first_string = 'docker exec -it mn.' + name_orchestrator + 'python orchestrator_script.py -h ' + orch_ip
-                second_string = ' -p 5461 -n ' + name_orchestrator + ' ---path ' + self.path[2:]
+                second_string = ' -p 5461 -n ' + name_orchestrator + ' --path ' + self.path[2:]
                 third_string = ' --experiment_name ' + self.name_experiment+'.json ' + ' &'
                 self.file_commands.write(first_string + second_string + third_string + new_line)
         print('Finish set up run orchestrator')
