@@ -72,7 +72,7 @@ class Orchestrator:
             print('orchestrator: ', orchestrator)
             self.server.connect_to_another_server_raw(orchestrator[0], orchestrator[1])
             self.server.send_message(s)
-            self.disconnect_send_channel()
+            self.server.disconnect_send_channel()
 
         # Send to others
 

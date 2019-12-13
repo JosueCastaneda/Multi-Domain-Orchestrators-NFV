@@ -71,7 +71,7 @@ class DockerCommandsGenerator:
                     other_orch = self.list_orchestrator[i]
                     first_string = 'docker exec -it mn.source python message_factory.py -t add_orchestrator -h '
                     second_string = current_orchestrator[1] + ' -p 5461 -n none -m none --vnf_host ' + other_orch[1]
-                    third_string = ' --vnf_port 5463'
+                    third_string = ' --vnf_port 5461'
                     self.file_commands.write(first_string + second_string + third_string + new_line)
 
     def write_new_line_to_file(self):
