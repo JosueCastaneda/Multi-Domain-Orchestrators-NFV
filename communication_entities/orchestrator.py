@@ -69,7 +69,7 @@ class Orchestrator:
                                                 new_value,
                                                 self.logical_clock[name_vnf_to_update])
         for orchestrator in self.list_orchestrator:
-            print('orchestrator')
+            print('orchestrator: ', orchestrator)
             self.server.connect_to_another_server_raw(orchestrator.host, orchestrator.port)
             self.server.send_message(s)
             self.disconnect_send_channel()
