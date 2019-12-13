@@ -1,4 +1,5 @@
 from communication_entities.messages.abstract_message import AbstractMessage
+from communication_entities.messages.migration_ack_message import MigrationAckMessage
 from utilities.logger import *
 
 
@@ -20,3 +21,5 @@ class UpdateVnfInfoAfterInternalOperation(AbstractMessage):
                                                          self.value_to_change,
                                                          self.new_value,
                                                          self.logical_clock)
+        ack_msg = MigrationAckMessage(None)
+        self.current_server.send_message_to_socket(self.client_socket, ack_msg)

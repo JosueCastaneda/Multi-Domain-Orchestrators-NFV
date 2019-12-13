@@ -3,7 +3,6 @@ import pickle
 import sys
 import threading
 
-from communication_entities.messages.migration_ack_message import MigrationAckMessage
 from communication_entities.messages.update_vnf_info_after_internal_operation import UpdateVnfInfoAfterInternalOperation
 from utilities.socket_size import SocketSize
 
@@ -85,8 +84,6 @@ class Orchestrator:
 
     def update_vnf_info(self, service_index, vnf_index_to_change, value_to_change, new_value, clock):
         self.vnf_fg_information[service_index][vnf_index_to_change][value_to_change] = new_value
-        m_ack = MigrationAckMessage(None)
-        self.server.send_message(m_ack)
 
     def update_vnf_info_with_clocks(self, service_index, vnf_index_to_change, value_to_change, new_value, clock):
         name_vnf_to_update = self.vnf_fg_information[service_index][vnf_index_to_change]['name']
