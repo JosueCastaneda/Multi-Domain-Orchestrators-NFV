@@ -85,7 +85,7 @@ class Orchestrator:
 
     def update_vnf_info(self, service_index, vnf_index_to_change, value_to_change, new_value, clock):
         self.vnf_fg_information[service_index][vnf_index_to_change][value_to_change] = new_value
-        m_ack = MigrationAckMessage()
+        m_ack = MigrationAckMessage(None)
         self.server.send_message(m_ack)
 
     def update_vnf_info_with_clocks(self, service_index, vnf_index_to_change, value_to_change, new_value, clock):
