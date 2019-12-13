@@ -20,7 +20,7 @@ class MirrorY(AbstractMessage):
         return video
 
     def process_by_message(self, parameter: ParameterPackage):
-        source = parameter.file_pack.name
+        source = parameter.file_pack.get_vnf_name
         video = self.process_package(source)
         source_no_format = source[:-4]
         operation_name = "_mirrorY"

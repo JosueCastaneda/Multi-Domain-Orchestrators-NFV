@@ -39,7 +39,7 @@ class Annotate(AbstractMessage):
 
     def process_by_message(self, parameter: ParameterPackage):
         annotation_parameter = parameter.annotation_parameter
-        source = parameter.file_pack.name
+        source = parameter.file_pack.get_vnf_name
         video = self.process_package(source, annotation_parameter)
         source_no_format = source[:-4]
         operation_name = "_annotate"

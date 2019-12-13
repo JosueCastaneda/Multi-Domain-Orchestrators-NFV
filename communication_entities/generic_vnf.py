@@ -8,7 +8,6 @@ from communication_entities.messages.migration_ack_message import MigrationAckMe
 from communication_entities.messages.migration_deactivate_message import MigrationDeactivateMessage
 from communication_entities.messages.migration_deactivate_recusive_message import MigrationDeactivateRecursiveMessage
 from communication_entities.messages.raw_text_message import RawTextMessage
-from communication_entities.messages.request_new_pop_message import RequestNewPopMessage
 from communication_entities.messages.send_all_states_message import SendAllStatesMessage
 from communication_entities.messages.send_queue_P_message import SendQueuePMessage
 from communication_entities.messages.send_queue_Q_message import SendQueueQMessage
@@ -25,86 +24,53 @@ from utilities.socket_size import SocketSize
 
 class GenericVNF:
 
-    def __init__(self, host, port, name, service_package=None,
-                 clients=5, topology=None, orchestrator=None, initial=0, migration_vnf=None, topology_migration_vnf=None):
-
-        self.server_param = CommunicationEntityPackage(host, port, clients)
-        self.server = GenericServer(self, self.server_param)
-        self.name = name
-        self.topology = topology
+    def __init__(self, configuration):
+        self.configuration = configuration
+        self.server = GenericServer(self, CommunicationEntityPackage(configuration.host(),
+                                                                     configuration.port()))
         self.list_affected_vnf = []
-        self.queue_P = [initial]
-        self.queue_Q = [initial + 1]
-        self.queue_R = [initial + 2]
-        self.service_package = service_package
-        self.orchestrator = orchestrator
-        self.migration_vnf_ip = migration_vnf
-        self.topology_migration_vnf = topology_migration_vnf
-        self.set_up_to_orchestrator(orchestrator, host, port)
-        log.info(''.join(["VNF: ", self.name, " is running!"]))
-        log.info(''.join(["Delay: ", str(self.topology.delay)]))
-        log.info(''.join(["Bandwidth: ", str(self.topology.bandwidth)]))
-        log.info(''.join(["Loss: ", str(self.topology.loss)]))
-        log.info(''.join(["Jitter: ", str(self.topology.jitter)]))
+        #TODO: This one needs to be here, due to many classes using it, it is necessary to refactor code
+        self.orchestrator = configuration.get_orchestrator()
+        self.migration_vnf_ip = configuration.migration_vnf()
+        self.set_up_to_orchestrator(configuration.get_orchestrator(),
+                                    configuration.host(),
+                                    configuration.port())
         self.print_state_vnf()
 
     # TODO: Get the topology and possible service working on for migration
     def set_up_to_orchestrator(self, orchestrator, host, port):
         self.server.connect_to_orchestrator(orchestrator)
-        add_message = AddVNF(host, port, self.name, self.topology, self.migration_vnf_ip, self.topology_migration_vnf)
+        add_message = AddVNF(host, port,
+                             self.configuration.name(),
+                             self.configuration.get_topology(),
+                             self.migration_vnf_ip,
+                             self.configuration.topology_migration_vnf(),
+                             self.configuration.get_connection_points(),
+                             self.configuration.get_dependency_list())
         self.server.send_message_to_orchestrator(add_message)
 
+    def send_update_to_orchestrator(self, orchestrator, host, port):
+        self.server.connect_to_orchestrator(orchestrator)
+        add_message = AddVNF(host, port,
+                             self.configuration.name(),
+                             self.configuration.get_topology(),
+                             self.migration_vnf_ip,
+                             self.configuration.topology_migration_vnf(),
+                             self.configuration.get_connection_points(),
+                             self.configuration.get_dependency_list())
+        self.server.send_message_to_orchestrator(add_message)
+
+
+    def get_configuration(self):
+        return self.configuration
+
     def print_state_vnf(self):
-        log.info(''.join(["VNF name: ", self.name]))
-        log.info(''.join(["Orchestrator: ", self.orchestrator.host, " ", str(self.orchestrator.port)]))
-        for vnf in self.list_affected_vnf:
-            print(vnf)
-        #     log.info(''.join(["Affected VNF Host: ", vnf.host, " Port: ", vnf.port]))
-
-        log.info("Queue Q: ")
-        for d in self.queue_Q:
-            log.info(''.join([str(d), " "]))
-
-    # TODO: Use polymorphism to improve this function. Or better, use the queue to do the operation
-    # def get_all_data_from_queue(self, queue):
-    def get_all_data_from_queue(self, operation):
-        str_log = 'Collecting data from queue:' + str(operation)
-        log.info(str_log)
-        data = []
-        if operation == "P":
-            while self.queue_P:
-                data.append(self.queue_P.pop(0))
-        elif operation == "Q":
-            while self.queue_Q:
-                data.append(self.queue_Q.pop(0))
-        elif operation == "R":
-            while self.queue_R:
-                data.append(self.queue_R.pop(0))
-        return data
-
-    # TODO: Use polymorphism to improve this function. Better, use the queue in parameters
-    def add_states_to_queue(self, state, operation):
-        if operation == "P":
-            self.queue_P.append(state)
-        elif operation == "Q":
-            self.queue_Q.append(state)
-        elif operation == "R":
-            self.queue_R.append(state)
-
-    def extend_queue(self, queue, extension):
-        if queue == "P":
-            self.queue_P.extend(extension)
-        elif queue == "Q":
-            self.queue_Q.extend(extension)
-        elif queue == "R":
-            self.queue_R.extend(extension)
+        self.configuration.print_state_vnf()
 
     # TODO: Change the magic number by saving the port in the generic VNF
     def handle_recursive_migration(self, new_vnf_topology, migrating_vnfs=None):
         if len(self.list_affected_vnf) > 0:
-            # m = RequestNewPopMessage(new_vnf_topology)
-            # new_vnf = self.server.send_and_receive_message_to_orchestrator(m)
-            new_vnf_topology = self.topology_migration_vnf.split(',')
+            new_vnf_topology = self.configuration.topology_migration_vnf().split(',')
             new_vnf_ip = self.migration_vnf_ip
             new_vnf = Topology(delay=new_vnf_topology[0],
                                bandwidth=new_vnf_topology[1],
@@ -147,7 +113,7 @@ class GenericVNF:
             if not is_cycle_found:
                 self.migration_switch_message_exchange()
             log.info('Finished with previous VNF now is the NEW VNF')
-            all_data = self.process_all_data_in_queues(new_vnf)
+            all_data = self.configuration.get_state().process_all_data_in_queues(new_vnf)
             self.send_all_data_in_queues(all_data)
             if is_first_migration:
                 log.info('Sending terminate without recursion')
@@ -163,9 +129,7 @@ class GenericVNF:
         log.info('handle_migration_affected has ended')
 
     def is_affected_vnf_already_migrating(self, vnf, migrating_vnfs):
-        # print('Affected VNF: ', vnf, ' type: ', type(vnf))
         for mig_vnf in migrating_vnfs:
-            # print('Mig: ', mig_vnf['ip'], ' type: ', type(mig_vnf))
             if vnf == mig_vnf['ip']:
                 log.info('VNF found, cycle detected!')
                 self.update_affected_vnf(vnf, mig_vnf['mig_ip'])
@@ -195,23 +159,8 @@ class GenericVNF:
         total_migration_time = end_migration_time - start_migration_time
         log.info('Saving migration time')
         pickle.dump(total_migration_time, open('migration_time.p', 'wb'))
-    #     end time
-
-    # TODO: Implement this to fit the VNF usage...
-    @staticmethod
-    def process_queue(my_queue):
-        log.info("Processing queue.....")
-
-        return my_queue
 
     def begin_migration(self, new_vnf):
-        """
-        Establish a link, or channel between source_VNF and new_VNF and send a
-        migration message to the new_VNF to get it ready to receive data
-
-        :param new_vnf: New VNF in a Topology message containing the connection information
-        :return:
-        """
         virtual_link_new_vnf_socket = CommunicationEntityPackage(new_vnf.ip, new_vnf.port, 1)
         log.info(''.join(["New IP: ", new_vnf.ip, " New Port ", str(new_vnf.port)]))
         self.server.connect_to_another_server_virtual(virtual_link_new_vnf_socket)
@@ -248,7 +197,7 @@ class GenericVNF:
             queue_p = answer_message.queue_p
             queue_q = answer_message.queue_q
             queue_r = answer_message.queue_r
-            self.exchange_queues(queue_p, queue_q, queue_r)
+            self.configuration.get_state().exchange_queues(queue_p, queue_q, queue_r)
         m_ack = MigrationAckMessage('OK')
         log.info('Sending ACK message to previous')
         self.server.send_message_virtual(m_ack)
@@ -260,11 +209,11 @@ class GenericVNF:
 
     def update_information_after_migration_to_orchestrator(self):
         log.info('Sending update to orchestrator')
-        self.server.connect_to_orchestrator(self.orchestrator)
-        message = UpdateVnfInfoAfterMigration(self.server_param.host,
-                                              self.server_param.host,
+        self.server.connect_to_orchestrator(self.configuration.get_orchestrator())
+        message = UpdateVnfInfoAfterMigration(self.configuration.host(),
+                                              self.configuration.host(),
                                               self.migration_vnf_ip,
-                                              self.topology_migration_vnf)
+                                              self.configuration.topology_migration_vnf())
         self.server.send_message_to_orchestrator(message)
 
     # TODO: Is almost the same, so this can be refactored
@@ -274,12 +223,6 @@ class GenericVNF:
         self.server.send_message_virtual(m1)
         self.server.disconnect_send_virtual_channel()
         self.print_state_vnf()
-
-    def process_all_data_in_queues(self, new_vnf):
-        x2 = self.process_queue(self.queue_Q)
-        x3 = self.process_queue(self.queue_P)
-        all_data = [x2, x3, new_vnf]
-        return all_data
 
     def send_all_data_from_current_vnf_to_new_vnf(self, data):
         m1 = AllQueueInformation(data)
@@ -296,7 +239,7 @@ class GenericVNF:
         self.server.connect_to_another_server(previous_vnf_in_chain)
         m = MigrationDeactivateMessage(new_vnf)
         migration_vnf = dict()
-        migration_vnf['ip'] = self.server_param.host
+        migration_vnf['ip'] = self.configuration.host()
         migration_vnf['mig_ip'] = self.migration_vnf_ip
         # TODO: Changes done to
         m.migrating_vnfs.append(migration_vnf)
@@ -306,11 +249,6 @@ class GenericVNF:
         self.server.send_message(m)
         log.info('Waiting for ACK previous acknowledge message')
         return pickle.loads(self.server.send_channel.recv(SocketSize.RECEIVE_BUFFER.value))
-
-    def exchange_queues(self, new_queue_p, new_queue_q, new_queue_r):
-        self.queue_P = new_queue_p
-        self.queue_Q = new_queue_q
-        self.queue_R = new_queue_r
 
     def check_if_previous_vnf_must_migrate(self, v, new_vnf, migrating_vnfs=None):
         answer_message = self.send_migration_message_to_previous_vnf(v, new_vnf, migrating_vnfs)
@@ -341,33 +279,25 @@ class GenericVNF:
         m1 = SendQueueQMessage(None)
         log.info('Sending SendQueueQMessage to previous VNF')
         self.server.send_message(m1)
-        self.collect_data_to_queue(self.queue_Q)
+        self.collect_data_to_queue(self.configuration.get_state().get_q())
 
         m2 = SendQueuePMessage(None)
         log.info('Sending SendQueuePMessage to previous VNF')
         self.server.send_message(m2)
-        self.collect_data_to_queue(self.queue_P)
+        self.collect_data_to_queue(self.configuration.get_state().get_p())
 
     # TODO: Use a more fine approach to prevent deadlocks by blocking operation
     def send_data_from_r_queue_to_new_vnf(self):
-        data = self.get_all_data_from_queue("R")
+        data = self.configuration.get_state().get_all_data_from_queue("R")
         log.info('Sending R to new VNF')
         m3 = SendQueueRMessage(data)
         self.server.send_message_virtual(m3)
         log.info('Waiting for reply to R message from new VNF')
         x = self.server.send_virtual_channel.recv(SocketSize.RECEIVE_BUFFER.value)
         answer_message = pickle.loads(x)
-        str_log = 'Message received of type: ' + str(type(answer_message))
-        log.info(str_log)
-    #     WAIT FOR ANSWER
+        log.info(''.join['Message received of type: ', str(type(answer_message))])
 
     def collect_data_to_queue(self, queue: list):
-        """
-        Saves all the data sent by a message from previous_VNF
-
-        :param queue: Current queue to append data to
-        :return:
-        """
         log.info('Waiting for answer from previous nfv')
         x = self.server.send_channel.recv(SocketSize.RECEIVE_BUFFER.value)
         answer_message = pickle.loads(x)
@@ -377,11 +307,6 @@ class GenericVNF:
             queue.append(d)
 
     def migration_switch_message_exchange(self):
-        """
-        Exchanges messages to be sure the switch phase is done correctly.
-        First, sends a switch message and then waits for a confirmation message
-        :return:
-        """
         m1 = SwitchMessage(None)
         log.info('Sending Switch message to previous VNF')
         self.server.send_message(m1)
@@ -390,13 +315,7 @@ class GenericVNF:
 
     def add_affected_vnf(self, vnf_pack):
         self.list_affected_vnf.append(vnf_pack)
+        self.configuration.add_affected_vfn(vnf_pack)
 
     def serve_clients(self):
         self.server.serve_clients()
-
-    def get_all_queue_data(self):
-        data = list()
-        data.append(self.queue_P)
-        data.append(self.queue_Q)
-        data.append(self.queue_R)
-        return data

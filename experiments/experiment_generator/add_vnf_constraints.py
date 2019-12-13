@@ -53,7 +53,6 @@ class AddVNFConstraints:
 
 
 def main():
-    print('Main')
     length_of_vnfs = 4
     video_definition = 480
 

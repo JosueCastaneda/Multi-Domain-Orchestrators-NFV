@@ -17,7 +17,7 @@ class SpeedUp(AbstractMessage):
         return speed_clip
 
     def process_by_message(self, parameter: ParameterPackage):
-        source = parameter.file_pack.name
+        source = parameter.file_pack.get_vnf_name
         factor = parameter.speed_factor
         video = self.process_package(source, factor)
         source_no_format = source[:-4]

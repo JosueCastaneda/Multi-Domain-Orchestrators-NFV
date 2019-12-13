@@ -24,7 +24,7 @@ class RawTextMessage(AbstractMessage):
         m1 = self.client_socket.recv(4096)
         answer_message = pickle.loads(m1)
         for d in answer_message.data:
-            self.current_server.orchestrator.add_states_to_queue(d, "R")
+            self.current_server.orchestrator.configuration.get_state().add_states_to_queue(d, "R")
         m = MigrationAckMessage(None)
         log.info('Sending ACK to current VNF so he can send the queues Message')
         self.current_server.send_message_to_socket(self.client_socket, m)
@@ -67,9 +67,9 @@ class RawTextMessage(AbstractMessage):
         #     answer_message = pickle.loads(m2)
 
         for d in answer_message.data[0]:
-            self.current_server.orchestrator.add_states_to_queue(d, "Q")
+            self.current_server.orchestrator.configuration.get_state().add_states_to_queue(d, "Q")
         for d in answer_message.data[1]:
-            self.current_server.orchestrator.add_states_to_queue(d, "P")
+            self.current_server.orchestrator.configuration.get_state().add_states_to_queue(d, "P")
         self.current_server.orchestrator.add_affected_vnf(answer_message.data[2])
         m = MigrationAckMessage(None)
         log.info('Sending ACK to current VNF so he can terminate the connection')

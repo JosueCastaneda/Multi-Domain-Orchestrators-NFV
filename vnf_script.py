@@ -3,8 +3,11 @@ import sys
 
 from communication_entities.generic_vnf import GenericVNF
 from entities.communication_entity_package import CommunicationEntityPackage
+from entities.migration_configuration import MigrationConfiguration
 from entities.service_package import ServicePackage
 from entities.topology import Topology
+from entities.vnf_configuration import VnfConfiguration
+from entities.vnf_static_configuration import VnfStaticConfiguration
 
 help_message = "vnf_script.py -v <port> -n <vnf_name> -o <orchestrator_ip> -q <orchestrator_port>"
 
@@ -33,7 +36,7 @@ def parse_parameters(host, port, name):
 
 def main(argv):
     vnf_host = "127.0.0.1"
-    debug = False
+    debug = True
     vnf_port = ""
     orchestrator_host = ""
     orchestrator_port = ""
@@ -127,15 +130,24 @@ def main(argv):
 
         orchestrator = CommunicationEntityPackage(orchestrator_host, orchestrator_port)
         vnf_host, vnf_port, vnf_name = parse_parameters(vnf_host, vnf_port, vnf_name)
-        annotate_vnf = GenericVNF(vnf_host,
-                                  vnf_port,
-                                  vnf_name,
-                                  orchestrator=orchestrator,
-                                  initial=int(initial_seed),
-                                  service_package= list_of_services,
-                                  topology=topology_vnf,
-                                  migration_vnf=migration_vnf,
-                                  topology_migration_vnf=topology_migration_vnf)
+        static_configuration = VnfStaticConfiguration(host=vnf_host,
+                                                      port=vnf_port,
+                                                      name=vnf_name,
+                                                      initial=int(initial_seed))
+
+        migration_configuration = MigrationConfiguration(migration_vnf=migration_vnf,
+                                                         topology_migration_vnf=topology_migration_vnf)
+
+        dependency_list = ['nissan', 'altima']
+        vnf_configuration = VnfConfiguration(static_configuration=static_configuration,
+                                             service_package=list_of_services,
+                                             topology=topology_vnf,
+                                             orchestrator=orchestrator,
+                                             migration_configuration=migration_configuration,
+                                             dependency_list=dependency_list)
+
+
+        annotate_vnf = GenericVNF(vnf_configuration)
         annotate_vnf.serve_clients()
     else:
         print("Invalid input")

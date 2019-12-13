@@ -13,7 +13,9 @@
       "loss": 0.0,
       "jitter": 0.0,
       "orchestrator": 0,
-      "migration_vnf_ip": null
+      "migration_vnf_ip": null,
+      "entry_connection_point": "rot_in",
+      "exit_connection_point": "rot_out"
     },
 
     {
@@ -28,7 +30,9 @@
       "loss": 0.0,
       "jitter": 0.0,
       "orchestrator": 0,
-      "migration_vnf_ip": null
+      "migration_vnf_ip": null,
+      "entry_connection_point": "crop_in",
+      "exit_connection_point": "crop_out"
     },
 
     {
@@ -43,7 +47,9 @@
       "loss": 0.0,
       "jitter": 0.0,
       "orchestrator": 0,
-      "migration_vnf_ip": null
+      "migration_vnf_ip": null,
+      "entry_connection_point": "paint_in",
+      "exit_connection_point": "paint_out"
     },
 
     {
@@ -58,7 +64,9 @@
       "loss": 0.0,
       "jitter": 0.0,
       "orchestrator": 0,
-      "migration_vnf_ip": null
+      "migration_vnf_ip": null,
+      "entry_connection_point": "resize_in",
+      "exit_connection_point": "resize_out"
     },
 
     {
@@ -73,7 +81,9 @@
       "loss": 0.0,
       "jitter": 0.0,
       "orchestrator": 0,
-      "migration_vnf_ip": null
+      "migration_vnf_ip": null,
+      "entry_connection_point": "black_in",
+      "exit_connection_point": "black_out"
     },
 
     {
@@ -88,7 +98,9 @@
       "loss": 0.0,
       "jitter": 0.0,
       "orchestrator": 0,
-      "migration_vnf_ip": null
+      "migration_vnf_ip": null,
+      "entry_connection_point": "annotate_in",
+      "exit_connection_point": "annotate_out"
     },
 
     {
@@ -103,7 +115,9 @@
       "loss": 0.0,
       "jitter": 0.0,
       "orchestrator": 0,
-      "migration_vnf_ip": null
+      "migration_vnf_ip": null,
+      "entry_connection_point": "mirrorx_in",
+      "exit_connection_point": "mirrorx_out"
     },
 
     {
@@ -118,7 +132,9 @@
       "loss": 0.0,
       "jitter": 0.0,
       "orchestrator": 0,
-      "migration_vnf_ip": null
+      "migration_vnf_ip": null,
+      "entry_connection_point": "invert_in",
+      "exit_connection_point": "invert_out"
     },
 
     {
@@ -133,7 +149,9 @@
       "loss": 0.0,
       "jitter": 0.0,
       "orchestrator": 0,
-      "migration_vnf_ip": null
+      "migration_vnf_ip": null,
+      "entry_connection_point": "fadeout_in",
+      "exit_connection_point": "fadeout_out"
     },
 
     {
@@ -148,7 +166,9 @@
       "loss": 0.0,
       "jitter": 0.0,
       "orchestrator": 0,
-      "migration_vnf_ip": null
+      "migration_vnf_ip": null,
+      "entry_connection_point": "speed_in",
+      "exit_connection_point": "speed_out"
     },
 
     {
@@ -163,7 +183,9 @@
       "loss": 0.0,
       "jitter": 0.0,
       "orchestrator": 0,
-      "migration_vnf_ip": null
+      "migration_vnf_ip": null,
+      "entry_connection_point": "fadein_in",
+      "exit_connection_point": "fadein_out"
     },
 
     {
@@ -178,7 +200,9 @@
       "loss": 0.0,
       "jitter": 0.0,
       "orchestrator": 0,
-      "migration_vnf_ip": null
+      "migration_vnf_ip": null,
+      "entry_connection_point": "composite_in",
+      "exit_connection_point": "composite_out"
     },
 
     {
@@ -193,7 +217,9 @@
       "loss": 0.0,
       "jitter": 0.0,
       "orchestrator": 0,
-      "migration_vnf_ip": null
+      "migration_vnf_ip": null,
+      "entry_connection_point": "mirrory_in",
+      "exit_connection_point": "mirrory_out"
     }
   ]
 }

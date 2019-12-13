@@ -13,5 +13,7 @@ class SendAllStatesMessage(AbstractMessage):
 
     def process_by_command_line(self):
         log.info("Updating queues with current vnf...")
-        self.current_server.orchestrator.exchange_queues(self.queue_p, self.queue_q, self.queue_r)
+        self.current_server.orchestrator.configuration_get_state().exchange_queues(self.queue_p,
+                                                                                   self.queue_q,
+                                                                                   self.queue_r)
         log.info("Finish updating queues with current vnf")

@@ -14,9 +14,9 @@ class DataVideoMessage(AbstractMessage):
 
     def process_by_command_line(self):
         log.info("Extending the current queues based with the previous one to new VNF")
-        self.current_server.orchestrator.extend_queue("P", self.queue_p)
-        self.current_server.orchestrator.extend_queue("Q", self.queue_q)
-        self.current_server.orchestrator.extend_queue("R", self.queue_r)
+        self.current_server.orchestrator.configuration.get_state().extend_queue("P", self.queue_p)
+        self.current_server.orchestrator.configuration.get_state().extend_queue("Q", self.queue_q)
+        self.current_server.orchestrator.configuration.get_state().extend_queue("R", self.queue_r)
 
         log.info("Waiting for video from client")
         while True:

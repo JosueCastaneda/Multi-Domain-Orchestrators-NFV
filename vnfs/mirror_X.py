@@ -20,8 +20,8 @@ class MirrorX(AbstractMessage):
         return video
 
     def process_by_message(self, parameter: ParameterPackage):
-        log.info(''.join(["Processing message...", parameter.file_pack.name]))
-        source = parameter.file_pack.name
+        log.info(''.join(["Processing message...", parameter.file_pack.get_vnf_name]))
+        source = parameter.file_pack.get_vnf_name
         video = self.process_package(source)
         source_no_format = source[:-4]
         operation_name = "_mirrorX"

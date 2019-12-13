@@ -8,6 +8,18 @@ class Topology:
         self.ip = ip
         self.port = port
 
+    def get_delay(self):
+        return self.delay
+
+    def get_bandwidth(self):
+        return self.bandwidth
+
+    def get_loss(self):
+        return self.loss
+
+    def get_jitter(self):
+        return self.jitter
+
     def set_delay(self, val):
         self.delay = val
 

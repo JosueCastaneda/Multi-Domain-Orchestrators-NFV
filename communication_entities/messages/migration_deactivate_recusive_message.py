@@ -36,17 +36,7 @@ class MigrationDeactivateRecursiveMessage(AbstractMessage):
         str_log = 'Received message of type: ' + str(type(answer_message))
         log.info(str_log)
         log.info(answer_message)
-        if operation == "P":
-            data_queue_tmp = self.current_server.orchestrator.get_all_data_from_queue("P")
-        elif operation == "Q":
-            data_queue_tmp = self.current_server.orchestrator.get_all_data_from_queue("Q")
-        else:
-            data_queue_tmp = self.current_server.orchestrator.get_all_data_from_queue("R")
-        if data_queue_tmp is None:
-            log.info('Data is None!')
-        else:
-            print('Data is: ', data_queue_tmp)
-        return data_queue_tmp
+        return self.current_server.orchestrator.get_configuration().get_state().get_all_data_from_queue(operation)
 
     def check_if_migration_is_needed(self):
         new_requirements = ServicePackage()

@@ -8,8 +8,9 @@ from experiments.experiment_generator.docker_commands_generator import DockerCom
 from experiments.experiment_generator.migration_message_generator import MigrationMessageGenerator
 from experiments.experiment_generator.update_service_with_migration_generator import UpdateServiceWithMigrationGenerator
 from experiments.experiment_generator.validator_generator import ValidatorGenerator
-from experiments.experiment_generator.update_vnf_information_with_migration_generator import UpdateVnfInformationWithMigrationGenerator
 from utilities.random_integer_generation import generate_random_integer
+from utilities.vnf_fg_update import generate_number_of_updates, generate_waiting_period, generate_index_to_change, \
+    generate_random_string_value, generate_index_to_change_by_value, generate_random_orchestrator_index
 
 
 class ExperimentGenerator():
@@ -23,7 +24,8 @@ class ExperimentGenerator():
                  loss,
                  jitter,
                  random_seed_list,
-                 random_np_seed_list):
+                 random_np_seed_list,
+                 max_number_of_changes):
         self.number_of_experiments = number_experiments
         self.number_of_services = number_services
         self.length_of_vnfs = length_vnf
@@ -40,6 +42,7 @@ class ExperimentGenerator():
         self.jitter_high = jitter[1]
         self.random_seed_list = random_seed_list
         self.random_np_seed_list = random_np_seed_list
+        self.max_number_of_changes = max_number_of_changes
 
         with open(self.path + 'vnf_info.json') as json_file:
             raw_data = json.load(json_file)
@@ -140,6 +143,28 @@ class ExperimentGenerator():
             parameters['speed_up'] = 2
         return parameters
 
+    def generate_virtual_network_function_forwarding_graph(self, operations):
+        vnf_fg_list = []
+        previous_vnf = None
+        for operation in operations:
+            vnf_fg_entry = dict()
+            vnf = self.get_vnf_by_operation(operation)
+            vnf_fg_entry['name'] = vnf['operation']
+            if previous_vnf:
+                vnf_fg_entry['first_connection_point'] = previous_vnf['exit_connection_point']
+            else:
+                vnf_fg_entry['first_connection_point'] = None
+            vnf_fg_entry['second_connection_point'] = vnf['entry_connection_point']
+            previous_vnf = vnf
+            vnf_fg_list.append(vnf_fg_entry)
+        return vnf_fg_list
+
+    def get_vnf_by_operation(self, operation):
+        for vnf in self.vnf_data:
+            if vnf['operation'] == operation:
+                return vnf
+        return None
+
     def create_file_parameter(self, parameters):
         file = dict()
         file['file_name'] = "videos/small_480.mp4"
@@ -172,12 +197,42 @@ class ExperimentGenerator():
         service['queue_p'] = []
         service['queue_r'] = []
         service['constraints'] = self.generate_constraints()
+        service['vnf-fg'] = self.generate_virtual_network_function_forwarding_graph(operations)
+        service['updates-vnf-fg'] = self.generate_updates_for_vnf_fg(service['vnf-fg'])
+        #TODO: This needs to change to add more orchestrators
+        service['orch_names'] = ['orch_1', 'orch_2', 'orch_3', 'orch_4']
         # TODO: Move this to the parameter
         if 'SPEED_UP' in operations:
             service['speed_factor'] = 2
         else:
             service['speed_factor'] = None
         return service
+
+    def generate_updates_for_vnf_fg(self, vnf_fg):
+        vnf_fg_list_updates = []
+        number_of_changes = generate_number_of_updates(self.max_number_of_changes)
+        for i in range(0, number_of_changes):
+            wait_period = generate_waiting_period()
+            vnf_index_to_change = generate_index_to_change_by_value(len(vnf_fg) - 1)
+            index_to_change = generate_index_to_change()
+            value_to_change = ''
+            if index_to_change == 0:
+                value_to_change = 'name'
+            elif index_to_change == 1:
+                value_to_change = 'first_connection_point'
+            elif index_to_change == 2:
+                value_to_change = 'second_connection_point'
+
+            new_value = generate_random_string_value()
+            orchestrator = generate_random_orchestrator_index()
+            vnf_fg_update_entry = dict()
+            vnf_fg_update_entry['wait_period'] = wait_period
+            vnf_fg_update_entry['vnf_index_to_change'] = vnf_index_to_change
+            vnf_fg_update_entry['value_to_change'] = value_to_change
+            vnf_fg_update_entry['new_value'] = new_value
+            vnf_fg_update_entry['orchestrator'] = orchestrator
+            vnf_fg_list_updates.append(vnf_fg_update_entry)
+        return vnf_fg_list_updates
 
     def initialize_parameters(self, parameters):
         parameters['annotation'] = None
@@ -192,7 +247,7 @@ class ExperimentGenerator():
 def main():
     number_of_experiments = 5
     number_of_services = 3
-    length_of_vnfs = 8
+    length_of_vnfs = 4
     video_definition = 480
     delay = [0, 20]
     bandwidth = [0, 70]
@@ -207,7 +262,7 @@ def main():
     random_np_seed_list = [3060307, 3953270, 5291516, 7353312, 8607401]
 
     experiment_path = '../first/' + str(video_definition) +'/exp_1_' + str(length_of_vnfs) + '/experiments/'
-
+    max_number_of_changes = 20
 
     print('Begin experiment generator')
     exp_gen = ExperimentGenerator(number_of_experiments,
@@ -219,7 +274,8 @@ def main():
                                   loss,
                                   jitter,
                                   random_seed_list,
-                                  random_np_seed_list)
+                                  random_np_seed_list,
+                                  max_number_of_changes)
     list_name_experiments = exp_gen.generate_experiment()
     print('End experiment generation')
 

@@ -57,6 +57,12 @@ class GenericServer:
         log.info(''.join(["Send Channel Host: ", server.host, " Port: ", str(server.port)]))
         self.send_channel.connect((server.host, int(server.port)))
 
+    def connect_to_another_server_raw(self, host, port):
+        # self.connect_channel_to_server(server, self.send_channel)
+        self.send_channel = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        log.info(''.join(["Send Channel Host: ", host, " Port: ", port]))
+        self.send_channel.connect(host, port)
+
     def connect_to_orchestrator(self, server):
         # self.connect_channel_to_server(server, self.send_orchestrator_channel)
         self.send_orchestrator_channel = socket.socket(socket.AF_INET, socket.SOCK_STREAM)

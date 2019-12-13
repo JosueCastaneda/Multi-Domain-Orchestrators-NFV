@@ -22,11 +22,11 @@ class MessageGenerator:
     def generate_message(self):
         m = None
         if self.command.message_type == "add_vnf":
-            m = self.generate_add_message(self.command.vnf_host, self.command.vnf_port, self.command.name)
+            m = self.generate_add_message(self.command.vnf_host, self.command.vnf_port, self.command.get_vnf_name)
         elif self.command.message_type == "add_chain":
             m = self.generate_chain_message(self.command.vnf_host, self.command.vnf_port)
         elif self.command.message_type == "migration":
-            m = self.generate_migration_message(self.command.name, self.command.new_name)
+            m = self.generate_migration_message(self.command.get_vnf_name, self.command.new_name)
         elif self.command.message_type == "new_pop":
             print("Request new pop")
         elif self.command.message_type == "add_orchestrator":

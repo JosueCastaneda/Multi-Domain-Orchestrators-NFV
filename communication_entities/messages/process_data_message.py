@@ -43,12 +43,13 @@ class ProcessDataMessage(AbstractMessage):
         self.save_queue_to_file()
 
     def save_processing_time(self):
-        name_no_format = self.parameters.file_pack.name[:-4]
+        name_no_format = self.parameters.file_pack.get_vnf_name[:-4]
         pickle.dump(self.parameters.processed_time, open(name_no_format + '_time_spent.p', 'wb'))
 
     def save_queue_to_file(self):
-        name_no_format = self.parameters.file_pack.name[:-4]
-        data_queue = self.current_server.orchestrator.get_all_queue_data()
+        name_no_format = self.parameters.file_pack.get_vnf_name[:-4]
+        data_queue = self.current_server.orchestrator.configuration.state.get_all_queue_data()
+        # data_queue = self.current_server.orchestrator.get_all_queue_data()
         pickle.dump(data_queue, open(name_no_format + '_queue.p', 'wb'))
 
     def create_message_type_by_operation(self, operation):
@@ -64,7 +65,7 @@ class ProcessDataMessage(AbstractMessage):
 
     def send_all_queues_to_new_vnf(self):
         log.info('Sending all the queue information to the next VNF in the chain')
-        data_queue = self.current_server.orchestrator.get_all_queue_data()
+        data_queue = self.current_server.orchestrator.configuration.state.get_all_queue_data()
         message_all_queue = AllQueueInformation(data_queue)
         self.current_server.send_message(message_all_queue)
         self.current_server.get_ack_channel()
@@ -85,7 +86,7 @@ class ProcessDataMessage(AbstractMessage):
     def generate_new_message(self, new_file):
         self.new_message = ProcessDataMessage(self.parameters)
         self.new_message.current_op_index = self.current_op_index
-        self.new_message.parameters.file_pack.name = new_file
+        self.new_message.parameters.file_pack.get_vnf_name = new_file
 
     def increase_operation_index(self):
         # TODO: Remove, only for debugging purposes
@@ -99,7 +100,7 @@ class ProcessDataMessage(AbstractMessage):
 
     def send_data_message_video_to_new_vnf(self, new_file):
         log.info('Sending DataVideoMessage to next VNF in chain')
-        data_queue = self.current_server.orchestrator.get_all_queue_data()
+        data_queue = self.current_server.orchestrator.configuration.state.get_all_queue_data()
         message_prepare_data_transfer = DataVideoMessage(new_file, data_queue)
         self.current_server.send_message(message_prepare_data_transfer)
         log.info('Finish sending DataVideoMessage to next VNF in chain')

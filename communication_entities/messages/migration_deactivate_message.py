@@ -33,14 +33,7 @@ class MigrationDeactivateMessage(AbstractMessage):
         m1 = self.client_socket.recv(4096)
         answer_message = pickle.loads(m1)
         log.info(answer_message)
-        if operation == "P":
-# data_queue_tmp = self.current_server.orchestrator.get_all_data_from_queue(self.current_server.orchestrator.queue_P)
-            data_queue_tmp = self.current_server.orchestrator.get_all_data_from_queue("P")
-        elif operation == "Q":
-            data_queue_tmp = self.current_server.orchestrator.get_all_data_from_queue("Q")
-        else:
-            data_queue_tmp = self.current_server.orchestrator.get_all_data_from_queue("R")
-        return data_queue_tmp
+        return self.current_server.orchestrator.get_configuration().get_state().get_all_data_from_queue(operation)
 
     def check_if_migration_is_needed(self):
         print('Migration Deactivate Message: ', self.data)
