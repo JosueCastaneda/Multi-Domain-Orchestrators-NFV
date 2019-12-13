@@ -75,10 +75,10 @@ class Orchestrator:
             self.server.connect_to_another_server_raw(orchestrator[0], orchestrator[1])
             self.server.send_message(s)
 
-            x = self.server.send_channel.recv(SocketSize.RECEIVE_BUFFER.value)
-            answer_message = pickle.loads(x)
-            str_log = 'Received answer from new VNF TYPE: ' + str(type(answer_message))
-            self.server.disconnect_send_channel()
+            # x = self.server.send_channel.recv(SocketSize.RECEIVE_BUFFER.value)
+            # answer_message = pickle.loads(x)
+            # str_log = 'Received answer from new VNF TYPE: ' + str(type(answer_message))
+            # self.server.disconnect_send_channel()
 
         # Send to others
 

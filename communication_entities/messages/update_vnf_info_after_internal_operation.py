@@ -21,5 +21,5 @@ class UpdateVnfInfoAfterInternalOperation(AbstractMessage):
                                                          self.value_to_change,
                                                          self.new_value,
                                                          self.logical_clock)
-        ack_msg = MigrationAckMessage(None)
-        self.current_server.send_message_to_socket(self.client_socket, ack_msg)
+        # ack_msg = MigrationAckMessage(None)
+        # self.current_server.send_message_to_socket(self.client_socket, ack_msg)
