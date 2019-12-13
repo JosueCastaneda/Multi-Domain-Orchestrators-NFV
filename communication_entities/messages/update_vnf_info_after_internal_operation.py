@@ -20,4 +20,3 @@ class UpdateVnfInfoAfterInternalOperation(AbstractMessage):
                                                          self.value_to_change,
                                                          self.new_value,
                                                          self.logical_clock)
-

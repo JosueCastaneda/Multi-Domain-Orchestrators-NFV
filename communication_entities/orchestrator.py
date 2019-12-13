@@ -1,8 +1,11 @@
 import json
+import pickle
 import sys
 import threading
 
+from communication_entities.messages.migration_ack_message import MigrationAckMessage
 from communication_entities.messages.update_vnf_info_after_internal_operation import UpdateVnfInfoAfterInternalOperation
+from utilities.socket_size import SocketSize
 
 sys.path.append('../')
 
@@ -72,12 +75,18 @@ class Orchestrator:
             print('orchestrator: ', orchestrator)
             self.server.connect_to_another_server_raw(orchestrator[0], orchestrator[1])
             self.server.send_message(s)
+
+            x = self.server.send_virtual_channel.recv(SocketSize.RECEIVE_BUFFER.value)
+            answer_message = pickle.loads(x)
+            str_log = 'Received answer from new VNF TYPE: ' + str(type(answer_message))
             self.server.disconnect_send_channel()
 
         # Send to others
 
     def update_vnf_info(self, service_index, vnf_index_to_change, value_to_change, new_value, clock):
         self.vnf_fg_information[service_index][vnf_index_to_change][value_to_change] = new_value
+        m_ack = MigrationAckMessage()
+        self.server.send_message(m_ack)
 
     def update_vnf_info_with_clocks(self, service_index, vnf_index_to_change, value_to_change, new_value, clock):
         name_vnf_to_update = self.vnf_fg_information[service_index][vnf_index_to_change]['name']
