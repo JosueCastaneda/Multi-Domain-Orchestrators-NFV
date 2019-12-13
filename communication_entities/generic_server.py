@@ -61,7 +61,7 @@ class GenericServer:
         # self.connect_channel_to_server(server, self.send_channel)
         self.send_channel = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         log.info(''.join(["Send Channel Host: ", host, " Port: ", port]))
-        self.send_channel.connect(host, port)
+        self.send_channel.connect((host, int(port)))
 
     def connect_to_orchestrator(self, server):
         # self.connect_channel_to_server(server, self.send_orchestrator_channel)
