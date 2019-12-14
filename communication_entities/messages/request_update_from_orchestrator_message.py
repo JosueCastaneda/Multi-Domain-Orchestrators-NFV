@@ -1,5 +1,5 @@
 import threading
-from random import random
+import random
 
 from communication_entities.messages.abstract_message import AbstractMessage
 from communication_entities.messages.migration_ack_message import MigrationAckMessage
