@@ -104,7 +104,7 @@ class Orchestrator:
                 self.vnf_fg_information[service_index][vnf_index_to_change][value_to_change] = new_value
                 self.logical_clock[name] = clock
 
-            if clock < self.logical_clock[name]:
+            if self.logical_clock[name] < clock:
                 self.inconsistencies += 1
 
             print('New value: ', self.vnf_fg_information[service_index][vnf_index_to_change][value_to_change])
