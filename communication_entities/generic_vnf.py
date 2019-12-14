@@ -338,7 +338,7 @@ class GenericVNF:
             file.write('\n')
             file.close()
         else:
-            with open('time_update', 'a') as f:
+            with open('time_update.txt', 'a') as f:
                 file.write(str(total_time))
                 file.write('\n')
                 file.close()
