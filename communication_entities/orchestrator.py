@@ -106,7 +106,7 @@ class Orchestrator:
             pickle.dump(self.vnf_fg_information, open('vnf_fg_info' + self.name + '.p', 'wb'))
 
     def update_vnf_info_timer(self, service_index, vnf_index_to_change, value_to_change, new_value, clock, wait_period):
-        wait_period += random.randint(0, 20)
+        wait_period += random.randint(0, 10)
 
         t = threading.Timer(wait_period, self.update_vnf_info_with_clocks, [service_index,
                                                                 vnf_index_to_change,
