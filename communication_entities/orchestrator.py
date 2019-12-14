@@ -89,19 +89,19 @@ class Orchestrator:
     def update_vnf_info_with_clocks(self, service_index, vnf_index_to_change, value_to_change, new_value, clock):
         name_vnf_to_update = self.vnf_fg_information[service_index][vnf_index_to_change]['name']
         my_clock = self.logical_clock[name_vnf_to_update] + 1
+        self.updates_remaining -= 1
         if clock >= my_clock:
             self.vnf_fg_information[service_index][vnf_index_to_change][value_to_change] = new_value
             self.logical_clock[name_vnf_to_update] = clock
             self.print_vnf_fg_information()
-        self.updates_remaining -= 1
 
     def print_vnf_fg_information(self):
-        for vnf_fg in self.vnf_fg_information:
-            for entry in vnf_fg:
-                print('Entry: ', entry)
-            log.info('*******************************************')
+        # for vnf_fg in self.vnf_fg_information:
+        #     for entry in vnf_fg:
+        #         print('Entry: ', entry)
+        #     log.info('*******************************************')
         log.info('Services left to update: ' + str(self.updates_remaining))
-        log.info('--------------------------------------------')
+        # log.info('--------------------------------------------')
         if self.updates_remaining == 0:
             pickle.dump(self.vnf_fg_information, open('vnf_fg_info' + self.name + '.p', 'wb'))
 
