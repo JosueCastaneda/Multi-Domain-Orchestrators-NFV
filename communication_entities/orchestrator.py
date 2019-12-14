@@ -82,14 +82,18 @@ class Orchestrator:
             # self.server.disconnect_send_channel()
 
     def update_vnf_info(self, service_index, vnf_index_to_change, value_to_change, new_value, clock):
-        log.info('Updating VNF')
-        old_value = self.vnf_fg_information[service_index][vnf_index_to_change][value_to_change]
-        print('Previous value: ',  str(old_value))
         self.vnf_fg_information[service_index][vnf_index_to_change][value_to_change] = new_value
-        after_update = self.vnf_fg_information[service_index][vnf_index_to_change][value_to_change]
-        print('New Value: ', str(after_update))
         self.updates_remaining -= 1
         self.print_vnf_fg_information()
+
+    def update_vnf_info_with_clocks(self, service_index, vnf_index_to_change, value_to_change, new_value, clock):
+        name_vnf_to_update = self.vnf_fg_information[service_index][vnf_index_to_change]['name']
+        my_clock = self.logical_clock[name_vnf_to_update] + 1
+        if clock >= my_clock:
+            self.vnf_fg_information[service_index][vnf_index_to_change][value_to_change] = new_value
+            self.logical_clock[name_vnf_to_update] = clock
+            self.print_vnf_fg_information()
+        self.updates_remaining -= 1
 
     def print_vnf_fg_information(self):
         for vnf_fg in self.vnf_fg_information:
@@ -104,20 +108,13 @@ class Orchestrator:
     def update_vnf_info_timer(self, service_index, vnf_index_to_change, value_to_change, new_value, clock, wait_period):
         wait_period += random.randint(0, 20)
 
-        t = threading.Timer(wait_period, self.update_vnf_info, [service_index,
+        t = threading.Timer(wait_period, self.update_vnf_info_with_clocks, [service_index,
                                                                 vnf_index_to_change,
                                                                 value_to_change,
                                                                 new_value,
                                                                 clock])
         self.updates_remaining += 1
         t.start()
-
-    def update_vnf_info_with_clocks(self, service_index, vnf_index_to_change, value_to_change, new_value, clock):
-        name_vnf_to_update = self.vnf_fg_information[service_index][vnf_index_to_change]['name']
-        my_clock = self.logical_clock[name_vnf_to_update] + 1
-        if clock >= my_clock:
-            self.vnf_fg_information[service_index][vnf_index_to_change][value_to_change] = new_value
-            self.logical_clock[name_vnf_to_update] = clock
 
     # This method should execute in an asynchronous wait to send messages asynchronously
     def send_forwarding_path_updates_to_other_orchestrators(self):
