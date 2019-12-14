@@ -110,6 +110,10 @@ class Orchestrator:
         log.info('Services left to update: ' + str(self.updates_remaining))
         if self.updates_remaining == 0:
             pickle.dump(self.vnf_fg_information, open('vnf_fg_info' + self.name + '.p', 'wb'))
+            for clock in self.logical_clock:
+                str_log = 'Clock: ' + clock
+                log.info(str_log)
+
 
     def update_vnf_info_timer(self, service_index, vnf_index_to_change, value_to_change, new_value, clock, wait_period, name_vnf_to_update):
         wait_period += random.randint(0, 10)
