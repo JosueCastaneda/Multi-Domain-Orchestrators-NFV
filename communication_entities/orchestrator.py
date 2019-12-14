@@ -94,9 +94,12 @@ class Orchestrator:
         try:
             my_clock = self.logical_clock[name] + 1
             print('Internal clock: ', my_clock, ' External clock: ', clock)
+            print('Old value: ', self.vnf_fg_information[service_index][vnf_index_to_change][value_to_change])
             if clock > my_clock:
+                log.info('New clock')
                 self.vnf_fg_information[service_index][vnf_index_to_change][value_to_change] = new_value
                 self.logical_clock[name] = clock
+            print('New value: ', self.vnf_fg_information[service_index][vnf_index_to_change][value_to_change])
             self.updates_remaining -= 1
             self.print_vnf_fg_information()
         finally:
