@@ -338,10 +338,10 @@ class GenericVNF:
             file.write('\n')
             file.close()
         else:
-            with open('time_update.txt', 'a') as f:
-                file.write(str(total_time))
-                file.write('\n')
-                file.close()
+            file = open('time_update.txt', 'a')
+            file.write(str(total_time))
+            file.write('\n')
+            file.close()
 
     def serve_clients(self):
         self.server.serve_clients()
