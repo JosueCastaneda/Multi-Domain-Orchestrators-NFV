@@ -57,9 +57,8 @@ class Orchestrator:
     def add_service_information(self):
         self.load_services_information()
         self.add_virtual_network_function_forwarding_graph_information()
-        # self.send_forwarding_path_updates_to_other_orchestrators()
 
-    def hello(self, service_index, vnf_index_to_change, value_to_change, new_value):
+    def send_update_message(self, service_index, vnf_index_to_change, value_to_change, new_value, wait_period):
         print("Changes: ", vnf_index_to_change, ' ', value_to_change, ' ', new_value)
         name_vnf_to_update = self.vnf_fg_information[service_index][vnf_index_to_change]['name']
         self.logical_clock[name_vnf_to_update] += 1
@@ -69,23 +68,28 @@ class Orchestrator:
                                                 vnf_index_to_change,
                                                 value_to_change,
                                                 new_value,
-                                                self.logical_clock[name_vnf_to_update])
+                                                self.logical_clock[name_vnf_to_update],
+                                                wait_period)
         for orchestrator in self.list_orchestrator:
             print('orchestrator: ', orchestrator)
-            print_lock = threading.Lock()
             self.server.connect_to_another_server_raw(orchestrator[0], orchestrator[1])
             self.server.send_message(s)
-            print_lock.release()
 
             # x = self.server.send_channel.recv(SocketSize.RECEIVE_BUFFER.value)
             # answer_message = pickle.loads(x)
             # str_log = 'Received answer from new VNF TYPE: ' + str(type(answer_message))
             # self.server.disconnect_send_channel()
 
-        # Send to others
-
     def update_vnf_info(self, service_index, vnf_index_to_change, value_to_change, new_value, clock):
         self.vnf_fg_information[service_index][vnf_index_to_change][value_to_change] = new_value
+
+    def update_vnf_info_timer(self, service_index, vnf_index_to_change, value_to_change, new_value, clock, wait_period):
+        t = threading.Timer(wait_period, self.update_vnf_info, [service_index,
+                                                                vnf_index_to_change,
+                                                                value_to_change,
+                                                                new_value,
+                                                                clock])
+        t.start()
 
     def update_vnf_info_with_clocks(self, service_index, vnf_index_to_change, value_to_change, new_value, clock):
         name_vnf_to_update = self.vnf_fg_information[service_index][vnf_index_to_change]['name']
@@ -96,14 +100,15 @@ class Orchestrator:
 
     # This method should execute in an asynchronous wait to send messages asynchronously
     def send_forwarding_path_updates_to_other_orchestrators(self):
-        print('LAS')
+        print('Sending path')
 
         for service in self.vnf_fg_update_information[0]['updates']:
             vnf_index_to_change = service['vnf_index_to_change']
             value_to_change = service['value_to_change']
             new_value = service['new_value']
-            t = threading.Timer(service['wait_period'], self.hello, [0, vnf_index_to_change, value_to_change, new_value])
-            t.start()
+            wait_period = service['wait_period']
+            self.send_update_message(0, vnf_index_to_change, value_to_change, new_value, wait_period)
+
 
         # for service in self.vnf_fg_update_information[1]['updates']:
         #     vnf_index_to_change = service['vnf_index_to_change']
