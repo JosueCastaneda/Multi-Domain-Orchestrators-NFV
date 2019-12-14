@@ -72,8 +72,10 @@ class Orchestrator:
                                                 self.logical_clock[name_vnf_to_update])
         for orchestrator in self.list_orchestrator:
             print('orchestrator: ', orchestrator)
+            print_lock = threading.Lock()
             self.server.connect_to_another_server_raw(orchestrator[0], orchestrator[1])
             self.server.send_message(s)
+            print_lock.release()
 
             # x = self.server.send_channel.recv(SocketSize.RECEIVE_BUFFER.value)
             # answer_message = pickle.loads(x)
