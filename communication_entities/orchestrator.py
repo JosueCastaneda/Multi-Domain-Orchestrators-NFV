@@ -111,7 +111,7 @@ class Orchestrator:
         if self.updates_remaining == 0:
             pickle.dump(self.vnf_fg_information, open('vnf_fg_info' + self.name + '.p', 'wb'))
             for clock in self.logical_clock:
-                str_log = 'Clock: ' + clock + ' val: ' + self.logical_clock[clock]
+                str_log = 'Clock: ' + clock + ' val: ' + str(self.logical_clock[clock])
                 log.info(str_log)
 
 
