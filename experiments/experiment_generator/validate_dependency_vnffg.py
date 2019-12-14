@@ -6,19 +6,19 @@ def check_entries_are_different(entries):
     m2_first = entries[1]['first_connection_point']
     m3_first = entries[2]['first_connection_point']
     m4_first = entries[3]['first_connection_point']
-    print('M1: ', m1_first, ' M2: ', m2_first, ' M3: ', m3_first, ' M4: ', m4_first)
     m1_second = entries[0]['second_connection_point']
     m2_second = entries[1]['second_connection_point']
     m3_second = entries[2]['second_connection_point']
     m4_second = entries[3]['second_connection_point']
-    print('M1: ', m1_second, ' M2: ', m2_second, ' M3: ', m3_second, ' M4: ', m4_second)
     if m1_first == m2_first and m2_first == m3_first and m3_first == m4_first:
         pass
     else:
+        print('M1: ', m1_first, ' M2: ', m2_first, ' M3: ', m3_first, ' M4: ', m4_first)
         return True
     if m1_second == m2_second and m2_second == m3_second and m3_second == m4_second:
         pass
     else:
+        print('M1: ', m1_second, ' M2: ', m2_second, ' M3: ', m3_second, ' M4: ', m4_second)
         return True
 
 

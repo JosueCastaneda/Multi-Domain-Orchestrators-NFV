@@ -106,7 +106,7 @@ class Orchestrator:
     def update_vnf_info_timer(self, service_index, vnf_index_to_change, value_to_change, new_value, clock, wait_period, name_vnf_to_update):
         wait_period += random.randint(0, 10)
 
-        t = threading.Timer(wait_period, self.update_vnf_info_with_clocks, [service_index,
+        t = threading.Timer(wait_period, self.update_vnf_info, [service_index,
                                                                 vnf_index_to_change,
                                                                 value_to_change,
                                                                 new_value,
