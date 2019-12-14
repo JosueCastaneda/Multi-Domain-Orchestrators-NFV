@@ -1,4 +1,5 @@
 import json
+import pickle
 import random
 import sys
 import threading
@@ -90,7 +91,6 @@ class Orchestrator:
         self.updates_remaining -= 1
         self.print_vnf_fg_information()
 
-
     def print_vnf_fg_information(self):
         for vnf_fg in self.vnf_fg_information:
             for entry in vnf_fg:
@@ -98,6 +98,8 @@ class Orchestrator:
             log.info('*******************************************')
         log.info('Services left to update: ' + str(self.updates_remaining))
         log.info('--------------------------------------------')
+        if self.updates_remaining == 0:
+            pickle.dump(self.vnf_fg_information, open('vnf_fg_info' + self.name + '.p', 'wb'))
 
     def update_vnf_info_timer(self, service_index, vnf_index_to_change, value_to_change, new_value, clock, wait_period):
         wait_period += random.randint(0, 20)
