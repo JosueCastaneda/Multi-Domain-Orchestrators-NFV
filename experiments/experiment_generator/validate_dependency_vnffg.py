@@ -3,14 +3,32 @@ import pickle
 
 def check_entries_are_different(entries):
     m1_first = entries[0]['first_connection_point']
+    m2_first = entries[1]['first_connection_point']
+    m3_first = entries[2]['first_connection_point']
+    m4_first = entries[3]['first_connection_point']
+    print('M1: ', m1_first, ' M2: ', m2_first, ' M3: ', m3_first, ' M4: ', m4_first)
     m1_second = entries[0]['second_connection_point']
-    for i in range(1, len(entries)):
-        m_entry_first = entries[i]['first_connection_point']
-        m_entry_second = entries[i]['first_connection_point']
-        if m1_first != m_entry_first or m1_second != m_entry_second:
-            return True
-        m1_first = m_entry_first
-        m1_second = m_entry_second
+    m2_second = entries[1]['second_connection_point']
+    m3_second = entries[2]['second_connection_point']
+    m4_second = entries[3]['second_connection_point']
+    print('M1: ', m1_second, ' M2: ', m2_second, ' M3: ', m3_second, ' M4: ', m4_second)
+    if m1_first == m2_first and m2_first == m3_first and m3_first == m4_first:
+        pass
+    else:
+        return True
+    if m1_second == m2_second and m2_second == m3_second and m3_second == m4_second:
+        pass
+    else:
+        return True
+
+
+    # for i in range(1, len(entries)):
+    #     m_entry_first = entries[i]['first_connection_point']
+    #     m_entry_second = entries[i]['first_connection_point']
+    #     if m1_first != m_entry_first or m1_second != m_entry_second:
+    #         return True
+    #     m1_first = m_entry_first
+    #     m1_second = m_entry_second
 
     return False
 
