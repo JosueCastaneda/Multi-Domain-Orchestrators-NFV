@@ -2,6 +2,7 @@ import json
 import pickle
 import sys
 import threading
+from random import random
 
 from communication_entities.messages.update_vnf_info_after_internal_operation import UpdateVnfInfoAfterInternalOperation
 from utilities.socket_size import SocketSize
@@ -84,13 +85,13 @@ class Orchestrator:
         log.info('Updating VNF')
         old_value = self.vnf_fg_information[service_index][vnf_index_to_change][value_to_change]
         print('Previous value: ',  str(old_value))
-        # log.info(''.join['Previous value: ', str(old_value)])
         self.vnf_fg_information[service_index][vnf_index_to_change][value_to_change] = new_value
         after_update = self.vnf_fg_information[service_index][vnf_index_to_change][value_to_change]
         print('New Value: ', str(after_update))
-        # log.info(''.join['Previous value: ', str(after_update)])
 
     def update_vnf_info_timer(self, service_index, vnf_index_to_change, value_to_change, new_value, clock, wait_period):
+        wait_period += random.randint(0, 20)
+
         t = threading.Timer(wait_period, self.update_vnf_info, [service_index,
                                                                 vnf_index_to_change,
                                                                 value_to_change,
