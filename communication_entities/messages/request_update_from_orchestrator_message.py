@@ -12,6 +12,8 @@ class RequestUpdateFromOrchestratorMessage(AbstractMessage):
         super().__init__(None)
         self.current_server = None
         self.save_client_socket = None
+        log.info('SEED IS: ')
+        log.info(str(seed))
         random.seed(seed)
 
     def answer_back(self):
