@@ -34,6 +34,7 @@ class Orchestrator:
         self.set_up_logical_clocks()
         self.add_service_information()
         log.info(''.join(["Orchestrator: ", self.name, " is running!"]))
+        self.updates_remaining = 0
 
     def set_up_logical_clocks(self):
         self.logical_clock['ANNOTATE'] = 0
@@ -86,14 +87,16 @@ class Orchestrator:
         self.vnf_fg_information[service_index][vnf_index_to_change][value_to_change] = new_value
         after_update = self.vnf_fg_information[service_index][vnf_index_to_change][value_to_change]
         print('New Value: ', str(after_update))
-
+        self.updates_remaining -= 1
         self.print_vnf_fg_information()
+
 
     def print_vnf_fg_information(self):
         for vnf_fg in self.vnf_fg_information:
             for entry in vnf_fg:
                 print('Entry: ', entry)
             log.info('*******************************************')
+        log.info('Services left to update: ' + str(self.updates_remaining))
         log.info('--------------------------------------------')
 
     def update_vnf_info_timer(self, service_index, vnf_index_to_change, value_to_change, new_value, clock, wait_period):
@@ -104,6 +107,7 @@ class Orchestrator:
                                                                 value_to_change,
                                                                 new_value,
                                                                 clock])
+        self.updates_remaining += 1
         t.start()
 
     def update_vnf_info_with_clocks(self, service_index, vnf_index_to_change, value_to_change, new_value, clock):
