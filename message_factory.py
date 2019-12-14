@@ -54,7 +54,7 @@ def read_parameters(argv):
     debug = False
 
     try:
-        opts, args = getopt.getopt(argv, "t:h:p:n:m:v:w:e",
+        opts, args = getopt.getopt(argv, "t:h:p:n:m:v:w:e:s",
                                    ["type=",
                                     "host=",
                                     "port=",
@@ -62,7 +62,8 @@ def read_parameters(argv):
                                     "new_name=",
                                     "vnf_host=",
                                     "vnf_port=",
-                                    "experiment="])
+                                    "experiment=",
+                                    "seed="])
     except getopt.GetoptError:
         print(command.help_message)
         sys.exit(2)
@@ -86,6 +87,8 @@ def read_parameters(argv):
         elif opt in ("-e", "--experiment"):
             str_exp = 'experiments/first/480/exp_1_8/experiments/experiment_' + arg +'.json'
             command.experiment = str_exp
+        elif opt in ("-s", "--seed"):
+            command.seed = arg
     return command
 
 

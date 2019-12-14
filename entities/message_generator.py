@@ -38,7 +38,7 @@ class MessageGenerator:
         elif self.command.message_type == "update_vnf_fg":
             m = InitiateVNFFGUpdatesMessage()
         elif self.command.message_type == "request_update":
-            m = RequestUpdateMessage()
+            m = RequestUpdateMessage(self.command.seed)
         return m
 
     @staticmethod

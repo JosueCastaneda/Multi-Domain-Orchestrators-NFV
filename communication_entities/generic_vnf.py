@@ -320,10 +320,10 @@ class GenericVNF:
         self.list_affected_vnf.append(vnf_pack)
         self.configuration.add_affected_vfn(vnf_pack)
 
-    def request_update_to_orchestrator(self):
+    def request_update_to_orchestrator(self, seed):
         log.info('Sending message to orchestrator')
         start_update_request_time = time.time()
-        message = RequestUpdateFromOrchestratorMessage()
+        message = RequestUpdateFromOrchestratorMessage(seed)
         self.server.connect_to_orchestrator(self.orchestrator)
         self.server.send_message_to_orchestrator(message)
         # Wait for the answer from the orchestrator
