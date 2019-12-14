@@ -334,12 +334,12 @@ class GenericVNF:
         file = None
         if not os.path.exists('time_update.txt'):
             file = open('time_update.txt', 'w+')
-            file.write(total_time)
+            file.write(str(total_time))
             file.write('\n')
             file.close()
         else:
             with open('time_update', 'a') as f:
-                file.write(total_time)
+                file.write(str(total_time))
                 file.write('\n')
                 file.close()
 
