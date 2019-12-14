@@ -1,5 +1,6 @@
 import threading
 import random
+from os import wait
 
 from communication_entities.messages.abstract_message import AbstractMessage
 from communication_entities.messages.migration_ack_message import MigrationAckMessage
@@ -11,6 +12,7 @@ class RequestUpdateFromOrchestratorMessage(AbstractMessage):
     def __init__(self):
         super().__init__(None)
         self.current_server = None
+        self.save_client_socket = None
 
     def answer_back(self):
         m = MigrationAckMessage(None)
@@ -19,5 +21,7 @@ class RequestUpdateFromOrchestratorMessage(AbstractMessage):
 
     def process_by_command_line(self):
         wait_period = random.randint(0, 10)
-        t = threading.Timer(wait_period, self.answer_back(), [])
-        t.start()
+        wait(wait_period)
+        self.answer_back()
+        # t = threading.Timer(wait_period, self.answer_back(), [])
+        # t.start()
