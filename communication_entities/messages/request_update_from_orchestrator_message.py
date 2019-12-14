@@ -14,7 +14,7 @@ class RequestUpdateFromOrchestratorMessage(AbstractMessage):
         self.save_client_socket = None
         log.info('SEED IS: ')
         log.info(str(seed))
-        random.seed(seed)
+        self.seed = seed
 
     def answer_back(self):
         m = MigrationAckMessage(None)
@@ -22,6 +22,7 @@ class RequestUpdateFromOrchestratorMessage(AbstractMessage):
         self.current_server.send_message_to_socket(self.client_socket, m)
 
     def process_by_command_line(self):
+        random.seed(self.seed)
         wait_period = random.uniform(0, 1)
         time.sleep(wait_period)
         self.answer_back()
