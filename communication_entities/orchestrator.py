@@ -114,7 +114,6 @@ class Orchestrator:
     # This method should execute in an asynchronous wait to send messages asynchronously
     def send_forwarding_path_updates_to_other_orchestrators(self):
         print('Sending path')
-
         for service in self.vnf_fg_update_information[0]['updates']:
             vnf_index_to_change = service['vnf_index_to_change']
             value_to_change = service['value_to_change']
@@ -122,22 +121,19 @@ class Orchestrator:
             wait_period = service['wait_period']
             self.send_update_message(0, vnf_index_to_change, value_to_change, new_value, wait_period)
 
+        for service in self.vnf_fg_update_information[1]['updates']:
+            vnf_index_to_change = service['vnf_index_to_change']
+            value_to_change = service['value_to_change']
+            new_value = service['new_value']
+            wait_period = service['wait_period']
+            self.send_update_message(1, vnf_index_to_change, value_to_change, new_value, wait_period)
 
-        # for service in self.vnf_fg_update_information[1]['updates']:
-        #     vnf_index_to_change = service['vnf_index_to_change']
-        #     value_to_change = service['value_to_change']
-        #     new_value = service['new_value']
-        #     t = threading.Timer(service['wait_period'], self.hello,
-        #                         [1, vnf_index_to_change, value_to_change, new_value])
-        #     t.start()
-        #
-        # for service in self.vnf_fg_update_information[2]['updates']:
-        #     vnf_index_to_change = service['vnf_index_to_change']
-        #     value_to_change = service['value_to_change']
-        #     new_value = service['new_value']
-        #     t = threading.Timer(service['wait_period'], self.hello,
-        #                         [2, vnf_index_to_change, value_to_change, new_value])
-        #     t.start()
+        for service in self.vnf_fg_update_information[2]['updates']:
+            vnf_index_to_change = service['vnf_index_to_change']
+            value_to_change = service['value_to_change']
+            new_value = service['new_value']
+            wait_period = service['wait_period']
+            self.send_update_message(1, vnf_index_to_change, value_to_change, new_value, wait_period)
 
         print('Finish sending messages')
         # t = threading.Timer(3.0, self.hello, [0, 1, 2, 'SAS'])
