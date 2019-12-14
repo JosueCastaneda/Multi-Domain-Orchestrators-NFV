@@ -21,6 +21,6 @@ class RequestUpdateFromOrchestratorMessage(AbstractMessage):
 
     def process_by_command_line(self):
         random.seed(self.seed)
-        wait_period = random.uniform(0, 1)
+        wait_period = random.uniform(0, 10)
         time.sleep(wait_period)
         self.answer_back()

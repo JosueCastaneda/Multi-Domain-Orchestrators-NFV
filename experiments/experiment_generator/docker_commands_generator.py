@@ -187,7 +187,7 @@ class DockerCommandsGenerator:
     def get_random_vnf_ip(self, seed):
         random.seed(seed)
         random_index = random.randint(0, len(self.vnf_container_list) - 1)
-        return self.vnf_container_list[random_index]['name']
+        return self.vnf_container_list[random_index]['ip']
 
     def get_pair_of_ip(self, service, index):
         first_ip = service['host_servers'][self.length_of_vnfs - index - 1]
