@@ -70,7 +70,8 @@ class Orchestrator:
                                                 value_to_change,
                                                 new_value,
                                                 self.logical_clock[name_vnf_to_update],
-                                                wait_period)
+                                                wait_period,
+                                                name_vnf_to_update)
         for orchestrator in self.list_orchestrator:
             print('orchestrator: ', orchestrator)
             self.server.connect_to_another_server_raw(orchestrator[0], orchestrator[1])
@@ -81,38 +82,34 @@ class Orchestrator:
             # str_log = 'Received answer from new VNF TYPE: ' + str(type(answer_message))
             # self.server.disconnect_send_channel()
 
-    def update_vnf_info(self, service_index, vnf_index_to_change, value_to_change, new_value, clock):
+    def update_vnf_info(self, service_index, vnf_index_to_change, value_to_change, new_value, clock, name):
         self.vnf_fg_information[service_index][vnf_index_to_change][value_to_change] = new_value
         self.updates_remaining -= 1
         self.print_vnf_fg_information()
 
-    def update_vnf_info_with_clocks(self, service_index, vnf_index_to_change, value_to_change, new_value, clock):
-        name_vnf_to_update = self.vnf_fg_information[service_index][vnf_index_to_change]['name']
-        my_clock = self.logical_clock[name_vnf_to_update] + 1
-        self.updates_remaining -= 1
-        if clock >= my_clock:
+    def update_vnf_info_with_clocks(self, service_index, vnf_index_to_change, value_to_change, new_value, clock, name):
+        # name_vnf_to_update = self.vnf_fg_information[service_index][vnf_index_to_change]['name']
+        my_clock = self.logical_clock[name] + 1
+        if clock > my_clock:
             self.vnf_fg_information[service_index][vnf_index_to_change][value_to_change] = new_value
-            self.logical_clock[name_vnf_to_update] = clock
-            self.print_vnf_fg_information()
+            self.logical_clock[name] = clock
+
+        self.updates_remaining -= 1
+        self.print_vnf_fg_information()
 
     def print_vnf_fg_information(self):
-        # for vnf_fg in self.vnf_fg_information:
-        #     for entry in vnf_fg:
-        #         print('Entry: ', entry)
-        #     log.info('*******************************************')
         log.info('Services left to update: ' + str(self.updates_remaining))
-        # log.info('--------------------------------------------')
         if self.updates_remaining == 0:
             pickle.dump(self.vnf_fg_information, open('vnf_fg_info' + self.name + '.p', 'wb'))
 
-    def update_vnf_info_timer(self, service_index, vnf_index_to_change, value_to_change, new_value, clock, wait_period):
+    def update_vnf_info_timer(self, service_index, vnf_index_to_change, value_to_change, new_value, clock, wait_period, name_vnf_to_update):
         wait_period += random.randint(0, 10)
 
-        t = threading.Timer(wait_period, self.update_vnf_info_with_clocks, [service_index,
+        t = threading.Timer(wait_period, self.update_vnf_info, [service_index,
                                                                 vnf_index_to_change,
                                                                 value_to_change,
                                                                 new_value,
-                                                                clock])
+                                                                clock, name_vnf_to_update])
         self.updates_remaining += 1
         t.start()
 
@@ -138,7 +135,7 @@ class Orchestrator:
             value_to_change = service['value_to_change']
             new_value = service['new_value']
             wait_period = service['wait_period']
-            self.send_update_message(1, vnf_index_to_change, value_to_change, new_value, wait_period)
+            self.send_update_message(2, vnf_index_to_change, value_to_change, new_value, wait_period)
 
         print('Finish sending messages')
         # t = threading.Timer(3.0, self.hello, [0, 1, 2, 'SAS'])
