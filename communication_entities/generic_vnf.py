@@ -327,7 +327,7 @@ class GenericVNF:
         self.server.connect_to_orchestrator(self.orchestrator)
         self.server.send_message_to_orchestrator(message)
         # Wait for the answer from the orchestrator
-        x = self.send_orchestrator_channel.recv(SocketSize.RECEIVE_BUFFER.value)
+        x = self.server.send_orchestrator_channel.recv(SocketSize.RECEIVE_BUFFER.value)
         answer_message = pickle.loads(x)
         end_update_request_time = time.time()
         total_time = end_update_request_time - start_update_request_time
