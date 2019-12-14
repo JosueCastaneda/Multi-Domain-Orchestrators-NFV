@@ -22,7 +22,7 @@ class RequestUpdateFromOrchestratorMessage(AbstractMessage):
 
     def process_by_command_line(self):
         wait_period = random.uniform(0, 3)
-        # time.sleep(wait_period)
+        time.sleep(wait_period)
         self.answer_back()
         # t = threading.Timer(wait_period, self.answer_back(), [])
         # t.start()
