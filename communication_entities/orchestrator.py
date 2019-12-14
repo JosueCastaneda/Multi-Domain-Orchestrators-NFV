@@ -96,7 +96,8 @@ class Orchestrator:
         lock = threading.Lock()
         lock.acquire()
         try:
-            my_clock = self.logical_clock[name] + 1
+            self.logical_clock[name] += 1
+            my_clock = self.logical_clock[name]
             print('Internal clock: ', my_clock, ' External clock: ', clock)
             print('Old value: ', self.vnf_fg_information[service_index][vnf_index_to_change][value_to_change])
             if clock > my_clock:
@@ -105,7 +106,7 @@ class Orchestrator:
                 self.logical_clock[name] = clock
 
             if self.logical_clock[name] < clock:
-                print('Inconsistency: ', self.logical_clock[name], ' external: ', clock)
+                print('Inconsistency- internal: ', self.logical_clock[name], ' external: ', clock)
                 self.inconsistencies += 1
 
             print('New value: ', self.vnf_fg_information[service_index][vnf_index_to_change][value_to_change])
