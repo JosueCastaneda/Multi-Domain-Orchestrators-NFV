@@ -6,6 +6,7 @@ from communication_entities.messages.add_vnf_to_chain_message import AddVNFToCha
 from communication_entities.messages.initiate_vnffg_updates_message import InitiateVNFFGUpdatesMessage
 from communication_entities.messages.migration_message import MigrationMessage
 from communication_entities.messages.process_data_message import ProcessDataMessage
+from communication_entities.messages.request_update_message import RequestUpdateMessage
 from entities.communication_entity_package import CommunicationEntityPackage
 from entities.parameter_generator import ParameterGenerator
 from entities.parameter_package import ParameterPackage
@@ -36,6 +37,8 @@ class MessageGenerator:
             m = self.generate_process_message()
         elif self.command.message_type == "update_vnf_fg":
             m = InitiateVNFFGUpdatesMessage()
+        elif self.command.message_type == "request_update":
+            m = RequestUpdateMessage()
         return m
 
     @staticmethod

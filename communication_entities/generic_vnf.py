@@ -1,3 +1,4 @@
+import os.path
 import pickle
 import time
 
@@ -8,6 +9,8 @@ from communication_entities.messages.migration_ack_message import MigrationAckMe
 from communication_entities.messages.migration_deactivate_message import MigrationDeactivateMessage
 from communication_entities.messages.migration_deactivate_recusive_message import MigrationDeactivateRecursiveMessage
 from communication_entities.messages.raw_text_message import RawTextMessage
+from communication_entities.messages.request_update_from_orchestrator_message import \
+    RequestUpdateFromOrchestratorMessage
 from communication_entities.messages.send_all_states_message import SendAllStatesMessage
 from communication_entities.messages.send_queue_P_message import SendQueuePMessage
 from communication_entities.messages.send_queue_Q_message import SendQueueQMessage
@@ -316,6 +319,29 @@ class GenericVNF:
     def add_affected_vnf(self, vnf_pack):
         self.list_affected_vnf.append(vnf_pack)
         self.configuration.add_affected_vfn(vnf_pack)
+
+    def request_update_to_orchestrator(self):
+        log.info('Sending message to orchestrator')
+        start_update_request_time = time.time()
+        message = RequestUpdateFromOrchestratorMessage()
+        self.server.connect_to_orchestrator(self.orchestrator)
+        self.server.send_message_to_orchestrator(message)
+        # Wait for the answer from the orchestrator
+        x = self.send_channel.recv(SocketSize.RECEIVE_BUFFER.value)
+        answer_message = pickle.loads(x)
+        end_update_request_time = time.time()
+        total_time = end_update_request_time - start_update_request_time
+        file = None
+        if not os.path.exists('time_update.txt'):
+            file = open('time_update.txt', 'w+')
+            file.write(total_time)
+            file.write('\n')
+            file.close()
+        else:
+            with open('time_update', 'a') as f:
+                file.write(total_time)
+                file.write('\n')
+                file.close()
 
     def serve_clients(self):
         self.server.serve_clients()
