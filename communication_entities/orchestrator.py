@@ -90,6 +90,7 @@ class Orchestrator:
     def update_vnf_info_with_clocks(self, service_index, vnf_index_to_change, value_to_change, new_value, clock, name):
         # name_vnf_to_update = self.vnf_fg_information[service_index][vnf_index_to_change]['name']
         my_clock = self.logical_clock[name] + 1
+        print('Internal clock: ', my_clock, ' External clock: ', clock)
         if clock > my_clock:
             self.vnf_fg_information[service_index][vnf_index_to_change][value_to_change] = new_value
             self.logical_clock[name] = clock
