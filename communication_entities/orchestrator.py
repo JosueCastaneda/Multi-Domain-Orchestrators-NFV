@@ -89,14 +89,19 @@ class Orchestrator:
 
     def update_vnf_info_with_clocks(self, service_index, vnf_index_to_change, value_to_change, new_value, clock, name):
         # name_vnf_to_update = self.vnf_fg_information[service_index][vnf_index_to_change]['name']
-        my_clock = self.logical_clock[name] + 1
-        print('Internal clock: ', my_clock, ' External clock: ', clock)
-        if clock > my_clock:
-            self.vnf_fg_information[service_index][vnf_index_to_change][value_to_change] = new_value
-            self.logical_clock[name] = clock
+        lock = threading.Lock()
+        lock.acquire()
+        try:
+            my_clock = self.logical_clock[name] + 1
+            print('Internal clock: ', my_clock, ' External clock: ', clock)
+            if clock > my_clock:
+                self.vnf_fg_information[service_index][vnf_index_to_change][value_to_change] = new_value
+                self.logical_clock[name] = clock
+            self.updates_remaining -= 1
+            self.print_vnf_fg_information()
+        finally:
+            lock.release()
 
-        self.updates_remaining -= 1
-        self.print_vnf_fg_information()
 
     def print_vnf_fg_information(self):
         log.info('Services left to update: ' + str(self.updates_remaining))
