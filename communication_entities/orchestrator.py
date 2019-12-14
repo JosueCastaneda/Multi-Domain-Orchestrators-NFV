@@ -1,10 +1,9 @@
 import json
+import random
 import sys
 import threading
-from random import random
 
 from communication_entities.messages.update_vnf_info_after_internal_operation import UpdateVnfInfoAfterInternalOperation
-from utilities.socket_size import SocketSize
 
 sys.path.append('../')
 
