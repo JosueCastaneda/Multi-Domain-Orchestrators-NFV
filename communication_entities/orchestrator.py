@@ -93,6 +93,8 @@ class Orchestrator:
         for vnf_fg in self.vnf_fg_information:
             for entry in vnf_fg:
                 print('Entry: ', entry)
+            log.info('*******************************************')
+        log.info('--------------------------------------------')
 
     def update_vnf_info_timer(self, service_index, vnf_index_to_change, value_to_change, new_value, clock, wait_period):
         wait_period += random.randint(0, 20)
