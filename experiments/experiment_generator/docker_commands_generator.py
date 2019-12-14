@@ -26,6 +26,7 @@ class DockerCommandsGenerator:
         self.length_of_vnfs = length_of_vnfs
         self.file_orchestrator = open(self.path + 'containers_orchestrator.sh', 'r+')
         self.file_commands = open(self.path + 'docker_commands_' + self.name_experiment + '.sh', 'w+')
+        self.seeds = None
         random.seed(5)
 
     def generate_commands(self):
@@ -38,6 +39,10 @@ class DockerCommandsGenerator:
         self.set_up_running_vnf()
         self.write_new_line_to_file()
         self.add_vnf_chains()
+        self.write_new_line_to_file()
+        self.set_up_running_vnf_unique()
+        self.write_new_line_to_file()
+        self.add_request_of_updates()
         self.close_file()
 
     def load_all_required_data(self):
@@ -46,6 +51,7 @@ class DockerCommandsGenerator:
         self.load_services()
         self.load_list_vnf_migration()
         self.load_list_of_migrating_vnfs_detail()
+        self.load_seeds()
 
     def set_up_run_orchestrators(self):
         new_line = '\n'
@@ -97,6 +103,26 @@ class DockerCommandsGenerator:
             fourth_str = ' --initial ' + vnf_initial +' &'
             self.file_commands.write(first_str + second_str + third_str + fourth_str + new_line)
 
+    def set_up_running_vnf_unique(self):
+        print('Running VNF')
+        new_line = '\n'
+        index = self.generate_random_indexes() - 1
+        orch_ip = self.list_orchestrator[index][1]
+        for vnf in self.vnf_container_list:
+            operation = vnf['name'][4:]
+            detailed_vnf = self.get_vnf_detailed_information(operation)
+            vnf_topology = self.generate_topology()
+            migration_ip = self.generate_migration_ip(detailed_vnf['server'])
+            migration_ip_topology = self.generate_migration_ip_topology(migration_ip)
+            services = self.generate_services()
+            vnf_initial = str(detailed_vnf['queue_p'][0])
+            first_str = 'docker exec -it mn.' + vnf['name'] + ' python vnf_script.py -h ' + vnf['ip'] + ' -v 4437 -o ' + orch_ip
+            second_str = ' -q 5461 -n ' + vnf['name'] + ' --topology ' + vnf_topology + ' --migration_ip ' + migration_ip
+            third_str = ' --migration_topology ' + migration_ip_topology + ' --services ' + services
+            fourth_str = ' --initial ' + vnf_initial +' &'
+            self.file_commands.write(first_str + second_str + third_str + fourth_str + new_line)
+
+
     def generate_random_indexes(self):
         return random.randint(1, len(self.list_orchestrator))
 
@@ -145,6 +171,23 @@ class DockerCommandsGenerator:
                 self.file_commands.write(first_str + second_str + new_line)
             self.write_new_line_to_file()
         print('Chaining Done!')
+
+    def add_request_of_updates(self):
+        print('Setting up updates')
+        new_line = '\n'
+        for i in range(0, 30):
+            random_seed = self.seeds[i]
+            random_vnf_ip = self.get_random_vnf_ip(random_seed)
+            first_str = 'docker exec -it mn.source python message_factory.py -t request_update -h ' + random_vnf_ip
+            second_str = ' -p 4437 -n none -m none --vnf_host none --vnf_port none --seed ' + str(random_seed)
+            self.file_commands.write(first_str + second_str + new_line)
+        self.write_new_line_to_file()
+        print('Setting done!')
+
+    def get_random_vnf_ip(self, seed):
+        random.seed(seed)
+        random_index = random.randint(0, len(self.vnf_container_list) - 1)
+        return self.vnf_container_list[random_index]['name']
 
     def get_pair_of_ip(self, service, index):
         first_ip = service['host_servers'][self.length_of_vnfs - index - 1]
@@ -225,6 +268,10 @@ class DockerCommandsGenerator:
         with open('vnf_info.json') as json_file:
             raw_data = json.load(json_file)
             self.vnf_list_detailed = raw_data['vnf']
+
+    def load_seeds(self):
+        with open('random_seeds.txt', 'r') as f:
+            self.seeds = [line.strip() for line in f]
 
     # TODO: Use join to add two strings togehter
     def load_list_vnf_migration(self):

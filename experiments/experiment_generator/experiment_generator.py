@@ -245,7 +245,7 @@ class ExperimentGenerator():
 
 
 def main():
-    number_of_experiments = 5
+    number_of_experiments = 10
     number_of_services = 3
     length_of_vnfs = 4
     video_definition = 480
@@ -260,6 +260,10 @@ def main():
     # FOR THE 8 Size
     random_seed_list = [2940627, 3717510, 4651201, 5211310, 8760564]
     random_np_seed_list = [3060307, 3953270, 5291516, 7353312, 8607401]
+
+    # For the 10 Size
+    random_seed_list = [42191, 41898, 41358, 91689, 36924, 89787, 52971, 88074, 12951, 79798]
+    random_np_seed_list = [72023, 75939, 31797, 34039, 41622, 16211, 31596, 84615, 31047, 59125]
 
     experiment_path = '../first/' + str(video_definition) +'/exp_1_' + str(length_of_vnfs) + '/experiments/'
     max_number_of_changes = 20
