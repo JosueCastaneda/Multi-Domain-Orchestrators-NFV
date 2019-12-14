@@ -36,6 +36,7 @@ class Orchestrator:
         self.add_service_information()
         log.info(''.join(["Orchestrator: ", self.name, " is running!"]))
         self.updates_remaining = 0
+        self.inconsistencies = 0
 
     def set_up_logical_clocks(self):
         self.logical_clock['ANNOTATE'] = 0
@@ -83,6 +84,9 @@ class Orchestrator:
             # self.server.disconnect_send_channel()
 
     def update_vnf_info(self, service_index, vnf_index_to_change, value_to_change, new_value, clock, name):
+        my_clock = self.logical_clock[name] + 1
+        if clock < my_clock:
+            self.inconsistencies += 1
         self.vnf_fg_information[service_index][vnf_index_to_change][value_to_change] = new_value
         self.updates_remaining -= 1
         self.print_vnf_fg_information()
@@ -99,6 +103,10 @@ class Orchestrator:
                 log.info('New clock')
                 self.vnf_fg_information[service_index][vnf_index_to_change][value_to_change] = new_value
                 self.logical_clock[name] = clock
+
+            if clock < self.logical_clock[name]:
+                self.inconsistencies += 1
+
             print('New value: ', self.vnf_fg_information[service_index][vnf_index_to_change][value_to_change])
             self.updates_remaining -= 1
             self.print_vnf_fg_information()
@@ -113,6 +121,8 @@ class Orchestrator:
             for clock in self.logical_clock:
                 str_log = 'Clock: ' + clock + ' val: ' + str(self.logical_clock[clock])
                 log.info(str_log)
+            str_incon = 'Inconsistencies: ' + str(self.inconsistencies)
+            log.info(str_incon)
 
 
     def update_vnf_info_timer(self, service_index, vnf_index_to_change, value_to_change, new_value, clock, wait_period, name_vnf_to_update):
