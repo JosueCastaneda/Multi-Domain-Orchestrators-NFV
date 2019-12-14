@@ -81,7 +81,12 @@ class Orchestrator:
             # self.server.disconnect_send_channel()
 
     def update_vnf_info(self, service_index, vnf_index_to_change, value_to_change, new_value, clock):
+        log.info('Updating VNF')
+        old_value = self.vnf_fg_information[service_index][vnf_index_to_change][value_to_change]
+        log.info(''.join['Previous value: ', str(old_value)])
         self.vnf_fg_information[service_index][vnf_index_to_change][value_to_change] = new_value
+        after_update = self.vnf_fg_information[service_index][vnf_index_to_change][value_to_change]
+        log.info(''.join['Previous value: ', str(after_update)])
 
     def update_vnf_info_timer(self, service_index, vnf_index_to_change, value_to_change, new_value, clock, wait_period):
         t = threading.Timer(wait_period, self.update_vnf_info, [service_index,
