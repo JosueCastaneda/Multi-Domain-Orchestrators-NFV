@@ -27,8 +27,12 @@ def main():
                 str_list = list(filter(None, times))
                 for entry in str_list:
                     list_times.append(float(entry))
-    x = statistics.mean(list_times)
-    print("Mean is :", x)
+    mean_time = statistics.mean(list_times)
+    std_time = statistics.stdev(list_times)
+    var_time = statistics.variance(list_times)
+    print("Mean is :", mean_time)
+    print("StD is :", std_time)
+    print('Variance: ', var_time)
 
 
 if __name__ == main():
