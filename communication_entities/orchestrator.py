@@ -37,6 +37,7 @@ class Orchestrator:
         log.info(''.join(["Orchestrator: ", self.name, " is running!"]))
         self.updates_remaining = 0
         self.inconsistencies = 0
+        self.messages_sent = 0
 
     def set_up_logical_clocks(self):
         self.logical_clock['ANNOTATE'] = 0
@@ -75,6 +76,7 @@ class Orchestrator:
                                                 name_vnf_to_update)
         for orchestrator in self.list_orchestrator:
             print('orchestrator: ', orchestrator)
+            self.messages_sent += 1
             self.server.connect_to_another_server_raw(orchestrator[0], orchestrator[1])
             self.server.send_message(s)
 
@@ -125,11 +127,13 @@ class Orchestrator:
                 log.info(str_log)
             str_incon = 'Inconsistencies: ' + str(self.inconsistencies)
             log.info(str_incon)
+            str_message_overhead = 'Messages: ' + str(self.messages_sent)
+            log.info(str_message_overhead)
 
 
     def update_vnf_info_timer(self, service_index, vnf_index_to_change, value_to_change, new_value, clock, wait_period, name_vnf_to_update):
         wait_period += random.randint(0, 10)
-        t = threading.Timer(wait_period, self.update_vnf_info_with_clocks, [service_index,
+        t = threading.Timer(wait_period, self.update_vnf_info, [service_index,
                                                                 vnf_index_to_change,
                                                                 value_to_change,
                                                                 new_value,
