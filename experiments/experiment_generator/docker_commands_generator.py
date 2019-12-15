@@ -175,7 +175,7 @@ class DockerCommandsGenerator:
     def add_request_of_updates(self):
         print('Setting up updates')
         new_line = '\n'
-        for i in range(0, 30):
+        for i in range(0, len(self.seeds)):
             random_seed = self.seeds[i]
             random_vnf_ip = self.get_random_vnf_ip(random_seed)
             first_str = 'docker exec -it mn.source python message_factory.py -t request_update -h ' + random_vnf_ip
