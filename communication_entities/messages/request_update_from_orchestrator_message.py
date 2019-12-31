@@ -8,11 +8,12 @@ from utilities.logger import log
 
 class RequestUpdateFromOrchestratorMessage(AbstractMessage):
 
-    def __init__(self, seed):
+    def __init__(self, seed, end_time):
         super().__init__(None)
         self.current_server = None
         self.save_client_socket = None
         self.seed = seed
+        self.end_time = end_time
 
     def answer_back(self):
         m = MigrationAckMessage(None)
@@ -21,9 +22,6 @@ class RequestUpdateFromOrchestratorMessage(AbstractMessage):
 
     def process_by_command_line(self):
         random.seed(self.seed)
-        # wait_period = random.uniform(0, 1)
-        # wait_period = random.uniform(0, 2)
-        # wait_period = random.uniform(0, 4)
-        wait_period = random.uniform(0, 8)
+        wait_period = random.uniform(0, self.end_time)
         time.sleep(wait_period)
         self.answer_back()

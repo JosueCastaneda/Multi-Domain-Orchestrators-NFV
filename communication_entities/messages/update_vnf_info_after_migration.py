@@ -4,12 +4,12 @@ from utilities.logger import *
 
 class UpdateVnfInfoAfterMigration(AbstractMessage):
 
-    def __init__(self, data, previous_vnf, new_vnf, new_vnf_topology):
-        super().__init__(data)
+    def __init__(self, configuration):
+        super().__init__(configuration.host())
+        self.previous_vnf = configuration.host()
+        self.new_vnf = configuration.migration_vnf()
+        self.new_vnf_topology = configuration.topology_migration_vnf()
         self.current_server = None
-        self.previous_vnf = previous_vnf
-        self.new_vnf = new_vnf
-        self.new_vnf_topology = new_vnf_topology
 
     def process_by_command_line(self):
         log.info("UpdateVnfInfoAfterMigration...")

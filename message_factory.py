@@ -54,7 +54,7 @@ def read_parameters(argv):
     debug = False
 
     try:
-        opts, args = getopt.getopt(argv, "t:h:p:n:m:v:w:e:s",
+        opts, args = getopt.getopt(argv, "t:h:p:n:m:v:w:e:s:x",
                                    ["type=",
                                     "host=",
                                     "port=",
@@ -63,7 +63,8 @@ def read_parameters(argv):
                                     "vnf_host=",
                                     "vnf_port=",
                                     "experiment=",
-                                    "seed="])
+                                    "seed=",
+                                    "end_time="])
     except getopt.GetoptError:
         print(command.help_message)
         sys.exit(2)
@@ -89,6 +90,8 @@ def read_parameters(argv):
             command.experiment = str_exp
         elif opt in ("-s", "--seed"):
             command.seed = arg
+        elif opt in ("-x", "--end_time"):
+            command.end_time = arg
     return command
 
 
