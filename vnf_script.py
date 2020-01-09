@@ -145,8 +145,6 @@ def main(argv):
                                              orchestrator=orchestrator,
                                              migration_configuration=migration_configuration,
                                              dependency_list=dependency_list)
-
-
         annotate_vnf = GenericVNF(vnf_configuration)
         annotate_vnf.serve_clients()
     else:

@@ -4,7 +4,10 @@ import random
 import sys
 import threading
 
+from communication_entities.messages.inform_of_vnf_update import InformOfVnfUpdate
+from communication_entities.messages.update_operation_message import UpdateOperationMessage
 from communication_entities.messages.update_vnf_info_after_internal_operation import UpdateVnfInfoAfterInternalOperation
+from entities.vnf_internal_operation_update_configuration import VnfInternalOperationUpdateConfiguration
 
 sys.path.append('../')
 
@@ -66,24 +69,18 @@ class Orchestrator:
         name_vnf_to_update = self.vnf_fg_information[service_index][vnf_index_to_change]['name']
         self.logical_clock[name_vnf_to_update] += 1
         self.vnf_fg_information[service_index][vnf_index_to_change][value_to_change] = new_value
-        s = UpdateVnfInfoAfterInternalOperation(None,
-                                                service_index,
-                                                vnf_index_to_change,
-                                                value_to_change,
-                                                new_value,
-                                                self.logical_clock[name_vnf_to_update],
-                                                wait_period,
-                                                name_vnf_to_update)
+        update_configuration = VnfInternalOperationUpdateConfiguration(service_index,
+                                                                       vnf_index_to_change,
+                                                                       value_to_change,
+                                                                       new_value,
+                                                                       self.logical_clock[name_vnf_to_update],
+                                                                       wait_period, name_vnf_to_update)
+        s = UpdateVnfInfoAfterInternalOperation(update_configuration)
         for orchestrator in self.list_orchestrator:
             print('orchestrator: ', orchestrator)
             self.messages_sent += 1
             self.server.connect_to_another_server_raw(orchestrator[0], orchestrator[1])
             self.server.send_message(s)
-
-            # x = self.server.send_channel.recv(SocketSize.RECEIVE_BUFFER.value)
-            # answer_message = pickle.loads(x)
-            # str_log = 'Received answer from new VNF TYPE: ' + str(type(answer_message))
-            # self.server.disconnect_send_channel()
 
     def update_vnf_info(self, service_index, vnf_index_to_change, value_to_change, new_value, clock, name):
         my_clock = self.logical_clock[name] + 1
@@ -94,7 +91,6 @@ class Orchestrator:
         self.print_vnf_fg_information()
 
     def update_vnf_info_with_clocks(self, service_index, vnf_index_to_change, value_to_change, new_value, clock, name):
-        # name_vnf_to_update = self.vnf_fg_information[service_index][vnf_index_to_change]['name']
         lock = threading.Lock()
         lock.acquire()
         try:
@@ -117,7 +113,6 @@ class Orchestrator:
         finally:
             lock.release()
 
-
     def print_vnf_fg_information(self):
         log.info('Services left to update: ' + str(self.updates_remaining))
         if self.updates_remaining == 0:
@@ -129,7 +124,6 @@ class Orchestrator:
             log.info(str_incon)
             str_message_overhead = 'Messages: ' + str(self.messages_sent)
             log.info(str_message_overhead)
-
 
     def update_vnf_info_timer(self, service_index, vnf_index_to_change, value_to_change, new_value, clock, wait_period, name_vnf_to_update):
         wait_period += random.randint(0, 10)
@@ -166,7 +160,6 @@ class Orchestrator:
             self.send_update_message(2, vnf_index_to_change, value_to_change, new_value, wait_period)
 
         print('Finish sending messages')
-        # t = threading.Timer(3.0, self.hello, [0, 1, 2, 'SAS'])
 
     def load_services_information(self):
         with open('experiments/' + self.experiment_path + self.experiment_name) as json_file:
@@ -196,13 +189,7 @@ class Orchestrator:
     def print_state_vnf(self):
         log.info(''.join(["VNF name: ", self.name]))
 
-    # TODO: Handle more cases of migration and the orchestrator requires to update his managed vnfs
     def get_local_vnf(self, vnf_name):
-        # # First check if the name is present in old ones to update
-        # for old_vnfs in self.list_old_vnfs:
-        #     if old_vnfs['name'] == vnf_name:
-        # # If not then use the normal list
-
         return self.list_vnf.get(vnf_name)
 
     # Todo: Implement this function to handle dynamic orchestrator
@@ -240,8 +227,8 @@ class Orchestrator:
                 old_vnf['ip'] = vnf_host
                 self.list_old_vnfs.append(old_vnf)
                 # SEND TO ALL ORCHESTRATORS MESSAGES
-                for orquestrator in self.list_orchestrator:
-                    print('Orchestrator: ', orquestrator)
+                for orchestrator in self.list_orchestrator:
+                    print('Orchestrator: ', orchestrator)
                 break
 
     def send_message_to_vnf(self, vnf, message):
@@ -271,3 +258,23 @@ class Orchestrator:
                 return answer_message
             log.info(''.join(["Querying Orchestrator: ", str(o[0]), " ", str(o[1]), " does not have it"]))
         return None
+
+    def get_local_vnf_by_ip(self, ip_of_vnf):
+        for vnf in self.list_vnf:
+            if vnf.host == ip_of_vnf:
+                return vnf
+        return None
+
+    # TODO: Check the return type to be sure send_message_to_vnf correclty sends the type of function
+    def send_update_to_vnf_by_oss(self, name_of_vnf_to_change, operation, first_operation, max_delay, local_search):
+        vnf_to_update_information_by_name = self.get_local_vnf(name_of_vnf_to_change)
+        if vnf_to_update_information_by_name:
+            new_message = UpdateOperationMessage(operation, first=first_operation, local_search=True)
+            random.randint(1, max_delay)
+            self.send_message_to_vnf(vnf_to_update_information_by_name, new_message)
+        else:
+            if local_search:
+                m = InformOfVnfUpdate(name_of_vnf_to_change, operation, max_delay, local_search=False)
+                self.send_message_to_orchestrators(m)
+
+    # def send_update_to_vnf_by_oss_recursive(self):

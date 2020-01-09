@@ -1,5 +1,6 @@
 from enum import Enum
 
+
 class StringConstants(Enum):
     SEND_PREVIOUS_VNF_P = 'Sending SendQueuePMessage to previous VNF'
     SEND_PREVIOUS_VNF_Q = 'Sending SendQueueQMessage to previous VNF'

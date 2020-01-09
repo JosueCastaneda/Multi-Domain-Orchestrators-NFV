@@ -100,7 +100,7 @@ class DockerCommandsGenerator:
             first_str = 'docker exec -it mn.' + vnf['name'] + ' python vnf_script.py -h ' + vnf['ip'] + ' -v 4437 -o ' + orch_ip
             second_str = ' -q 5461 -n ' + vnf['name'] + ' --topology ' + vnf_topology + ' --migration_ip ' + migration_ip
             third_str = ' --migration_topology ' + migration_ip_topology + ' --services ' + services
-            fourth_str = ' --initial ' + vnf_initial +' &'
+            fourth_str = ' --initial ' + vnf_initial + ' &'
             self.file_commands.write(first_str + second_str + third_str + fourth_str + new_line)
 
     def set_up_running_vnf_unique(self):
@@ -119,7 +119,7 @@ class DockerCommandsGenerator:
             first_str = 'docker exec -it mn.' + vnf['name'] + ' python vnf_script.py -h ' + vnf['ip'] + ' -v 4437 -o ' + orch_ip
             second_str = ' -q 5461 -n ' + vnf['name'] + ' --topology ' + vnf_topology + ' --migration_ip ' + migration_ip
             third_str = ' --migration_topology ' + migration_ip_topology + ' --services ' + services
-            fourth_str = ' --initial ' + vnf_initial +' &'
+            fourth_str = ' --initial ' + vnf_initial + ' &'
             self.file_commands.write(first_str + second_str + third_str + fourth_str + new_line)
 
 
@@ -184,6 +184,10 @@ class DockerCommandsGenerator:
         self.write_new_line_to_file()
         print('Setting done!')
 
+    # TODO: Complete this function
+    def add_internal_updates_information(self):
+        pass
+
     def get_random_vnf_ip(self, seed):
         random.seed(seed)
         random_index = random.randint(0, len(self.vnf_container_list) - 1)
@@ -211,7 +215,7 @@ class DockerCommandsGenerator:
 
     def get_vnf_detailed_information(self, operation):
         for vnf in self.vnf_list_detailed:
-            if vnf['operation'] +' ' == operation:
+            if vnf['operation'] + ' ' == operation:
                 return vnf
         return None
 

@@ -4,23 +4,16 @@ from utilities.logger import *
 
 class UpdateVnfInfoAfterInternalOperation(AbstractMessage):
 
-    def __init__(self, data,
-                 service_index,
-                 vnf_index_to_change,
-                 value_to_change,
-                 new_value,
-                 logical_clock,
-                 wait_period,
-                 name_vnf_to_update):
-        super().__init__(data)
+    def __init__(self, configuration):
+        super().__init__(None)
         self.current_server = None
-        self.service_index = service_index
-        self.vnf_index_to_change = vnf_index_to_change
-        self.value_to_change = value_to_change
-        self.new_value = new_value
-        self.logical_clock = logical_clock
-        self.wait_period = wait_period
-        self.name_vnf_to_update = name_vnf_to_update
+        self.service_index = configuration.service_index
+        self.vnf_index_to_change = configuration.vnf_index_to_change
+        self.value_to_change = configuration.value_to_change
+        self.new_value = configuration.new_value
+        self.logical_clock = configuration.logical_clock
+        self.wait_period = configuration.wait_period
+        self.name_vnf_to_update = configuration.name_vnf_to_update
 
     def process_by_command_line(self):
         log.info("UpdateVnfInfoAfterInternalOperation...")

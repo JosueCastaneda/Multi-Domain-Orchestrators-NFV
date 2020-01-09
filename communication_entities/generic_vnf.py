@@ -1,9 +1,11 @@
 import pickle
+import random
 import time
 
 from communication_entities.generic_server import GenericServer
 from communication_entities.messages.add_vnf_message import AddVNF
 from communication_entities.messages.all_queue_information import AllQueueInformation
+from communication_entities.messages.inform_of_vnf_update import InformOfVnfUpdate
 from communication_entities.messages.migration_ack_message import MigrationAckMessage
 from communication_entities.messages.migration_deactivate_recusive_message import MigrationDeactivateRecursiveMessage
 from communication_entities.messages.raw_text_message import RawTextMessage
@@ -308,3 +310,28 @@ class GenericVNF:
 
     def serve_clients(self):
         self.server.serve_clients()
+
+    def update_vnf_by_operation_simple(self, operation, first_operation):
+        self.apply_operation(operation)
+        for affected in self.list_affected_vnf:
+            if first_operation:
+                self.handle_first_operation(affected, operation)
+            else:
+                self.handle_recursive_operation(affected, operation)
+
+    # TODO: Stub operation
+    def apply_operation(self, operation):
+        print('Operation: ', operation)
+
+    def handle_first_operation(self, affected, operation):
+        new_message = InformOfVnfUpdate(affected, operation, first=False, local_search=True)
+        self.connect_and_send_message_to_orchestrator(new_message)
+
+    def handle_recursive_operation(self, affected, operation):
+        if self.is_dependent_change():
+            self.handle_first_operation(affected, operation)
+
+    def is_dependent_change(self):
+        if random.randint(1, 100) >= self.configuration.dependent_changes_threshold:
+            return True
+        return False

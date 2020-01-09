@@ -41,6 +41,7 @@ class MessageGenerator:
             m = RequestUpdateMessage(self.command.seed, self.command.end_time)
         return m
 
+    # FIXME: Now it only accepts a single argument,
     @staticmethod
     def generate_add_message(vnf_host, vnf_port, name):
         return AddVNF(vnf_host, vnf_port, name)

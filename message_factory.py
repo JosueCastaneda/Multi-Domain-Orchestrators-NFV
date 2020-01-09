@@ -13,11 +13,6 @@ from utilities.logger import log
 
 def main(argv):
     command = read_parameters(argv)
-    # file = 'experiments/first/1920/exp_1_3/parameters.json'
-    # file = 'experiments/first/480/exp_1_4/experiments/experiment_0.json'
-    # file = 'experiments/first/1920/exp_1_5/parameters.json'
-    #file = 'experiments/first/1920/exp_1_6/parameters.json'
-    # print('Filename:', file)
     if command.is_valid():
         messages = generate_messages(command)
         if isinstance(messages, list):
@@ -86,7 +81,7 @@ def read_parameters(argv):
         elif opt in ("-w", "--vnf_port"):
             command.vnf_port = arg
         elif opt in ("-e", "--experiment"):
-            str_exp = 'experiments/first/480/exp_1_8/experiments/experiment_' + arg +'.json'
+            str_exp = 'experiments/first/480/exp_1_8/experiments/experiment_' + arg + '.json'
             command.experiment = str_exp
         elif opt in ("-s", "--seed"):
             command.seed = arg

@@ -10,7 +10,8 @@ class VnfConfiguration:
                  topology=None,
                  orchestrator=None,
                  migration_configuration=None,
-                 dependency_list=None):
+                 dependency_list=None,
+                 dependent_changes_threshold=None):
         self.static_configuration = static_configuration
         self.state = VnfState(initial_value=static_configuration.get_initial())
         self.service_package = service_package
@@ -20,6 +21,7 @@ class VnfConfiguration:
         self.connection_points = []
         self.dependency_list = dependency_list
         self.list_affected_vnf = []
+        self.dependent_changes_threshold = dependent_changes_threshold
 
     def get_dependency_list(self):
         return self.dependency_list

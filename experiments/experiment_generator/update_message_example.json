@@ -1,0 +1,20 @@
+{
+  "hosts":
+  [
+    {
+      "host": "10.0.3.1",
+      "port": "3447",
+      "seed": "9999"
+    },
+    {
+      "host": "10.0.3.2",
+      "port": "3447",
+      "seed": "99919"
+    }
+  ],
+  "service_index": "0",
+  "vnf_index_to_change": "1",
+  "value_to_change": "new_name",
+  "new_value": "10.0.33.4",
+  "name_vnf_to_update": "test_vnf"
+}
