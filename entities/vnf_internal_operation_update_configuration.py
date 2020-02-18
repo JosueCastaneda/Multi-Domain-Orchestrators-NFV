@@ -2,7 +2,7 @@ class VnfInternalOperationUpdateConfiguration:
     # TODO: Check why Now I am sending the hosts, ports, seeds and number of hosts as parameters
     def __init__(self,
                  service_index,
-                 vnf_to_change_index,
+                 vnf_index_to_change,
                  value_to_change,
                  new_value,
                  wait_period,
@@ -17,7 +17,7 @@ class VnfInternalOperationUpdateConfiguration:
         self.list_seeds = seeds
         self.number_of_hosts = number_of_hosts
         self.service_index = service_index
-        self.vnf_to_change_index = vnf_to_change_index
+        self.vnf_to_change_index = vnf_index_to_change
         self.value_to_change = value_to_change
         self.new_value = new_value
         self.wait_period = wait_period

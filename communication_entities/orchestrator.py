@@ -73,12 +73,13 @@ class Orchestrator:
         name_vnf_to_update = self.vnf_fg_information[service_index][vnf_index_to_change]['name']
         self.logical_clock[name_vnf_to_update] += 1
         self.vnf_fg_information[service_index][vnf_index_to_change][value_to_change] = new_value
-        update_configuration = VnfInternalOperationUpdateConfiguration(service_index,
-                                                                       vnf_index_to_change,
-                                                                       value_to_change,
-                                                                       new_value,
-                                                                       self.logical_clock[name_vnf_to_update],
-                                                                       wait_period, name_vnf_to_update,
+        update_configuration = VnfInternalOperationUpdateConfiguration(service_index=service_index,
+                                                                       vnf_index_to_change=vnf_index_to_change,
+                                                                       value_to_change=value_to_change,
+                                                                       new_value=new_value,
+                                                                       logical_clock=self.logical_clock[name_vnf_to_update],
+                                                                       wait_period=wait_period,
+                                                                       name_vnf_to_update=name_vnf_to_update,
                                                                        hosts=0,
                                                                        ports=0,
                                                                        seeds=0,
