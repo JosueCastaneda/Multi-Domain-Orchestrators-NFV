@@ -136,7 +136,7 @@ class Orchestrator:
         str_log_wait = 'Waiting period: ' + str(wait_period)
         log.info(str_log_wait)
 
-        t = threading.Timer(wait_period, self.update_vnf_info, [service_index,
+        t = threading.Timer(wait_period, self.update_vnf_info_with_clocks, [service_index,
                                                                 vnf_index_to_change,
                                                                 value_to_change,
                                                                 new_value,
