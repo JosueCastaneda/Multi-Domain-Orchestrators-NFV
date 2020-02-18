@@ -6,7 +6,16 @@ from utilities.random_integer_generation import generate_random_integer
 class DockerCommandsGenerator:
 
     # TODO: Update the constructor to use a single object instead of multiple variables
-    def __init__(self, path, delay, bandwidth, loss, jitter, name_of_experiment, length_of_vnfs):
+    def __init__(self,
+                 path,
+                 delay,
+                 bandwidth,
+                 loss,
+                 jitter,
+                 name_of_experiment,
+                 length_of_vnfs,
+                 index_update,
+                 index_threshold):
         self.path = path
         self.list_orchestrator = list()
         self.vnf_list_detailed = []
@@ -27,7 +36,11 @@ class DockerCommandsGenerator:
         self.file_orchestrator = open(self.path + 'containers_orchestrator.sh', 'r+')
         self.file_commands = open(self.path + 'docker_commands_' + self.name_experiment + '.sh', 'w+')
         self.seeds = None
+        self.dependent_thresholds = None
+        self.number_of_updates = None
         random.seed(5)
+        self.index_updates = index_update
+        self.index_thresholds = index_threshold
 
     def generate_commands(self):
         self.write_first_line_to_file()
@@ -70,6 +83,9 @@ class DockerCommandsGenerator:
     def set_up_chain_orchestrators(self):
         print('Chaining')
         new_line = '\n'
+        head_line = '# Add orchestrators'
+        self.file_commands.write(head_line + new_line)
+
         for index in range(len(self.list_orchestrator)):
             current_orchestrator = self.list_orchestrator[index]
             for i in range(len(self.list_orchestrator)):
@@ -87,6 +103,9 @@ class DockerCommandsGenerator:
     def set_up_running_vnf(self):
         print('Running VNF')
         new_line = '\n'
+        head_line = '# Setup running VNF'
+        self.file_commands.write(head_line + new_line)
+
         for vnf in self.vnf_container_list:
             index = self.generate_random_indexes() - 1
             orch_ip = self.list_orchestrator[index][1]
@@ -106,6 +125,10 @@ class DockerCommandsGenerator:
     def set_up_running_vnf_unique(self):
         print('Running VNF')
         new_line = '\n'
+
+        head_line = '# Set up running unique VNF'
+        self.file_commands.write(head_line + new_line)
+
         index = self.generate_random_indexes() - 1
         orch_ip = self.list_orchestrator[index][1]
         for vnf in self.vnf_container_list:
@@ -163,6 +186,9 @@ class DockerCommandsGenerator:
     def add_vnf_chains(self):
         print('Setting chains VNF')
         new_line = '\n'
+        head_line = '# Add chains for the experiment'
+        self.file_commands.write(head_line + new_line)
+
         for service in self.detailed_services:
             for i in range(0, self.length_of_vnfs - 1):
                 first_ip, second_ip = self.get_pair_of_ip(service, i)
@@ -175,6 +201,10 @@ class DockerCommandsGenerator:
     def add_request_of_updates(self):
         print('Setting up updates')
         new_line = '\n'
+        self.write_new_line_to_file()
+        head_line = '# Updates to the service'
+        self.file_commands.write(head_line + new_line)
+
         for i in range(0, len(self.seeds)):
             random_seed = self.seeds[i]
             random_vnf_ip = self.get_random_vnf_ip(random_seed)
@@ -276,6 +306,14 @@ class DockerCommandsGenerator:
     def load_seeds(self):
         with open('random_seeds.txt', 'r') as f:
             self.seeds = [line.strip() for line in f]
+
+    def load_threshold_values(self):
+        with open('dependent_threshold_values.txt', 'r') as f:
+            self.dependent_thresholds = [line.strip() for line in f]
+
+    def load_number_of_updates(self):
+        with open('number_of_updates.txt', 'r') as f:
+            self.number_of_updates = [line.strip() for line in f]
 
     # TODO: Use join to add two strings togehter
     def load_list_vnf_migration(self):

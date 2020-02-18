@@ -1,5 +1,6 @@
 import pickle
 import random
+import threading
 import time
 
 from communication_entities.generic_server import GenericServer
@@ -25,7 +26,7 @@ from utilities.logger import log
 from utilities.socket_size import SocketSize
 from utilities.string_constants import StringConstants
 from utilities.vnf_factory import crete_new_vnf_from_topology, create_migration_deactivate_message
-from utilities.vnf_fg_update import save_update_time, save_migration_time
+from utilities.vnf_fg_update import save_update_time, save_migration_time, save_update_time_by_operation
 
 
 class GenericVNF:
@@ -311,25 +312,35 @@ class GenericVNF:
     def serve_clients(self):
         self.server.serve_clients()
 
-    def update_vnf_by_operation_simple(self, operation, first_operation):
-        self.apply_operation(operation)
-        for affected in self.list_affected_vnf:
-            if first_operation:
-                self.handle_first_operation(affected, operation)
-            else:
-                self.handle_recursive_operation(affected, operation)
+    def update_vnf_by_operation_simple(self, operation, first_operation, wait_period, time_elapsed):
+        t = threading.Timer(wait_period, self.apply_operation, [operation, first_operation, time_elapsed, wait_period])
+        self.updates_remaining += 1
+        t.start()
 
-    # TODO: Stub operation
-    def apply_operation(self, operation):
+    # TODO: Stub operation. Need to implement this function to really change something in the VNF
+    def apply_operation(self, operation, is_first_operation, elapsed_time, wait_period):
         print('Operation: ', operation)
+        if len(self.list_affected_vnf) == 0:
+            save_update_time_by_operation(elapsed_time)
+        else:
+            for affected in self.list_affected_vnf:
+                if is_first_operation:
+                    self.handle_first_operation(affected, operation, elapsed_time, wait_period)
+                else:
+                    self.handle_recursive_operation(affected, operation, elapsed_time, wait_period)
 
-    def handle_first_operation(self, affected, operation):
-        new_message = InformOfVnfUpdate(affected, operation, first=False, local_search=True)
+    def handle_first_operation(self, affected, operation, elapsed_time, wait_period):
+        current_time = time.time()
+        new_time = current_time - elapsed_time
+        new_delay = random.randint(1, wait_period)
+        new_message = InformOfVnfUpdate(affected, operation, new_delay, time=new_time, first=False, local_search=True)
         self.connect_and_send_message_to_orchestrator(new_message)
 
-    def handle_recursive_operation(self, affected, operation):
+    def handle_recursive_operation(self, affected, operation, elapsed_time, wait_period):
         if self.is_dependent_change():
-            self.handle_first_operation(affected, operation)
+            self.handle_first_operation(affected, operation, elapsed_time, wait_period)
+        else:
+            save_update_time_by_operation(elapsed_time)
 
     def is_dependent_change(self):
         if random.randint(1, 100) >= self.configuration.dependent_changes_threshold:

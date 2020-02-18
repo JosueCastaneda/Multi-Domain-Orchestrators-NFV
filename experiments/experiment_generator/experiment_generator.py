@@ -246,8 +246,8 @@ class ExperimentGenerator():
 
 def main():
     number_of_experiments = 10
-    number_of_services = 3
-    length_of_vnfs = 4
+    number_of_services = 10
+    length_of_vnfs = 5
     video_definition = 480
     delay = [0, 20]
     bandwidth = [0, 70]
@@ -291,7 +291,9 @@ def main():
                                            loss,
                                            jitter,
                                            experiment_file,
-                                           length_of_vnfs)
+                                           length_of_vnfs,
+                                           index_update=0,
+                                           index_threshold=0)
         dock_gen.generate_commands()
         print('End docker commands')
 
@@ -301,11 +303,11 @@ def main():
         up_service.add_migration_information_to_services()
         print('Finish applying migration information ....')
 
-    for experiment_file in list_name_experiments:
-        print('Begin valid generation')
-        val_gen = ValidatorGenerator(experiment_file, experiment_path)
-        val_gen.validate_experiment()
-        print('End valid generation')
+    # for experiment_file in list_name_experiments:
+    #     print('Begin valid generation')
+    #     val_gen = ValidatorGenerator(experiment_file, experiment_path)
+    #     val_gen.validate_experiment()
+    #     print('End valid generation')
 
     # for experiment_file in list_name_experiments:
     #     print('Begin docker commands')

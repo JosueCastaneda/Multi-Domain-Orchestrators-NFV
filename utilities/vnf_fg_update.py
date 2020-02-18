@@ -42,6 +42,17 @@ def save_update_time(total_time):
     file.close()
 
 
+def save_update_time_by_operation(total_time):
+    file_name = 'time_update_operation.txt'
+    if not os.path.exists(file_name):
+        file = open(file_name, 'w+')
+    else:
+        file = open(file_name, 'a')
+    file.write(str(total_time))
+    file.write('\n')
+    file.close()
+
+
 def save_migration_time(total_time):
     log.info('Saving migration time')
     pickle.dump(total_time, open('migration_time.p', 'wb'))

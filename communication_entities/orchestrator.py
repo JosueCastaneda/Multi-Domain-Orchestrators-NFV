@@ -3,10 +3,12 @@ import pickle
 import random
 import sys
 import threading
+import time
 
 from communication_entities.messages.inform_of_vnf_update import InformOfVnfUpdate
-from communication_entities.messages.update_operation_message import UpdateOperationMessage
+from communication_entities.messages.update_operation_message import UpdateVnfViaOperationMessage
 from communication_entities.messages.update_vnf_info_after_internal_operation import UpdateVnfInfoAfterInternalOperation
+from entities.update_configuration_by_oss import UpdateConfigurationByOss
 from entities.vnf_internal_operation_update_configuration import VnfInternalOperationUpdateConfiguration
 
 sys.path.append('../')
@@ -19,7 +21,7 @@ from utilities.logger import *
 
 class Orchestrator:
 
-    def __init__(self, server, path, experiment_name, orchestrator_list=None, topology=None, name=""):
+    def __init__(self, server, path, experiment_name, orchestrator_list=None, topology=None, name="", is_clock_algorithm_active=False):
         self.list_vnf = dict()
         self.list_old_vnfs = []
         self.list_orchestrator = orchestrator_list
@@ -41,6 +43,8 @@ class Orchestrator:
         self.updates_remaining = 0
         self.inconsistencies = 0
         self.messages_sent = 0
+        self.messages_overhead = 0
+        self.is_clock_algorithm_active = is_clock_algorithm_active
 
     def set_up_logical_clocks(self):
         self.logical_clock['ANNOTATE'] = 0
@@ -90,21 +94,21 @@ class Orchestrator:
         self.updates_remaining -= 1
         self.print_vnf_fg_information()
 
-    def update_vnf_info_with_clocks(self, service_index, vnf_index_to_change, value_to_change, new_value, clock, name):
+    def update_vnf_info_with_clocks(self, service_index, vnf_index_to_change, value_to_change, new_value, received_clock, name):
         lock = threading.Lock()
         lock.acquire()
         try:
             self.logical_clock[name] += 1
             my_clock = self.logical_clock[name]
-            print('Internal clock: ', my_clock, ' External clock: ', clock)
+            print('Internal clock: ', my_clock, ' External clock: ', received_clock)
             print('Old value: ', self.vnf_fg_information[service_index][vnf_index_to_change][value_to_change])
-            if clock > my_clock:
+            if received_clock > my_clock:
                 log.info('New clock')
                 self.vnf_fg_information[service_index][vnf_index_to_change][value_to_change] = new_value
-                self.logical_clock[name] = clock
+                self.logical_clock[name] = received_clock
 
-            if self.logical_clock[name] < clock:
-                print('Inconsistency- internal: ', self.logical_clock[name], ' external: ', clock)
+            if self.logical_clock[name] < received_clock:
+                print('Inconsistency- internal: ', self.logical_clock[name], ' external: ', received_clock)
                 self.inconsistencies += 1
 
             print('New value: ', self.vnf_fg_information[service_index][vnf_index_to_change][value_to_change])
@@ -266,15 +270,51 @@ class Orchestrator:
         return None
 
     # TODO: Check the return type to be sure send_message_to_vnf correclty sends the type of function
-    def send_update_to_vnf_by_oss(self, name_of_vnf_to_change, operation, first_operation, max_delay, local_search):
-        vnf_to_update_information_by_name = self.get_local_vnf(name_of_vnf_to_change)
+    def send_update_to_vnf_by_oss(self, configuration):
+        vnf_to_update_information_by_name = self.get_local_vnf(configuration.name_of_vnf_to_change)
+        wait_period = random.randint(1, configuration.max_delay)
         if vnf_to_update_information_by_name:
-            new_message = UpdateOperationMessage(operation, first=first_operation, local_search=True)
-            random.randint(1, max_delay)
-            self.send_message_to_vnf(vnf_to_update_information_by_name, new_message)
+            self.handle_local_update(vnf_to_update_information_by_name, configuration, wait_period)
         else:
-            if local_search:
-                m = InformOfVnfUpdate(name_of_vnf_to_change, operation, max_delay, local_search=False)
-                self.send_message_to_orchestrators(m)
+            self.handle_external_update(vnf_to_update_information_by_name)
 
-    # def send_update_to_vnf_by_oss_recursive(self):
+    def handle_local_update(self, vnf_to_update_information_by_name, configuration, wait_period):
+        overhead_time = self.check_consistency_and_update_vnf_clock(vnf_to_update_information_by_name,
+                                                                    configuration.received_clock,
+                                                                    wait_period)
+        new_time = time.time()
+        time_elapsed = new_time - configuration.passed_time + overhead_time
+        new_configuration = UpdateConfigurationByOss(operation=configuration.operation,
+                                                     wait_period=configuration.wait_period,
+                                                     time_elapsed=time_elapsed,
+                                                     first_operation=configuration.first_operation,
+                                                     local_search=True)
+        new_message = UpdateVnfViaOperationMessage(new_configuration)
+        self.send_message_to_vnf(vnf_to_update_information_by_name, new_message)
+
+    def handle_external_update(self, configuration):
+        if configuration.local_search:
+            new_time = time.time()
+            time_elapsed = new_time - configuration.passed_time
+            m = InformOfVnfUpdate(configuration.name_of_vnf_to_change,
+                                  configuration.operation,
+                                  configuration.max_delay,
+                                  time_elapsed,
+                                  local_search=False)
+            self.send_message_to_orchestrators(m)
+        else:
+            self.messages_overhead += 1
+            str_overhead_messages = '# Messages overhead: ' + self.messages_overhead
+            log.info(str_overhead_messages)
+
+    def check_consistency_and_update_vnf_clock(self, vnf_name, received_clock, wait_period):
+        self.logical_clock[vnf_name] += 1
+        internal_clock = self.logical_clock[vnf_name]
+        if received_clock >= internal_clock:
+            self.logical_clock[vnf_name] = received_clock
+        else:
+            if self.is_clock_algorithm_active:
+                return wait_period
+            else:
+                self.inconsistencies += 1
+        return 0

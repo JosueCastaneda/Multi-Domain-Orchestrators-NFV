@@ -1,0 +1,225 @@
+{
+  "vnf":
+  [
+    {
+      "operation": "ROTATE",
+      "server": "10.0.0.13",
+      "port": 4437,
+      "queue_p": [1],
+      "queue_q": [2],
+      "queue_r": [3],
+      "delay": 0.0,
+      "bandwidth": 0.0,
+      "loss": 0.0,
+      "jitter": 0.0,
+      "orchestrator": 0,
+      "migration_vnf_ip": null,
+      "entry_connection_point": "rot_in",
+      "exit_connection_point": "rot_out"
+    },
+
+    {
+      "operation": "CROP",
+      "server": "10.0.0.12",
+      "port": 4437,
+      "queue_p": [4],
+      "queue_q": [5],
+      "queue_r": [6],
+      "delay": 0.0,
+      "bandwidth": 0.0,
+      "loss": 0.0,
+      "jitter": 0.0,
+      "orchestrator": 0,
+      "migration_vnf_ip": null,
+      "entry_connection_point": "crop_in",
+      "exit_connection_point": "crop_out"
+    },
+
+    {
+      "operation": "PAINTING",
+      "server": "10.0.0.15",
+      "port": 4437,
+      "queue_p": [7],
+      "queue_q": [8],
+      "queue_r": [9],
+      "delay": 0.0,
+      "bandwidth": 0.0,
+      "loss": 0.0,
+      "jitter": 0.0,
+      "orchestrator": 0,
+      "migration_vnf_ip": null,
+      "entry_connection_point": "paint_in",
+      "exit_connection_point": "paint_out"
+    },
+
+    {
+      "operation": "RESIZE",
+      "server": "10.0.0.101",
+      "port": 4437,
+      "queue_p": [10],
+      "queue_q": [11],
+      "queue_r": [12],
+      "delay": 0.0,
+      "bandwidth": 0.0,
+      "loss": 0.0,
+      "jitter": 0.0,
+      "orchestrator": 0,
+      "migration_vnf_ip": null,
+      "entry_connection_point": "resize_in",
+      "exit_connection_point": "resize_out"
+    },
+
+    {
+      "operation": "BLACK_WHITE",
+      "server": "10.0.0.20",
+      "port": 4437,
+      "queue_p": [13],
+      "queue_q": [14],
+      "queue_r": [15],
+      "delay": 0.0,
+      "bandwidth": 0.0,
+      "loss": 0.0,
+      "jitter": 0.0,
+      "orchestrator": 0,
+      "migration_vnf_ip": null,
+      "entry_connection_point": "black_in",
+      "exit_connection_point": "black_out"
+    },
+
+    {
+      "operation": "ANNOTATE",
+      "server": "10.0.0.18",
+      "port": 4437,
+      "queue_p": [16],
+      "queue_q": [17],
+      "queue_r": [18],
+      "delay": 0.0,
+      "bandwidth": 0.0,
+      "loss": 0.0,
+      "jitter": 0.0,
+      "orchestrator": 0,
+      "migration_vnf_ip": null,
+      "entry_connection_point": "annotate_in",
+      "exit_connection_point": "annotate_out"
+    },
+
+    {
+      "operation": "MIRROR_X",
+      "server": "10.0.0.17",
+      "port": 4437,
+      "queue_p": [19],
+      "queue_q": [20],
+      "queue_r": [21],
+      "delay": 0.0,
+      "bandwidth": 0.0,
+      "loss": 0.0,
+      "jitter": 0.0,
+      "orchestrator": 0,
+      "migration_vnf_ip": null,
+      "entry_connection_point": "mirrorx_in",
+      "exit_connection_point": "mirrorx_out"
+    },
+
+    {
+      "operation": "INVERT_COLORS",
+      "server": "10.0.0.21",
+      "port": 4437,
+      "queue_p": [22],
+      "queue_q": [23],
+      "queue_r": [24],
+      "delay": 0.0,
+      "bandwidth": 0.0,
+      "loss": 0.0,
+      "jitter": 0.0,
+      "orchestrator": 0,
+      "migration_vnf_ip": null,
+      "entry_connection_point": "invert_in",
+      "exit_connection_point": "invert_out"
+    },
+
+    {
+      "operation": "FADE_OUT",
+      "server": "10.0.0.19",
+      "port": 4437,
+      "queue_p": [25],
+      "queue_q": [26],
+      "queue_r": [27],
+      "delay": 0.0,
+      "bandwidth": 0.0,
+      "loss": 0.0,
+      "jitter": 0.0,
+      "orchestrator": 0,
+      "migration_vnf_ip": null,
+      "entry_connection_point": "fadeout_in",
+      "exit_connection_point": "fadeout_out"
+    },
+
+    {
+      "operation": "SPEED_UP",
+      "server": "10.0.0.68",
+      "port": 4437,
+      "queue_p": [28],
+      "queue_q": [29],
+      "queue_r": [30],
+      "delay": 0.0,
+      "bandwidth": 0.0,
+      "loss": 0.0,
+      "jitter": 0.0,
+      "orchestrator": 0,
+      "migration_vnf_ip": null,
+      "entry_connection_point": "speed_in",
+      "exit_connection_point": "speed_out"
+    },
+
+    {
+      "operation": "FADE_IN",
+      "server": "10.0.0.14",
+      "port": 4437,
+      "queue_p": [31],
+      "queue_q": [32],
+      "queue_r": [33],
+      "delay": 0.0,
+      "bandwidth": 0.0,
+      "loss": 0.0,
+      "jitter": 0.0,
+      "orchestrator": 0,
+      "migration_vnf_ip": null,
+      "entry_connection_point": "fadein_in",
+      "exit_connection_point": "fadein_out"
+    },
+
+    {
+      "operation": "COMPOSITE",
+      "server": "10.0.0.100",
+      "port": 4437,
+      "queue_p": [34],
+      "queue_q": [35],
+      "queue_r": [36],
+      "delay": 0.0,
+      "bandwidth": 0.0,
+      "loss": 0.0,
+      "jitter": 0.0,
+      "orchestrator": 0,
+      "migration_vnf_ip": null,
+      "entry_connection_point": "composite_in",
+      "exit_connection_point": "composite_out"
+    },
+
+    {
+      "operation": "MIRROR_Y",
+      "server": "10.0.0.16",
+      "port": 4437,
+      "queue_p": [37],
+      "queue_q": [38],
+      "queue_r": [39],
+      "delay": 0.0,
+      "bandwidth": 0.0,
+      "loss": 0.0,
+      "jitter": 0.0,
+      "orchestrator": 0,
+      "migration_vnf_ip": null,
+      "entry_connection_point": "mirrory_in",
+      "exit_connection_point": "mirrory_out"
+    }
+  ]
+}
