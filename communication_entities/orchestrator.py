@@ -133,7 +133,7 @@ class Orchestrator:
 
     def update_vnf_info_timer(self, service_index, vnf_index_to_change, value_to_change, new_value, clock, wait_period, name_vnf_to_update):
         #wait_period += random.randint(0, 5)
-        wait_period = random.randint(0, 2)
+        wait_period = random.randint(0, 20)
         str_log_wait = 'Waiting period: ' + str(wait_period)
         log.info(str_log_wait)
 
