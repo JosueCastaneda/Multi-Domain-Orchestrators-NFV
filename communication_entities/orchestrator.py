@@ -69,7 +69,7 @@ class Orchestrator:
         self.add_virtual_network_function_forwarding_graph_information()
 
     def send_update_message(self, service_index, vnf_index_to_change, value_to_change, new_value, wait_period):
-        print("Changes: ", vnf_index_to_change, ' ', value_to_change, ' ', new_value)
+        print("VNF index to change: ", vnf_index_to_change, ' Value to change: ', value_to_change, ' New value:', new_value)
         name_vnf_to_update = self.vnf_fg_information[service_index][vnf_index_to_change]['name']
         self.logical_clock[name_vnf_to_update] += 1
         self.vnf_fg_information[service_index][vnf_index_to_change][value_to_change] = new_value
@@ -78,7 +78,11 @@ class Orchestrator:
                                                                        value_to_change,
                                                                        new_value,
                                                                        self.logical_clock[name_vnf_to_update],
-                                                                       wait_period, name_vnf_to_update)
+                                                                       wait_period, name_vnf_to_update,
+                                                                       hosts=0,
+                                                                       ports=0,
+                                                                       seeds=0,
+                                                                       number_of_hosts=0)
         s = UpdateVnfInfoAfterInternalOperation(update_configuration)
         for orchestrator in self.list_orchestrator:
             print('orchestrator: ', orchestrator)

@@ -1,5 +1,5 @@
 class VnfInternalOperationUpdateConfiguration:
-
+    # TODO: Check why Now I am sending the hosts, ports, seeds and number of hosts as parameters
     def __init__(self,
                  service_index,
                  vnf_to_change_index,
