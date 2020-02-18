@@ -86,6 +86,7 @@ class Orchestrator:
             # self.server.disconnect_send_channel()
 
     def update_vnf_info(self, service_index, vnf_index_to_change, value_to_change, new_value, clock, name):
+        log.info('Called after trigger ')
         my_clock = self.logical_clock[name] + 1
         if clock < my_clock:
             self.inconsistencies += 1
@@ -130,9 +131,11 @@ class Orchestrator:
             str_message_overhead = 'Messages: ' + str(self.messages_sent)
             log.info(str_message_overhead)
 
-
     def update_vnf_info_timer(self, service_index, vnf_index_to_change, value_to_change, new_value, clock, wait_period, name_vnf_to_update):
         wait_period += random.randint(0, 10)
+        str_log_wait = 'Waiting period: ' + wait_period
+        log.info(str_log_wait)
+
         t = threading.Timer(wait_period, self.update_vnf_info, [service_index,
                                                                 vnf_index_to_change,
                                                                 value_to_change,
