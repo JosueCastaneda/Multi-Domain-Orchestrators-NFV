@@ -246,7 +246,7 @@ class ExperimentGenerator():
 
 def main():
     number_of_experiments = 10
-    number_of_services = 3
+    number_of_services = 10
     length_of_vnfs = 5
     video_definition = 480
     delay = [0, 20]
