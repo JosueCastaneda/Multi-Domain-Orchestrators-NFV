@@ -253,17 +253,28 @@ def main():
     bandwidth = [0, 70]
     loss = [0, 10]
     jitter = [0, 10]
-    # FOR the 4th SIZE
-    # random_seed_list = [5, 1234, 12424, 282812, 239423]
-    # random_np_seed_list = [10, 2939, 104739, 14, 297573]
+    random_seed_list = None
+    random_np_seed_list = None
 
-    # FOR THE 8 Size
-    random_seed_list = [2940627, 3717510, 4651201, 5211310, 8760564]
-    random_np_seed_list = [3060307, 3953270, 5291516, 7353312, 8607401]
+    if length_of_vnfs == 4:
+        random_seed_list = [915079, 103325, 559869, 675171, 995719, 363117, 343184, 419122, 266230, 142585]
+        random_np_seed_list = [195144, 566204, 794644, 260097, 390724, 355203, 896144, 958085, 487911, 291244]
 
-    # For the 10 Size
-    random_seed_list = [42191, 41898, 41358, 91689, 36924, 89787, 52971, 88074, 12951, 79798]
-    random_np_seed_list = [72023, 75939, 31797, 34039, 41622, 16211, 31596, 84615, 31047, 59125]
+    if length_of_vnfs == 5:
+        random_seed_list = [70293, 294020, 660707, 500796, 915766, 976451, 628093, 879378, 197748, 774728]
+        random_np_seed_list = [70771, 976140, 735573, 368811, 825713, 13711, 718981, 52465, 371367, 597550]
+
+    if length_of_vnfs == 6:
+        random_seed_list = [980344, 524550, 34272, 206324, 547154, 620900, 212556, 720587, 411835, 416558]
+        random_np_seed_list = [961746, 551665, 16940, 431629, 442351, 135882, 943199, 765013, 351824, 376447]
+
+    if length_of_vnfs == 8:
+        random_seed_list = [2940627, 3717510, 4651201, 5211310, 8760564]
+        random_np_seed_list = [3060307, 3953270, 5291516, 7353312, 8607401]
+
+    if length_of_vnfs == 10:
+        random_seed_list = [42191, 41898, 41358, 91689, 36924, 89787, 52971, 88074, 12951, 79798]
+        random_np_seed_list = [72023, 75939, 31797, 34039, 41622, 16211, 31596, 84615, 31047, 59125]
 
     experiment_path = '../first/' + str(video_definition) +'/exp_1_' + str(length_of_vnfs) + '/experiments/'
     max_number_of_changes = 20
