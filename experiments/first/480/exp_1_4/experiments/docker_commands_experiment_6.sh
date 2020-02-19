@@ -17,46 +17,74 @@ docker exec -it mn.source python message_factory.py -t add_orchestrator -h 10.0.
 docker exec -it mn.source python message_factory.py -t add_orchestrator -h 10.0.0.36 -p 5461 -n none -m none --vnf_host 10.0.0.32 --vnf_port 5461
 docker exec -it mn.source python message_factory.py -t add_orchestrator -h 10.0.0.36 -p 5461 -n none -m none --vnf_host 10.0.0.34 --vnf_port 5461
 
-docker exec -it mn.vnf_ROTATE  python vnf_script.py -h 10.0.0.13 -v 4437 -o 10.0.0.34 -q 5461 -n vnf_ROTATE  --topology 11,67,0,7 --migration_ip 10.0.0.229 --migration_topology 9,18,2,7 --services 20,44,24,24,36,256,8,28,44,252,4,32 --initial 1 &
-docker exec -it mn.vnf_CROP  python vnf_script.py -h 10.0.0.12 -v 4437 -o 10.0.0.32 -q 5461 -n vnf_CROP  --topology 20,6,2,1 --migration_ip 10.0.0.182 --migration_topology 15,40,7,4 --services 20,44,24,24,36,256,8,28,44,252,4,32 --initial 4 &
-docker exec -it mn.vnf_PAINTING  python vnf_script.py -h 10.0.0.15 -v 4437 -o 10.0.0.34 -q 5461 -n vnf_PAINTING  --topology 15,31,6,8 --migration_ip 10.0.0.244 --migration_topology 16,17,3,5 --services 20,44,24,24,36,256,8,28,44,252,4,32 --initial 7 &
-docker exec -it mn.vnf_RESIZE  python vnf_script.py -h 10.0.0.101 -v 4437 -o 10.0.0.30 -q 5461 -n vnf_RESIZE  --topology 18,31,0,3 --migration_ip 10.0.0.195 --migration_topology 5,66,10,6 --services 20,44,24,24,36,256,8,28,44,252,4,32 --initial 10 &
-docker exec -it mn.vnf_BLACK_WHITE  python vnf_script.py -h 10.0.0.20 -v 4437 -o 10.0.0.36 -q 5461 -n vnf_BLACK_WHITE  --topology 8,23,6,2 --migration_ip 10.0.0.251 --migration_topology 4,48,5,3 --services 20,44,24,24,36,256,8,28,44,252,4,32 --initial 13 &
-docker exec -it mn.vnf_ANNOTATE  python vnf_script.py -h 10.0.0.18 -v 4437 -o 10.0.0.30 -q 5461 -n vnf_ANNOTATE  --topology 4,56,2,2 --migration_ip 10.0.0.238 --migration_topology 8,7,9,9 --services 20,44,24,24,36,256,8,28,44,252,4,32 --initial 16 &
-docker exec -it mn.vnf_MIRROR_X  python vnf_script.py -h 10.0.0.17 -v 4437 -o 10.0.0.30 -q 5461 -n vnf_MIRROR_X  --topology 0,26,3,2 --migration_ip 10.0.0.233 --migration_topology 15,6,1,1 --services 20,44,24,24,36,256,8,28,44,252,4,32 --initial 19 &
-docker exec -it mn.vnf_INVERT_COLORS  python vnf_script.py -h 10.0.0.21 -v 4437 -o 10.0.0.32 -q 5461 -n vnf_INVERT_COLORS  --topology 9,40,3,8 --migration_ip 10.0.0.217 --migration_topology 4,50,0,7 --services 20,44,24,24,36,256,8,28,44,252,4,32 --initial 22 &
-docker exec -it mn.vnf_FADE_OUT  python vnf_script.py -h 10.0.0.19 -v 4437 -o 10.0.0.32 -q 5461 -n vnf_FADE_OUT  --topology 5,25,6,4 --migration_ip 10.0.0.153 --migration_topology 17,13,9,3 --services 20,44,24,24,36,256,8,28,44,252,4,32 --initial 25 &
-docker exec -it mn.vnf_SPEED_UP  python vnf_script.py -h 10.0.0.68 -v 4437 -o 10.0.0.30 -q 5461 -n vnf_SPEED_UP  --topology 11,53,2,2 --migration_ip 10.0.0.209 --migration_topology 4,11,5,10 --services 20,44,24,24,36,256,8,28,44,252,4,32 --initial 28 &
-docker exec -it mn.vnf_FADE_IN  python vnf_script.py -h 10.0.0.14 -v 4437 -o 10.0.0.34 -q 5461 -n vnf_FADE_IN  --topology 2,42,4,9 --migration_ip 10.0.0.249 --migration_topology 1,19,6,10 --services 20,44,24,24,36,256,8,28,44,252,4,32 --initial 31 &
-docker exec -it mn.vnf_COMPOSITE  python vnf_script.py -h 10.0.0.100 -v 4437 -o 10.0.0.30 -q 5461 -n vnf_COMPOSITE  --topology 19,43,1,4 --migration_ip 10.0.0.181 --migration_topology 4,58,9,2 --services 20,44,24,24,36,256,8,28,44,252,4,32 --initial 34 &
-docker exec -it mn.vnf_MIRROR_Y  python vnf_script.py -h 10.0.0.16 -v 4437 -o 10.0.0.34 -q 5461 -n vnf_MIRROR_Y  --topology 9,61,5,2 --migration_ip 10.0.0.156 --migration_topology 4,16,0,0 --services 20,44,24,24,36,256,8,28,44,252,4,32 --initial 37 &
+docker exec -it mn.vnf_ROTATE  python vnf_script.py -h 10.0.0.13 -v 4437 -o 10.0.0.34 -q 5461 -n vnf_ROTATE  --topology 11,67,0,7 --migration_ip 10.0.0.229 --migration_topology 9,18,2,7 --services 56,232,8,8,60,248,28,0,20,144,28,36,12,196,0,28,24,112,40,0,32,184,28,8,68,112,28,4,28,164,4,4,28,180,40,36,44,268,36,32 --initial 1 &
+docker exec -it mn.vnf_CROP  python vnf_script.py -h 10.0.0.12 -v 4437 -o 10.0.0.32 -q 5461 -n vnf_CROP  --topology 20,6,2,1 --migration_ip 10.0.0.182 --migration_topology 15,40,7,4 --services 56,232,8,8,60,248,28,0,20,144,28,36,12,196,0,28,24,112,40,0,32,184,28,8,68,112,28,4,28,164,4,4,28,180,40,36,44,268,36,32 --initial 4 &
+docker exec -it mn.vnf_PAINTING  python vnf_script.py -h 10.0.0.15 -v 4437 -o 10.0.0.34 -q 5461 -n vnf_PAINTING  --topology 15,31,6,8 --migration_ip 10.0.0.244 --migration_topology 16,17,3,5 --services 56,232,8,8,60,248,28,0,20,144,28,36,12,196,0,28,24,112,40,0,32,184,28,8,68,112,28,4,28,164,4,4,28,180,40,36,44,268,36,32 --initial 7 &
+docker exec -it mn.vnf_RESIZE  python vnf_script.py -h 10.0.0.101 -v 4437 -o 10.0.0.30 -q 5461 -n vnf_RESIZE  --topology 18,31,0,3 --migration_ip 10.0.0.195 --migration_topology 5,66,10,6 --services 56,232,8,8,60,248,28,0,20,144,28,36,12,196,0,28,24,112,40,0,32,184,28,8,68,112,28,4,28,164,4,4,28,180,40,36,44,268,36,32 --initial 10 &
+docker exec -it mn.vnf_BLACK_WHITE  python vnf_script.py -h 10.0.0.20 -v 4437 -o 10.0.0.36 -q 5461 -n vnf_BLACK_WHITE  --topology 8,23,6,2 --migration_ip 10.0.0.251 --migration_topology 4,48,5,3 --services 56,232,8,8,60,248,28,0,20,144,28,36,12,196,0,28,24,112,40,0,32,184,28,8,68,112,28,4,28,164,4,4,28,180,40,36,44,268,36,32 --initial 13 &
+docker exec -it mn.vnf_ANNOTATE  python vnf_script.py -h 10.0.0.18 -v 4437 -o 10.0.0.30 -q 5461 -n vnf_ANNOTATE  --topology 4,56,2,2 --migration_ip 10.0.0.238 --migration_topology 8,7,9,9 --services 56,232,8,8,60,248,28,0,20,144,28,36,12,196,0,28,24,112,40,0,32,184,28,8,68,112,28,4,28,164,4,4,28,180,40,36,44,268,36,32 --initial 16 &
+docker exec -it mn.vnf_MIRROR_X  python vnf_script.py -h 10.0.0.17 -v 4437 -o 10.0.0.30 -q 5461 -n vnf_MIRROR_X  --topology 0,26,3,2 --migration_ip 10.0.0.233 --migration_topology 15,6,1,1 --services 56,232,8,8,60,248,28,0,20,144,28,36,12,196,0,28,24,112,40,0,32,184,28,8,68,112,28,4,28,164,4,4,28,180,40,36,44,268,36,32 --initial 19 &
+docker exec -it mn.vnf_INVERT_COLORS  python vnf_script.py -h 10.0.0.21 -v 4437 -o 10.0.0.32 -q 5461 -n vnf_INVERT_COLORS  --topology 9,40,3,8 --migration_ip 10.0.0.217 --migration_topology 4,50,0,7 --services 56,232,8,8,60,248,28,0,20,144,28,36,12,196,0,28,24,112,40,0,32,184,28,8,68,112,28,4,28,164,4,4,28,180,40,36,44,268,36,32 --initial 22 &
+docker exec -it mn.vnf_FADE_OUT  python vnf_script.py -h 10.0.0.19 -v 4437 -o 10.0.0.32 -q 5461 -n vnf_FADE_OUT  --topology 5,25,6,4 --migration_ip 10.0.0.153 --migration_topology 17,13,9,3 --services 56,232,8,8,60,248,28,0,20,144,28,36,12,196,0,28,24,112,40,0,32,184,28,8,68,112,28,4,28,164,4,4,28,180,40,36,44,268,36,32 --initial 25 &
+docker exec -it mn.vnf_SPEED_UP  python vnf_script.py -h 10.0.0.68 -v 4437 -o 10.0.0.30 -q 5461 -n vnf_SPEED_UP  --topology 11,53,2,2 --migration_ip 10.0.0.209 --migration_topology 4,11,5,10 --services 56,232,8,8,60,248,28,0,20,144,28,36,12,196,0,28,24,112,40,0,32,184,28,8,68,112,28,4,28,164,4,4,28,180,40,36,44,268,36,32 --initial 28 &
+docker exec -it mn.vnf_FADE_IN  python vnf_script.py -h 10.0.0.14 -v 4437 -o 10.0.0.34 -q 5461 -n vnf_FADE_IN  --topology 2,42,4,9 --migration_ip 10.0.0.249 --migration_topology 1,19,6,10 --services 56,232,8,8,60,248,28,0,20,144,28,36,12,196,0,28,24,112,40,0,32,184,28,8,68,112,28,4,28,164,4,4,28,180,40,36,44,268,36,32 --initial 31 &
+docker exec -it mn.vnf_COMPOSITE  python vnf_script.py -h 10.0.0.100 -v 4437 -o 10.0.0.30 -q 5461 -n vnf_COMPOSITE  --topology 19,43,1,4 --migration_ip 10.0.0.181 --migration_topology 4,58,9,2 --services 56,232,8,8,60,248,28,0,20,144,28,36,12,196,0,28,24,112,40,0,32,184,28,8,68,112,28,4,28,164,4,4,28,180,40,36,44,268,36,32 --initial 34 &
+docker exec -it mn.vnf_MIRROR_Y  python vnf_script.py -h 10.0.0.16 -v 4437 -o 10.0.0.34 -q 5461 -n vnf_MIRROR_Y  --topology 9,61,5,2 --migration_ip 10.0.0.156 --migration_topology 4,16,0,0 --services 56,232,8,8,60,248,28,0,20,144,28,36,12,196,0,28,24,112,40,0,32,184,28,8,68,112,28,4,28,164,4,4,28,180,40,36,44,268,36,32 --initial 37 &
+
+docker exec -it mn.source python message_factory.py -t add_chain -h 10.0.0.18 -p 4437 -n none -m none -v 10.0.0.68 --vnf_port 4437
+docker exec -it mn.source python message_factory.py -t add_chain -h 10.0.0.68 -p 4437 -n none -m none -v 10.0.0.17 --vnf_port 4437
+docker exec -it mn.source python message_factory.py -t add_chain -h 10.0.0.17 -p 4437 -n none -m none -v 10.0.0.15 --vnf_port 4437
+
+docker exec -it mn.source python message_factory.py -t add_chain -h 10.0.0.20 -p 4437 -n none -m none -v 10.0.0.14 --vnf_port 4437
+docker exec -it mn.source python message_factory.py -t add_chain -h 10.0.0.14 -p 4437 -n none -m none -v 10.0.0.68 --vnf_port 4437
+docker exec -it mn.source python message_factory.py -t add_chain -h 10.0.0.68 -p 4437 -n none -m none -v 10.0.0.101 --vnf_port 4437
+
+docker exec -it mn.source python message_factory.py -t add_chain -h 10.0.0.101 -p 4437 -n none -m none -v 10.0.0.14 --vnf_port 4437
+docker exec -it mn.source python message_factory.py -t add_chain -h 10.0.0.14 -p 4437 -n none -m none -v 10.0.0.15 --vnf_port 4437
+docker exec -it mn.source python message_factory.py -t add_chain -h 10.0.0.15 -p 4437 -n none -m none -v 10.0.0.20 --vnf_port 4437
+
+docker exec -it mn.source python message_factory.py -t add_chain -h 10.0.0.12 -p 4437 -n none -m none -v 10.0.0.21 --vnf_port 4437
+docker exec -it mn.source python message_factory.py -t add_chain -h 10.0.0.21 -p 4437 -n none -m none -v 10.0.0.20 --vnf_port 4437
+docker exec -it mn.source python message_factory.py -t add_chain -h 10.0.0.20 -p 4437 -n none -m none -v 10.0.0.100 --vnf_port 4437
+
+docker exec -it mn.source python message_factory.py -t add_chain -h 10.0.0.18 -p 4437 -n none -m none -v 10.0.0.15 --vnf_port 4437
+docker exec -it mn.source python message_factory.py -t add_chain -h 10.0.0.15 -p 4437 -n none -m none -v 10.0.0.20 --vnf_port 4437
+docker exec -it mn.source python message_factory.py -t add_chain -h 10.0.0.20 -p 4437 -n none -m none -v 10.0.0.101 --vnf_port 4437
+
+docker exec -it mn.source python message_factory.py -t add_chain -h 10.0.0.68 -p 4437 -n none -m none -v 10.0.0.101 --vnf_port 4437
+docker exec -it mn.source python message_factory.py -t add_chain -h 10.0.0.101 -p 4437 -n none -m none -v 10.0.0.20 --vnf_port 4437
+docker exec -it mn.source python message_factory.py -t add_chain -h 10.0.0.20 -p 4437 -n none -m none -v 10.0.0.100 --vnf_port 4437
 
 docker exec -it mn.source python message_factory.py -t add_chain -h 10.0.0.17 -p 4437 -n none -m none -v 10.0.0.21 --vnf_port 4437
-docker exec -it mn.source python message_factory.py -t add_chain -h 10.0.0.21 -p 4437 -n none -m none -v 10.0.0.13 --vnf_port 4437
+docker exec -it mn.source python message_factory.py -t add_chain -h 10.0.0.21 -p 4437 -n none -m none -v 10.0.0.16 --vnf_port 4437
+docker exec -it mn.source python message_factory.py -t add_chain -h 10.0.0.16 -p 4437 -n none -m none -v 10.0.0.12 --vnf_port 4437
+
+docker exec -it mn.source python message_factory.py -t add_chain -h 10.0.0.16 -p 4437 -n none -m none -v 10.0.0.13 --vnf_port 4437
+docker exec -it mn.source python message_factory.py -t add_chain -h 10.0.0.13 -p 4437 -n none -m none -v 10.0.0.12 --vnf_port 4437
+docker exec -it mn.source python message_factory.py -t add_chain -h 10.0.0.12 -p 4437 -n none -m none -v 10.0.0.14 --vnf_port 4437
+
+docker exec -it mn.source python message_factory.py -t add_chain -h 10.0.0.15 -p 4437 -n none -m none -v 10.0.0.17 --vnf_port 4437
+docker exec -it mn.source python message_factory.py -t add_chain -h 10.0.0.17 -p 4437 -n none -m none -v 10.0.0.101 --vnf_port 4437
+docker exec -it mn.source python message_factory.py -t add_chain -h 10.0.0.101 -p 4437 -n none -m none -v 10.0.0.18 --vnf_port 4437
+
+docker exec -it mn.source python message_factory.py -t add_chain -h 10.0.0.21 -p 4437 -n none -m none -v 10.0.0.15 --vnf_port 4437
+docker exec -it mn.source python message_factory.py -t add_chain -h 10.0.0.15 -p 4437 -n none -m none -v 10.0.0.13 --vnf_port 4437
 docker exec -it mn.source python message_factory.py -t add_chain -h 10.0.0.13 -p 4437 -n none -m none -v 10.0.0.19 --vnf_port 4437
 
-docker exec -it mn.source python message_factory.py -t add_chain -h 10.0.0.19 -p 4437 -n none -m none -v 10.0.0.21 --vnf_port 4437
-docker exec -it mn.source python message_factory.py -t add_chain -h 10.0.0.21 -p 4437 -n none -m none -v 10.0.0.100 --vnf_port 4437
-docker exec -it mn.source python message_factory.py -t add_chain -h 10.0.0.100 -p 4437 -n none -m none -v 10.0.0.13 --vnf_port 4437
 
-docker exec -it mn.source python message_factory.py -t add_chain -h 10.0.0.21 -p 4437 -n none -m none -v 10.0.0.19 --vnf_port 4437
-docker exec -it mn.source python message_factory.py -t add_chain -h 10.0.0.19 -p 4437 -n none -m none -v 10.0.0.13 --vnf_port 4437
-docker exec -it mn.source python message_factory.py -t add_chain -h 10.0.0.13 -p 4437 -n none -m none -v 10.0.0.101 --vnf_port 4437
-
-
-docker exec -it mn.vnf_ROTATE  python vnf_script.py -h 10.0.0.13 -v 4437 -o 10.0.0.36 -q 5461 -n vnf_ROTATE  --topology 15,22,0,4 --migration_ip 10.0.0.229 --migration_topology 9,18,2,7 --services 20,44,24,24,36,256,8,28,44,252,4,32 --initial 1 &
-docker exec -it mn.vnf_CROP  python vnf_script.py -h 10.0.0.12 -v 4437 -o 10.0.0.36 -q 5461 -n vnf_CROP  --topology 0,45,6,0 --migration_ip 10.0.0.182 --migration_topology 15,40,7,4 --services 20,44,24,24,36,256,8,28,44,252,4,32 --initial 4 &
-docker exec -it mn.vnf_PAINTING  python vnf_script.py -h 10.0.0.15 -v 4437 -o 10.0.0.36 -q 5461 -n vnf_PAINTING  --topology 17,53,5,6 --migration_ip 10.0.0.244 --migration_topology 16,17,3,5 --services 20,44,24,24,36,256,8,28,44,252,4,32 --initial 7 &
-docker exec -it mn.vnf_RESIZE  python vnf_script.py -h 10.0.0.101 -v 4437 -o 10.0.0.36 -q 5461 -n vnf_RESIZE  --topology 18,1,7,0 --migration_ip 10.0.0.195 --migration_topology 5,66,10,6 --services 20,44,24,24,36,256,8,28,44,252,4,32 --initial 10 &
-docker exec -it mn.vnf_BLACK_WHITE  python vnf_script.py -h 10.0.0.20 -v 4437 -o 10.0.0.36 -q 5461 -n vnf_BLACK_WHITE  --topology 5,25,1,3 --migration_ip 10.0.0.251 --migration_topology 4,48,5,3 --services 20,44,24,24,36,256,8,28,44,252,4,32 --initial 13 &
-docker exec -it mn.vnf_ANNOTATE  python vnf_script.py -h 10.0.0.18 -v 4437 -o 10.0.0.36 -q 5461 -n vnf_ANNOTATE  --topology 14,44,8,5 --migration_ip 10.0.0.238 --migration_topology 8,7,9,9 --services 20,44,24,24,36,256,8,28,44,252,4,32 --initial 16 &
-docker exec -it mn.vnf_MIRROR_X  python vnf_script.py -h 10.0.0.17 -v 4437 -o 10.0.0.36 -q 5461 -n vnf_MIRROR_X  --topology 16,32,7,1 --migration_ip 10.0.0.233 --migration_topology 15,6,1,1 --services 20,44,24,24,36,256,8,28,44,252,4,32 --initial 19 &
-docker exec -it mn.vnf_INVERT_COLORS  python vnf_script.py -h 10.0.0.21 -v 4437 -o 10.0.0.36 -q 5461 -n vnf_INVERT_COLORS  --topology 18,47,4,0 --migration_ip 10.0.0.217 --migration_topology 4,50,0,7 --services 20,44,24,24,36,256,8,28,44,252,4,32 --initial 22 &
-docker exec -it mn.vnf_FADE_OUT  python vnf_script.py -h 10.0.0.19 -v 4437 -o 10.0.0.36 -q 5461 -n vnf_FADE_OUT  --topology 13,11,3,5 --migration_ip 10.0.0.153 --migration_topology 17,13,9,3 --services 20,44,24,24,36,256,8,28,44,252,4,32 --initial 25 &
-docker exec -it mn.vnf_SPEED_UP  python vnf_script.py -h 10.0.0.68 -v 4437 -o 10.0.0.36 -q 5461 -n vnf_SPEED_UP  --topology 16,46,2,5 --migration_ip 10.0.0.209 --migration_topology 4,11,5,10 --services 20,44,24,24,36,256,8,28,44,252,4,32 --initial 28 &
-docker exec -it mn.vnf_FADE_IN  python vnf_script.py -h 10.0.0.14 -v 4437 -o 10.0.0.36 -q 5461 -n vnf_FADE_IN  --topology 8,69,1,4 --migration_ip 10.0.0.249 --migration_topology 1,19,6,10 --services 20,44,24,24,36,256,8,28,44,252,4,32 --initial 31 &
-docker exec -it mn.vnf_COMPOSITE  python vnf_script.py -h 10.0.0.100 -v 4437 -o 10.0.0.36 -q 5461 -n vnf_COMPOSITE  --topology 10,39,2,1 --migration_ip 10.0.0.181 --migration_topology 4,58,9,2 --services 20,44,24,24,36,256,8,28,44,252,4,32 --initial 34 &
-docker exec -it mn.vnf_MIRROR_Y  python vnf_script.py -h 10.0.0.16 -v 4437 -o 10.0.0.36 -q 5461 -n vnf_MIRROR_Y  --topology 20,19,4,7 --migration_ip 10.0.0.156 --migration_topology 4,16,0,0 --services 20,44,24,24,36,256,8,28,44,252,4,32 --initial 37 &
+docker exec -it mn.vnf_ROTATE  python vnf_script.py -h 10.0.0.13 -v 4437 -o 10.0.0.36 -q 5461 -n vnf_ROTATE  --topology 15,22,0,4 --migration_ip 10.0.0.229 --migration_topology 9,18,2,7 --services 56,232,8,8,60,248,28,0,20,144,28,36,12,196,0,28,24,112,40,0,32,184,28,8,68,112,28,4,28,164,4,4,28,180,40,36,44,268,36,32 --initial 1 &
+docker exec -it mn.vnf_CROP  python vnf_script.py -h 10.0.0.12 -v 4437 -o 10.0.0.36 -q 5461 -n vnf_CROP  --topology 0,45,6,0 --migration_ip 10.0.0.182 --migration_topology 15,40,7,4 --services 56,232,8,8,60,248,28,0,20,144,28,36,12,196,0,28,24,112,40,0,32,184,28,8,68,112,28,4,28,164,4,4,28,180,40,36,44,268,36,32 --initial 4 &
+docker exec -it mn.vnf_PAINTING  python vnf_script.py -h 10.0.0.15 -v 4437 -o 10.0.0.36 -q 5461 -n vnf_PAINTING  --topology 17,53,5,6 --migration_ip 10.0.0.244 --migration_topology 16,17,3,5 --services 56,232,8,8,60,248,28,0,20,144,28,36,12,196,0,28,24,112,40,0,32,184,28,8,68,112,28,4,28,164,4,4,28,180,40,36,44,268,36,32 --initial 7 &
+docker exec -it mn.vnf_RESIZE  python vnf_script.py -h 10.0.0.101 -v 4437 -o 10.0.0.36 -q 5461 -n vnf_RESIZE  --topology 18,1,7,0 --migration_ip 10.0.0.195 --migration_topology 5,66,10,6 --services 56,232,8,8,60,248,28,0,20,144,28,36,12,196,0,28,24,112,40,0,32,184,28,8,68,112,28,4,28,164,4,4,28,180,40,36,44,268,36,32 --initial 10 &
+docker exec -it mn.vnf_BLACK_WHITE  python vnf_script.py -h 10.0.0.20 -v 4437 -o 10.0.0.36 -q 5461 -n vnf_BLACK_WHITE  --topology 5,25,1,3 --migration_ip 10.0.0.251 --migration_topology 4,48,5,3 --services 56,232,8,8,60,248,28,0,20,144,28,36,12,196,0,28,24,112,40,0,32,184,28,8,68,112,28,4,28,164,4,4,28,180,40,36,44,268,36,32 --initial 13 &
+docker exec -it mn.vnf_ANNOTATE  python vnf_script.py -h 10.0.0.18 -v 4437 -o 10.0.0.36 -q 5461 -n vnf_ANNOTATE  --topology 14,44,8,5 --migration_ip 10.0.0.238 --migration_topology 8,7,9,9 --services 56,232,8,8,60,248,28,0,20,144,28,36,12,196,0,28,24,112,40,0,32,184,28,8,68,112,28,4,28,164,4,4,28,180,40,36,44,268,36,32 --initial 16 &
+docker exec -it mn.vnf_MIRROR_X  python vnf_script.py -h 10.0.0.17 -v 4437 -o 10.0.0.36 -q 5461 -n vnf_MIRROR_X  --topology 16,32,7,1 --migration_ip 10.0.0.233 --migration_topology 15,6,1,1 --services 56,232,8,8,60,248,28,0,20,144,28,36,12,196,0,28,24,112,40,0,32,184,28,8,68,112,28,4,28,164,4,4,28,180,40,36,44,268,36,32 --initial 19 &
+docker exec -it mn.vnf_INVERT_COLORS  python vnf_script.py -h 10.0.0.21 -v 4437 -o 10.0.0.36 -q 5461 -n vnf_INVERT_COLORS  --topology 18,47,4,0 --migration_ip 10.0.0.217 --migration_topology 4,50,0,7 --services 56,232,8,8,60,248,28,0,20,144,28,36,12,196,0,28,24,112,40,0,32,184,28,8,68,112,28,4,28,164,4,4,28,180,40,36,44,268,36,32 --initial 22 &
+docker exec -it mn.vnf_FADE_OUT  python vnf_script.py -h 10.0.0.19 -v 4437 -o 10.0.0.36 -q 5461 -n vnf_FADE_OUT  --topology 13,11,3,5 --migration_ip 10.0.0.153 --migration_topology 17,13,9,3 --services 56,232,8,8,60,248,28,0,20,144,28,36,12,196,0,28,24,112,40,0,32,184,28,8,68,112,28,4,28,164,4,4,28,180,40,36,44,268,36,32 --initial 25 &
+docker exec -it mn.vnf_SPEED_UP  python vnf_script.py -h 10.0.0.68 -v 4437 -o 10.0.0.36 -q 5461 -n vnf_SPEED_UP  --topology 16,46,2,5 --migration_ip 10.0.0.209 --migration_topology 4,11,5,10 --services 56,232,8,8,60,248,28,0,20,144,28,36,12,196,0,28,24,112,40,0,32,184,28,8,68,112,28,4,28,164,4,4,28,180,40,36,44,268,36,32 --initial 28 &
+docker exec -it mn.vnf_FADE_IN  python vnf_script.py -h 10.0.0.14 -v 4437 -o 10.0.0.36 -q 5461 -n vnf_FADE_IN  --topology 8,69,1,4 --migration_ip 10.0.0.249 --migration_topology 1,19,6,10 --services 56,232,8,8,60,248,28,0,20,144,28,36,12,196,0,28,24,112,40,0,32,184,28,8,68,112,28,4,28,164,4,4,28,180,40,36,44,268,36,32 --initial 31 &
+docker exec -it mn.vnf_COMPOSITE  python vnf_script.py -h 10.0.0.100 -v 4437 -o 10.0.0.36 -q 5461 -n vnf_COMPOSITE  --topology 10,39,2,1 --migration_ip 10.0.0.181 --migration_topology 4,58,9,2 --services 56,232,8,8,60,248,28,0,20,144,28,36,12,196,0,28,24,112,40,0,32,184,28,8,68,112,28,4,28,164,4,4,28,180,40,36,44,268,36,32 --initial 34 &
+docker exec -it mn.vnf_MIRROR_Y  python vnf_script.py -h 10.0.0.16 -v 4437 -o 10.0.0.36 -q 5461 -n vnf_MIRROR_Y  --topology 20,19,4,7 --migration_ip 10.0.0.156 --migration_topology 4,16,0,0 --services 56,232,8,8,60,248,28,0,20,144,28,36,12,196,0,28,24,112,40,0,32,184,28,8,68,112,28,4,28,164,4,4,28,180,40,36,44,268,36,32 --initial 37 &
 
 docker exec -it mn.source python message_factory.py -t request_update -h 10.0.0.16 -p 4437 -n none -m none --vnf_host none --vnf_port none --seed 70590
 docker exec -it mn.source python message_factory.py -t request_update -h 10.0.0.21 -p 4437 -n none -m none --vnf_host none --vnf_port none --seed 18095
