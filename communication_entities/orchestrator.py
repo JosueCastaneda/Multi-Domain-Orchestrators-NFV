@@ -136,12 +136,21 @@ class Orchestrator:
         wait_period = random.randint(0, 10)
         str_log_wait = 'Waiting period: ' + str(wait_period)
         log.info(str_log_wait)
+        other_algorithm = False
 
-        t = threading.Timer(wait_period, self.update_vnf_info, [service_index,
-                                                                vnf_index_to_change,
-                                                                value_to_change,
-                                                                new_value,
-                                                                clock, name_vnf_to_update])
+        if other_algorithm:
+            t = threading.Timer(wait_period, self.update_vnf_info, [service_index,
+                                                                    vnf_index_to_change,
+                                                                    value_to_change,
+                                                                    new_value,
+                                                                    clock, name_vnf_to_update])
+        else:
+            t = threading.Timer(wait_period, self.update_vnf_info_with_clocks, [service_index,
+                                                                    vnf_index_to_change,
+                                                                    value_to_change,
+                                                                    new_value,
+                                                                    clock, name_vnf_to_update])
+
         self.updates_remaining += 1
         t.start()
 
