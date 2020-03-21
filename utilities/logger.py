@@ -1,9 +1,13 @@
 import logging
+import os
+log_dir = '/test/vnfs_deploy'
+os.chmod(log_dir, 0o777)
 
 log = logging.getLogger('logger')
 log.setLevel(logging.DEBUG)
 
-formatter = logging.Formatter('%(asctime)s - %(filename)s - %(lineno)s - %(funcName)20s() - %(levelname)s - %(message)s')
+log_str = '%(asctime)s - %(filename)s - %(lineno)s - %(funcName)20s() - %(levelname)s - %(message)s'
+formatter = logging.Formatter(log_str)
 
 fh = logging.FileHandler('test.log', mode='w', encoding='utf-8')
 fh.setLevel(logging.DEBUG)
