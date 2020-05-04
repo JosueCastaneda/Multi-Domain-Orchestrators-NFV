@@ -1,0 +1,21 @@
+{
+  "operation": "PAINTING",
+  "server": "10.0.0.15",
+  "port": 4437,
+  "queue_p": [7],
+  "queue_q": [8],
+  "queue_r": [9],
+  "delay": 0.0,
+  "bandwidth": 0.0,
+  "loss": 0.0,
+  "jitter": 0.0,
+  "orchestrator": 0,
+  "migration_vnf_ip": null,
+  "entry_connection_point": "paint_in",
+  "exit_connection_point": "paint_out",
+  "id": "painting_vnf",
+  "parameters":
+  {
+    "extra": "None"
+  }
+}

@@ -1,0 +1,21 @@
+{
+  "operation": "FADE_IN",
+  "server": "10.0.0.14",
+  "port": 4437,
+  "queue_p": [31],
+  "queue_q": [32],
+  "queue_r": [33],
+  "delay": 0.0,
+  "bandwidth": 0.0,
+  "loss": 0.0,
+  "jitter": 0.0,
+  "orchestrator": 0,
+  "migration_vnf_ip": null,
+  "entry_connection_point": "fadein_in",
+  "exit_connection_point": "fadein_out",
+  "id": "fade_in_vnf",
+  "parameters":
+  {
+    "duration": 10
+  }
+}

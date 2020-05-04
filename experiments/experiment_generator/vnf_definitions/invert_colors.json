@@ -1,0 +1,21 @@
+{
+  "operation": "INVERT_COLORS",
+  "server": "10.0.0.21",
+  "port": 4437,
+  "queue_p": [22],
+  "queue_q": [23],
+  "queue_r": [24],
+  "delay": 0.0,
+  "bandwidth": 0.0,
+  "loss": 0.0,
+  "jitter": 0.0,
+  "orchestrator": 0,
+  "migration_vnf_ip": null,
+  "entry_connection_point": "invert_in",
+  "exit_connection_point": "invert_out",
+  "id": "invert_colors_vnf",
+  "parameters":
+  {
+    "extra": "None"
+  }
+}

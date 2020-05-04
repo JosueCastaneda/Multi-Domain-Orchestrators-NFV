@@ -1,0 +1,90 @@
+{
+  "orchestrators":
+  [
+    {
+      "id":"82b5bb4e-7fc5-11ea-8736-04ea56f99520",
+      "type": "orchestrator",
+      "ip": "10.0.0.2",
+      "port": "4437",
+      "vnfs": [],
+      "services": [],
+      "location": "East-US",
+      "current_ip": 1,
+      "vnf_constraints":
+      {
+        "delay": 20,
+        "loss": 10,
+        "jitter": 1,
+        "bandwidth": 15
+      }
+    },
+    {
+      "id":"b97e2c9c-7fc5-11ea-8736-04ea56f99520",
+      "type": "orchestrator",
+      "ip": "10.0.1.2",
+      "port": "4437",
+      "vnfs": [],
+      "services": [],
+      "location": "West-US",
+      "current_ip": 1,
+      "vnf_constraints":
+      {
+        "delay": 30,
+        "loss": 40,
+        "jitter": 2,
+        "bandwidth": 10
+      }
+    },
+    {
+      "id":"d48989be-7fc5-11ea-8736-04ea56f99520",
+      "type": "orchestrator",
+      "ip": "10.0.2.2",
+      "port": "4437",
+      "vnfs": [],
+      "services": [],
+      "location": "North UK",
+      "current_ip": 1,
+      "vnf_constraints":
+      {
+        "delay": 50,
+        "loss": 70,
+        "jitter": 12,
+        "bandwidth": 18
+      }
+    },
+    {
+      "id":"fc46f8ba-7fc5-11ea-8736-04ea56f99520",
+      "type": "orchestrator",
+      "ip": "10.0.3.2",
+      "port": "4437",
+      "vnfs": [],
+      "services": [],
+      "location": "South Korea",
+      "current_ip": 1,
+      "vnf_constraints":
+      {
+        "delay": 70,
+        "loss": 80,
+        "jitter": 11,
+        "bandwidth": 125
+      }
+    },
+    {
+      "id":"15d4de14-7fc6-11ea-8736-04ea56f99520",
+      "type": "orchestrator",
+      "ip": "10.0.4.2",
+      "port": "4437",
+      "vnfs": [],
+      "services": [],
+      "location": "Brazil",
+      "current_ip": 1,
+      "vnf_constraints":
+      {
+        "delay": 210,
+        "loss": 50,
+        "jitter": 21,
+        "bandwidth": 145
+      }
+    }
+  ]
+}

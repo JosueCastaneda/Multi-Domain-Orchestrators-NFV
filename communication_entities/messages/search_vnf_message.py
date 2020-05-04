@@ -1,6 +1,6 @@
 from communication_entities.messages.abstract_message import AbstractMessage
-from communication_entities.messages.vnf_not_found_message import VNFNotFound
-from communication_entities.messages.vnf_found_message import VNFFound
+from communication_entities.messages.vnf_information.vnf_not_found_message import VNFNotFound
+from communication_entities.messages.vnf_information.vnf_found_message import VNFFound
 from utilities.logger import log
 
 

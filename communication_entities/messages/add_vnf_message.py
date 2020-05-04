@@ -1,10 +1,11 @@
 from communication_entities.messages.abstract_message import AbstractMessage
-from entities.vnf_information import VnfInformation
+from entities.vnf_entities.vnf_information import VnfInformation
 
 
 class AddVNF(AbstractMessage):
 
     def __init__(self,
+                 id,
                  vnf_host,
                  vnf_port,
                  vnf_name,
@@ -14,6 +15,7 @@ class AddVNF(AbstractMessage):
                  connection_points=None,
                  dependency_list=None):
         super().__init__(None)
+        self.id = id
         self.current_server = None
         self.vnf_host = vnf_host
         self.vnf_port = vnf_port
@@ -32,5 +34,6 @@ class AddVNF(AbstractMessage):
                                          self.migration_vnf_ip,
                                          self.topology_migration_vnf,
                                          self.connection_points,
-                                         self.dependency_list)
+                                         self.dependency_list,
+                                         self.id)
         self.current_server.orchestrator.add_vnf(vnf_information)

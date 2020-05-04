@@ -1,7 +1,7 @@
 import logging
-import os
+
 log_dir = '/test/vnfs_deploy'
-os.chmod(log_dir, 0o777)
+# os.chmod(log_dir, 0o777)
 
 log = logging.getLogger('logger')
 log.setLevel(logging.DEBUG)

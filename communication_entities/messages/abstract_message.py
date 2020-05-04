@@ -1,4 +1,4 @@
-from entities.parameter_package import ParameterPackage
+from entities.parameters.parameter_package import ParameterPackage
 from utilities.logger import log
 
 

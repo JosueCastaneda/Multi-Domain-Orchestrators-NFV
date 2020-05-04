@@ -1,0 +1,86 @@
+{
+  "experiment":
+  {
+    "id": "xxx",
+    "orchestrators":
+    [
+      {
+        "id": "orch_1",
+        "ip": "192.168.0.1",
+        "port": 100,
+        "services":
+        [
+          {
+            "id": "ser_1_orch_1",
+            "type": "service",
+            "vnfcs":
+            [
+              {
+                "id": "vnf_1_ser_1_orch_1",
+                "type": "vnf",
+                "managed_by": "orch_1"
+              },
+              {
+                "id": "vnf_2_ser_1_orch_1",
+                "type": "vnf",
+                "managed_by": "orch_1"
+              }
+            ]
+          },
+          {
+            "id": "ser_2_orch_1",
+            "vnfcs":
+            [
+              {
+                "id": "vnf_3_ser_1_orch_1",
+                "type": "vnf",
+                "managed_by": "orch_1"
+              },
+              {
+                "id": "ser_1_orch_1",
+                "type": "service",
+                "managed_by": "orch_1"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "id": "orch_2",
+        "ip": "192.168.1.1",
+        "port": 100,
+        "services":
+        [
+          {
+            "id": "ser_1_orch_2",
+            "vnfcs":
+            [
+              {
+                "id": "vnf_1_ser_1_orch_1",
+                "managed_by": "orch_1"
+              },
+              {
+                "id": "vnf_2_ser_1_orch_1",
+                "managed_by": "orch_1"
+              }
+            ]
+          },
+          {
+            "id": "ser_2_orch_2",
+            "vnfcs":
+            [
+              {
+                "id": "vnf_3_ser_1_orch_1",
+                "managed_by": "orch_1"
+              },
+              {
+                "id": "ser_1_orch_1",
+                "managed_by": "orch_1"
+              }
+            ]
+          }
+        ]
+      }
+    ]
+  }
+}

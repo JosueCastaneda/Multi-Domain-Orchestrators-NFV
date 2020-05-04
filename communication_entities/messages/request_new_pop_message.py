@@ -1,6 +1,6 @@
 from communication_entities.messages.abstract_message import AbstractMessage
 from communication_entities.messages.topology_message import TopologyMessage
-from entities.parameter_package import ParameterPackage
+from entities.parameters.parameter_package import ParameterPackage
 from entities.topology import Topology
 from utilities.random_integer_generation import generate_random_integer
 

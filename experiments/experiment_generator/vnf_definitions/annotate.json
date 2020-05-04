@@ -1,0 +1,26 @@
+{
+  "operation": "ANNOTATE",
+  "server": "10.0.0.18",
+  "port": 4437,
+  "queue_p": [16],
+  "queue_q": [17],
+  "queue_r": [18],
+  "delay": 0.0,
+  "bandwidth": 0.0,
+  "loss": 0.0,
+  "jitter": 0.0,
+  "orchestrator": 0,
+  "migration_vnf_ip": null,
+  "entry_connection_point": "annotate_in",
+  "exit_connection_point": "annotate_out",
+  "id": "annotate_vnf",
+  "parameters":
+  {
+      "begin_subclip": 0,
+      "end_subclip": 10,
+      "Text": "Test",
+      "duration": 10,
+      "fontsize": 16,
+      "color": "white"
+  }
+}

@@ -47,7 +47,7 @@ class JsonParser:
         return sub_line
 
     @staticmethod
-    def parse_for_datacenter(line):
+    def parse_for_data_center(line):
         index = line.find('-d')
         index_image = line.find('-n')
         sub_line = line[index + 3:index_image - 1]

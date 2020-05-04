@@ -3,14 +3,15 @@ import json
 from communication_entities.messages.add_orchestrator_message import AddOrchestratorMessage
 from communication_entities.messages.add_vnf_message import AddVNF
 from communication_entities.messages.add_vnf_to_chain_message import AddVNFToChainMessage
-from communication_entities.messages.initiate_vnffg_updates_message import InitiateVNFFGUpdatesMessage
-from communication_entities.messages.migration_message import MigrationMessage
+from communication_entities.messages.vnf_forwarding_graph.initiate_vnffg_updates_message import InitiateVNFFGUpdatesMessage
+from communication_entities.messages.lcm_messages.request_service_scale_message import RequestServiceScaleMessage
+from communication_entities.messages.lcm_messages.migration.migration_message import MigrationMessage
 from communication_entities.messages.process_data_message import ProcessDataMessage
 from communication_entities.messages.request_update_message import RequestUpdateMessage
 from entities.communication_entity_package import CommunicationEntityPackage
-from entities.parameter_generator import ParameterGenerator
-from entities.parameter_package import ParameterPackage
-from entities.vnf_package import VnfPackage
+from entities.parameters.parameter_generator import ParameterGenerator
+from entities.parameters.parameter_package import ParameterPackage
+from entities.vnf_entities.vnf_package import VnfPackage
 from utilities.logger import log
 from utilities.message_type import MessageType
 
@@ -32,13 +33,17 @@ class MessageGenerator:
         elif self.command.message_type == "new_pop":
             print("Request new pop")
         elif self.command.message_type == "add_orchestrator":
-            m = AddOrchestratorMessage(self.command.vnf_host, self.command.vnf_port)
+            m = AddOrchestratorMessage(self.command.vnf_host,
+                                       self.command.vnf_port,
+                                       orchestrator_id=self.command.orchestrator_id)
         elif self.command.message_type == "process":
             m = self.generate_process_message()
         elif self.command.message_type == "update_vnf_fg":
             m = InitiateVNFFGUpdatesMessage()
         elif self.command.message_type == "request_update":
             m = RequestUpdateMessage(self.command.seed)
+        elif self.command.message_type == "request_scale":
+            m = RequestServiceScaleMessage(self.command.service_id, self.command.seed)
         return m
 
     @staticmethod
@@ -58,10 +63,7 @@ class MessageGenerator:
         with open(self.json_file, 'r') as json_file:
             data = json.load(json_file)
             for service in data['services']:
-
                 operations = service['operations']
-                # Substract operation from current server
-                # number_servers = len(operations) - 1
                 number_servers = len(operations)
                 if 'annotation' in service['parameters']:
                     annotation_parameter = service['parameters']['annotation']

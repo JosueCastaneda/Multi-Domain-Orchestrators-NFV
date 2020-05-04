@@ -1,0 +1,35 @@
+{
+  "experiment":
+  {
+    "number_of_experiments":  5,
+    "number_of_services": 10,
+    "number_of_vnf_components": 4,
+    "video_definition": 480,
+    "max_number_of_changes": 20,
+    "number_of_vnfs_per_orchestrator": 5,
+    "number_of_vnfs": 13,
+    "constraints":
+    {
+      "delay":
+      {
+        "low": 0,
+        "high": 20
+      },
+      "bandwidth":
+      {
+        "low": 0,
+        "high": 70
+      },
+      "loss":
+      {
+        "low": 0,
+        "high": 10
+      },
+      "jitter":
+      {
+        "low": 0,
+        "high": 10
+      }
+    }
+  }
+}

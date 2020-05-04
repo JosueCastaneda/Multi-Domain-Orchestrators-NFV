@@ -1,24 +1,26 @@
+import json
 import os.path
 import pickle
 import time
 
 from communication_entities.generic_server import GenericServer
 from communication_entities.messages.add_vnf_message import AddVNF
-from communication_entities.messages.all_queue_information import AllQueueInformation
-from communication_entities.messages.migration_ack_message import MigrationAckMessage
-from communication_entities.messages.migration_deactivate_message import MigrationDeactivateMessage
-from communication_entities.messages.migration_deactivate_recusive_message import MigrationDeactivateRecursiveMessage
+from communication_entities.messages.queue_processing.all_queue_information import AllQueueInformation
+from communication_entities.messages.lcm_messages.scale_confirmation_message import ScaleConfirmationMessage
+from communication_entities.messages.lcm_messages.migration.migration_ack_message import MigrationAckMessage
+from communication_entities.messages.lcm_messages.migration.migration_deactivate_message import MigrationDeactivateMessage
+from communication_entities.messages.lcm_messages.migration.migration_deactivate_recusive_message import MigrationDeactivateRecursiveMessage
 from communication_entities.messages.raw_text_message import RawTextMessage
 from communication_entities.messages.request_update_from_orchestrator_message import \
     RequestUpdateFromOrchestratorMessage
-from communication_entities.messages.send_all_states_message import SendAllStatesMessage
-from communication_entities.messages.send_queue_P_message import SendQueuePMessage
-from communication_entities.messages.send_queue_Q_message import SendQueueQMessage
-from communication_entities.messages.send_queue_R_message import SendQueueRMessage
-from communication_entities.messages.switch_message import SwitchMessage
-from communication_entities.messages.terminate_message import TerminateMessage
-from communication_entities.messages.terminate_message_without_recursion import TerminateMessageWithoutRecursion
-from communication_entities.messages.update_vnf_info_after_migration import UpdateVnfInfoAfterMigration
+from communication_entities.messages.state_management.send_all_states_message import SendAllStatesMessage
+from communication_entities.messages.queue_processing.send_queue_P_message import SendQueuePMessage
+from communication_entities.messages.queue_processing.send_queue_Q_message import SendQueueQMessage
+from communication_entities.messages.queue_processing.send_queue_R_message import SendQueueRMessage
+from communication_entities.messages.state_management.switch_message import SwitchMessage
+from communication_entities.messages.state_management.terminate_message import TerminateMessage
+from communication_entities.messages.state_management.terminate_message_without_recursion import TerminateMessageWithoutRecursion
+from communication_entities.messages.vnf_information.update_vnf_info_after_migration import UpdateVnfInfoAfterMigration
 from entities.communication_entity_package import CommunicationEntityPackage
 from entities.topology import Topology
 from utilities.logger import log
@@ -27,29 +29,49 @@ from utilities.socket_size import SocketSize
 
 class GenericVNF:
 
-    def __init__(self, configuration):
-        self.configuration = configuration
-        self.server = GenericServer(self, CommunicationEntityPackage(configuration.host(),
-                                                                     configuration.port()))
+    def __init__(self, experiment_index,  orchestrator_index, vnf_index):
+        self.experiment_name = 'experiment_' + str(experiment_index) + '.json'
+        self.orchestrator_index = int(orchestrator_index)
+        self.vnf_index = int(vnf_index)
+        vnf_information, orchestrator_information = self.load_text_data()
+        self.id = vnf_information['id']
+        self.server = GenericServer(self, CommunicationEntityPackage(vnf_information['server'],
+                                                                     int(vnf_information['port'])))
         self.list_affected_vnf = []
-        #TODO: This one needs to be here, due to many classes using it, it is necessary to refactor code
-        self.orchestrator = configuration.get_orchestrator()
-        self.migration_vnf_ip = configuration.migration_vnf()
-        self.set_up_to_orchestrator(configuration.get_orchestrator(),
-                                    configuration.host(),
-                                    configuration.port())
-        self.print_state_vnf()
+        self.orchestrator = CommunicationEntityPackage(orchestrator_information['ip'],
+                                                       int(orchestrator_information['port']))
+        self.migration_vnf_ip = None
+        self.set_up_to_orchestrator(self.orchestrator, orchestrator_information['ip'],
+                                    int(orchestrator_information['port']))
+        # self.print_state_vnf()
+
+    def load_text_data(self):
+        print('VNF INDEX: ' + str(self.vnf_index))
+        print('EXPERIMENT INDEX: ' + str(self.experiment_name))
+        print('ORCHESTRATOR INDEX: ' + str(self.orchestrator_index))
+        str_new_file_name = 'experiments/experiment_generator/experiments/' + self.experiment_name
+        with open(str_new_file_name) as json_file:
+            raw_data = json.load(json_file)
+        vnf_information = raw_data['orchestrators'][self.orchestrator_index]['vnfs'][self.vnf_index]
+        orchestrator_information = raw_data['orchestrators'][self.orchestrator_index]
+        print('IP: ' + str(vnf_information['server']))
+        print('PORT: ' + str(vnf_information['port']))
+
+
+        return vnf_information, orchestrator_information
 
     # TODO: Get the topology and possible service working on for migration
-    def set_up_to_orchestrator(self, orchestrator, host, port):
+    def set_up_to_orchestrator(self, orchestrator, host_orchestrator, port_orchestrator):
         self.server.connect_to_orchestrator(orchestrator)
-        add_message = AddVNF(host, port,
-                             self.configuration.name(),
-                             self.configuration.get_topology(),
-                             self.migration_vnf_ip,
-                             self.configuration.topology_migration_vnf(),
-                             self.configuration.get_connection_points(),
-                             self.configuration.get_dependency_list())
+        add_message = AddVNF(self.id,
+                             host_orchestrator,
+                             port_orchestrator,
+                             self.id,
+                             None,
+                             None,
+                             None,
+                             None,
+                             None)
         self.server.send_message_to_orchestrator(add_message)
 
     def send_update_to_orchestrator(self, orchestrator, host, port):
@@ -63,12 +85,11 @@ class GenericVNF:
                              self.configuration.get_dependency_list())
         self.server.send_message_to_orchestrator(add_message)
 
-
     def get_configuration(self):
         return self.configuration
 
-    def print_state_vnf(self):
-        self.configuration.print_state_vnf()
+    # def print_state_vnf(self):
+    #     self.configuration.print_state_vnf()
 
     # TODO: Change the magic number by saving the port in the generic VNF
     def handle_recursive_migration(self, new_vnf_topology, migrating_vnfs=None):
@@ -183,7 +204,7 @@ class GenericVNF:
         self.server.disconnect_send_channel()
         log.info('Finished disconnecting all the channels')
         self.update_information_after_migration_to_orchestrator()
-        self.print_state_vnf()
+        # self.print_state_vnf()
 
     def terminate_migration_without_recursion(self):
         log.info('Send TerminateMessageWithoutRecursion to new VNF')
@@ -208,7 +229,7 @@ class GenericVNF:
         self.server.disconnect_send_channel()
         log.info('Finished disconnecting all the channels')
         self.update_information_after_migration_to_orchestrator()
-        self.print_state_vnf()
+        # self.print_state_vnf()
 
     def update_information_after_migration_to_orchestrator(self):
         log.info('Sending update to orchestrator')
@@ -225,7 +246,7 @@ class GenericVNF:
         log.info('Sending terminate message to new VNF. Migration has ended')
         self.server.send_message_virtual(m1)
         self.server.disconnect_send_virtual_channel()
-        self.print_state_vnf()
+        # self.print_state_vnf()
 
     def send_all_data_from_current_vnf_to_new_vnf(self, data):
         m1 = AllQueueInformation(data)
@@ -289,6 +310,13 @@ class GenericVNF:
         self.server.send_message(m2)
         self.collect_data_to_queue(self.configuration.get_state().get_p())
 
+    def scale(self, vnfc_id, original_sender, service_id):
+        print('Scaled: ' + str(self.id))
+        acknowledge_message = ScaleConfirmationMessage(self.id, service_id)
+        original_orchestrator = CommunicationEntityPackage(original_sender['ip'], int(original_sender['port']))
+        self.server.connect_to_orchestrator(original_orchestrator)
+        self.server.send_message_to_orchestrator(acknowledge_message)
+
     # TODO: Use a more fine approach to prevent deadlocks by blocking operation
     def send_data_from_r_queue_to_new_vnf(self):
         data = self.configuration.get_state().get_all_data_from_queue("R")
@@ -318,7 +346,7 @@ class GenericVNF:
 
     def add_affected_vnf(self, vnf_pack):
         self.list_affected_vnf.append(vnf_pack)
-        self.configuration.add_affected_vfn(vnf_pack)
+        # self.configuration.add_affected_vfn(vnf_pack)
 
     def request_update_to_orchestrator(self, seed):
         log.info('Sending message to orchestrator')

@@ -1,0 +1,21 @@
+{
+  "operation": "BLACK_WHITE",
+  "server": "10.0.0.20",
+  "port": 4437,
+  "queue_p": [13],
+  "queue_q": [14],
+  "queue_r": [15],
+  "delay": 0.0,
+  "bandwidth": 0.0,
+  "loss": 0.0,
+  "jitter": 0.0,
+  "orchestrator": 0,
+  "migration_vnf_ip": null,
+  "entry_connection_point": "black_in",
+  "exit_connection_point": "black_out",
+  "id": "black_white_vnf",
+  "parameters":
+  {
+    "extra": "None"
+  }
+}

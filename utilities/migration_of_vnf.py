@@ -2,10 +2,18 @@ import copy
 
 
 def is_recursive_migration_required(new_vnf, previous_vnf, service_constraints):
-    is_delay_valid = check_constraint(service_constraints['delay'], previous_vnf['delay'], new_vnf['delay'])
-    is_loss_valid = check_constraint(service_constraints['loss'], previous_vnf['loss'], new_vnf['loss'])
-    is_jitter_valid = check_constraint(service_constraints['jitter'], previous_vnf['jitter'], new_vnf['jitter'])
-    is_bandwidth_valid = check_constraint(service_constraints['bandwidth'], previous_vnf['bandwidth'], new_vnf['bandwidth'])
+    is_delay_valid = check_constraint(service_constraints['delay'],
+                                      previous_vnf['delay'],
+                                      new_vnf['delay'])
+    is_loss_valid = check_constraint(service_constraints['loss'],
+                                     previous_vnf['loss'],
+                                     new_vnf['loss'])
+    is_jitter_valid = check_constraint(service_constraints['jitter'],
+                                       previous_vnf['jitter'],
+                                       new_vnf['jitter'])
+    is_bandwidth_valid = check_constraint(service_constraints['bandwidth'],
+                                          previous_vnf['bandwidth'],
+                                          new_vnf['bandwidth'])
     if is_bandwidth_valid and is_loss_valid and is_jitter_valid and is_delay_valid:
         return False
     return True

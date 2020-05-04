@@ -4,357 +4,141 @@ import random
 
 import numpy as np
 
-from experiments.experiment_generator.docker_commands_generator import DockerCommandsGenerator
-from experiments.experiment_generator.migration_message_generator import MigrationMessageGenerator
-from experiments.experiment_generator.update_service_with_migration_generator import UpdateServiceWithMigrationGenerator
-from experiments.experiment_generator.validator_generator import ValidatorGenerator
-from utilities.random_integer_generation import generate_random_integer
-from utilities.vnf_fg_update import generate_number_of_updates, generate_waiting_period, generate_index_to_change, \
-    generate_random_string_value, generate_index_to_change_by_value, generate_random_orchestrator_index
+from experiments.experiment_generator.classes.constraints.service_definition import ServiceDefinition
+from experiments.experiment_generator.classes.constraints.vnf_definition import VNFDefinition
+from experiments.experiment_generator.classes.constraints.vnf_definition_configuration import VNFDefinitionConfiguration
+from utilities.experiment_file_loader import load_orchestrators, create_empty_experiment_entry, load_vnf_raw_data
+from utilities.random_integer_generation import generate_random_integer, generate_unique_identifier, \
+    generate_random_index_from_vnf_components
 
 
 class ExperimentGenerator():
 
-    def __init__(self, number_experiments,
-                 number_services,
-                 length_vnf,
-                 experiment_path,
-                 delay,
-                 bandwidth,
-                 loss,
-                 jitter,
-                 random_seed_list,
-                 random_np_seed_list,
-                 max_number_of_changes):
-        self.number_of_experiments = number_experiments
-        self.number_of_services = number_services
-        self.length_of_vnfs = length_vnf
-        self.number_of_vnf = 13
-        self.path = experiment_path
-        self.list_name_of_experiments = []
-        self.delay_low = delay[0]
-        self.delay_high = delay[1]
-        self.bandwidth_low = bandwidth[0]
-        self.bandwidth_high = bandwidth[1]
-        self.loss_low = loss[0]
-        self.loss_high = loss[1]
-        self.jitter_low = jitter[0]
-        self.jitter_high = jitter[1]
-        self.random_seed_list = random_seed_list
-        self.random_np_seed_list = random_np_seed_list
-        self.max_number_of_changes = max_number_of_changes
+    def __init__(self, configuration, local_deployment=False):
+        self.number_of_experiments = configuration.number_of_experiments
+        self.number_of_services = configuration.number_of_services
+        self.length_of_vnfs = configuration.number_of_vnf_components
+        self.number_of_vnf = configuration.number_of_vnfs
+        self.path = configuration.path
+        self.random_seed_list = configuration.random_seed_list
+        self.random_np_seed_list = configuration.random_np_seed_list
+        self.number_of_vnfs_per_orchestrator = configuration.number_of_vnfs_per_orchestrator
+        self.list_orchestrators = load_orchestrators(True)
+        self.current_queues_number = 0
+        self.list_vnf_components = list()
+        self.vnf_data = load_vnf_raw_data()
+        self.list_name_of_experiments = list()
+        # TODO: This is only for local deployments
+        self.vnf_port = 5500
+        self.local_deployment = local_deployment
 
-        with open(self.path + 'vnf_info.json') as json_file:
-            raw_data = json.load(json_file)
-            self.vnf_data = raw_data['vnf']
+    def add_vnfs_to_orchestrators(self):
+        for orchestrator in self.list_orchestrators:
+            remaining_vnfs_per_orchestrator = self.number_of_vnfs_per_orchestrator
+            while remaining_vnfs_per_orchestrator > 0:
+                if self.local_deployment:
+                    new_vnf = self.generate_random_vnf_local(orchestrator)
+                else:
+                    new_vnf = self.generate_random_vnf(orchestrator)
+                orchestrator.add_vnf(new_vnf)
+                remaining_vnfs_per_orchestrator -= 1
+
+    def generate_random_vnf(self, orchestrator):
+        random_index = generate_random_integer(0, len(self.vnf_data) - 1)
+        vnf_data = self.vnf_data[random_index]
+        with open(vnf_data['file']) as json_file:
+            vnf_blue_print = json.load(json_file)
+        vnf_configuration = VNFDefinitionConfiguration(vnf_blue_print['operation'],
+                                                       orchestrator.get_new_ip(),
+                                                       vnf_blue_print['port'],
+                                                       orchestrator.id,
+                                                       self.current_queues_number,
+                                                       orchestrator.constraints)
+        new_vnf = VNFDefinition(vnf_configuration)
+        self.current_queues_number += 3
+        return new_vnf
+
+    def generate_random_vnf_local(self, orchestrator):
+        random_index = generate_random_integer(0, len(self.vnf_data) - 1)
+        vnf_data = self.vnf_data[random_index]
+        with open(vnf_data['file']) as json_file:
+            vnf_blue_print = json.load(json_file)
+        vnf_configuration = VNFDefinitionConfiguration(vnf_blue_print['operation'],
+                                                       '127.0.0.1',
+                                                       self.vnf_port,
+                                                       orchestrator.id,
+                                                       self.current_queues_number,
+                                                       orchestrator.constraints)
+        new_vnf = VNFDefinition(vnf_configuration)
+        self.current_queues_number += 3
+        self.vnf_port += 2
+        return new_vnf
+
+    def change_random_seeds(self, experiment):
+        random.seed(self.random_seed_list[experiment])
+        np.random.seed(self.random_np_seed_list[experiment])
+
+    def generate_service_entry(self, orchestrator):
+        new_service = ServiceDefinition(orchestrator)
+        remaining_vnfc_components = 1 + generate_random_integer(1, self.length_of_vnfs)
+        vnfs_managed_by_orchestrator = self.create_list_of_vnf_components(orchestrator.get_vnfs())
+        while remaining_vnfc_components > 0:
+            new_vnfc_index = generate_random_index_from_vnf_components(vnfs_managed_by_orchestrator, new_service)
+            new_service.add_vnf_component(vnfs_managed_by_orchestrator[new_vnfc_index])
+            remaining_vnfc_components -= 1
+            self.remaining_vnfc_components = remaining_vnfc_components
+        self.list_vnf_components.append(new_service)
+        return new_service
+
+    def create_list_of_vnf_components(self, orchestrator_list):
+        new_list_of_components = list()
+        for element in orchestrator_list:
+            new_list_of_components.append(element)
+        for element in self.list_vnf_components:
+            new_list_of_components.append(element)
+        return new_list_of_components
+
+    def create_json_file_for_experiment(self, experiment_number):
+        dir_name = 'experiments'
+        file_name = dir_name + '/experiment_' + str(experiment_number) + '.json'
+        if not os.path.exists(dir_name):
+            os.makedirs(dir_name)
+
+        new_experiment = self.create_experiment_as_json_directory()
+        self.list_name_of_experiments.append(str(experiment_number))
+        with open(file_name, 'w') as json_file:
+            json.dump(new_experiment, json_file)
+
+    def create_experiment_as_json_directory(self):
+        new_experiment = dict()
+        new_experiment['orchestrators'] = list()
+        for orchestrator in self.list_orchestrators:
+            new_orchestrator_json_encoded = orchestrator.create_dictionary_specification()
+            new_experiment['orchestrators'].append(new_orchestrator_json_encoded)
+        return new_experiment
+
+    def get_random_orchestrator(self):
+        random_index = generate_random_integer(0, len(self.list_orchestrators) - 1)
+        return self.list_orchestrators[random_index]
+
+    def add_services_to_experiment(self, new_experiment):
+        for service_count in range(self.number_of_services):
+            orchestrator = self.get_random_orchestrator()
+            new_service = self.generate_service_entry(orchestrator)
+            orchestrator.add_service(new_service)
+            new_experiment['services'].append(new_service)
 
     def generate_experiment(self):
-
-        for experiment in range(self.number_of_experiments):
-            random.seed(self.random_seed_list[experiment])
-            np.random.seed(self.random_np_seed_list[experiment])
-
-            if not os.path.exists(self.path):
-                os.makedirs(self.path)
-
-            self.list_name_of_experiments.append('experiment_' + str(experiment))
-            with open(self.path + 'experiment_' + str(experiment) + '.json', 'w') as json_file:
-                experiment = dict()
-                experiment['services'] = []
-                for service in range(self.number_of_services):
-                    list_random_index = self.generate_random_indexes()
-                    vnf_list = []
-                    for index in list_random_index:
-                        vnf_list.append(self.vnf_data[index])
-                    service = self.create_entry_service(vnf_list)
-                    experiment['services'].append(service)
-
-                # Select the VNFs to migrate
-                migration_indexes = self.generate_random_vector()
-                self.generate_migration_parameter(migration_indexes, experiment)
-                json.dump(experiment, json_file)
+        for experiment_counter in range(self.number_of_experiments):
+            self.change_random_seeds(experiment_counter)
+            self.add_vnfs_to_orchestrators()
+            new_experiment = create_empty_experiment_entry()
+            self.add_services_to_experiment(new_experiment)
+            self.create_json_file_for_experiment(experiment_counter)
+            self.list_vnf_components = []
+            self.clear_orchestrator_vnfs()
         return self.list_name_of_experiments
 
-    def generate_constraints(self):
-        topology_constraints = dict()
-        topology_constraints['delay'] = self.length_of_vnfs * generate_random_integer(self.delay_low, self.delay_high)
-        topology_constraints['bandwidth'] = self.length_of_vnfs * generate_random_integer(self.bandwidth_low, self.bandwidth_high)
-        topology_constraints['loss'] = self.length_of_vnfs * generate_random_integer(self.loss_low, self.loss_high)
-        topology_constraints['jitter'] = self.length_of_vnfs * generate_random_integer(self.jitter_low, self.jitter_high)
-        return topology_constraints
-
-    # TODO: Handle multiple migrations, for the moment just one
-    def generate_migration_parameter(self, migration_indexes, experiment):
-        migration = []
-        vnf_index = 0
-        number_of_migrations = 0
-        for index in migration_indexes:
-            if self.valid_migration_index(index):
-                host_migrating = self.vnf_data[vnf_index]
-                migration.append(host_migrating['server'])
-                number_of_migrations += 1
-                break
-            vnf_index += 1
-        experiment['migrating_vnfs'] = migration
-        experiment['number_of_migrations'] = number_of_migrations
-        return experiment
-
-    @staticmethod
-    def valid_migration_index(index):
-        return index > 1.0 or index < -1.0
-
-    def generate_random_vector(self):
-        standard_deviation = 0
-        variance = 1
-        # TODO: CHANGE FOR CLASS PARAMETER
-        x = np.random.normal(standard_deviation, variance, self.number_of_vnf)
-        return x
-
-    def generate_random_indexes(self):
-        return random.sample(range(self.number_of_vnf), self.length_of_vnfs)
-
-    def handle_parameters(self, operation, parameters):
-        generic_parameter = dict()
-        if operation == 'ANNOTATE':
-            generic_parameter['text'] = 'Test'
-            generic_parameter['font_size'] = 30
-            generic_parameter['color'] = 'white'
-            parameters['annotation'] = generic_parameter
-
-        if operation == 'CROP':
-            generic_parameter['initial_time'] = 0
-            generic_parameter['end_time'] = 10
-            parameters['crop'] = generic_parameter
-
-        if operation == 'FADE_IN':
-            generic_parameter['duration'] = 10
-            parameters['fade_in'] = generic_parameter
-
-        if operation == 'FADE_OUT':
-            generic_parameter['duration'] = 10
-            parameters['fade_out'] = generic_parameter
-
-        if operation == 'RESIZE':
-            generic_parameter['width'] = 300
-            generic_parameter['height'] = 300
-            parameters['resize'] = generic_parameter
-
-        if operation == 'SPEED_UP':
-            parameters['speed_up'] = 2
-        return parameters
-
-    def generate_virtual_network_function_forwarding_graph(self, operations):
-        vnf_fg_list = []
-        previous_vnf = None
-        for operation in operations:
-            vnf_fg_entry = dict()
-            vnf = self.get_vnf_by_operation(operation)
-            vnf_fg_entry['name'] = vnf['operation']
-            if previous_vnf:
-                vnf_fg_entry['first_connection_point'] = previous_vnf['exit_connection_point']
-            else:
-                vnf_fg_entry['first_connection_point'] = None
-            vnf_fg_entry['second_connection_point'] = vnf['entry_connection_point']
-            previous_vnf = vnf
-            vnf_fg_list.append(vnf_fg_entry)
-        return vnf_fg_list
-
-    def get_vnf_by_operation(self, operation):
-        for vnf in self.vnf_data:
-            if vnf['operation'] == operation:
-                return vnf
-        return None
-
-    def create_file_parameter(self, parameters):
-        file = dict()
-        file['file_name'] = "videos/small_480.mp4"
-        file['format_file'] = '.mp4'
-        file['filename_processed'] = 'small_processed_'
-        parameters['file'] = file
-        return parameters
-
-    def create_entry_service(self, vnf_list):
-        operations = []
-        servers = []
-        ports = []
-        parameters = dict()
-        parameters = self.initialize_parameters(parameters)
-
-        for vnf in vnf_list:
-            operation = vnf['operation']
-            operations.append(operation)
-            servers.append(vnf['server'])
-            ports.append(vnf['port'])
-            parameters = self.handle_parameters(operation, parameters)
-
-        parameters = self.create_file_parameter(parameters)
-        service = dict()
-        service['operations'] = operations
-        service['host_servers'] = servers
-        service['port_servers'] = ports
-        service['parameters'] = parameters
-        service['queue_q'] = []
-        service['queue_p'] = []
-        service['queue_r'] = []
-        service['constraints'] = self.generate_constraints()
-        service['vnf-fg'] = self.generate_virtual_network_function_forwarding_graph(operations)
-        service['updates-vnf-fg'] = self.generate_updates_for_vnf_fg(service['vnf-fg'])
-        #TODO: This needs to change to add more orchestrators
-        service['orch_names'] = ['orch_1', 'orch_2', 'orch_3', 'orch_4']
-        # TODO: Move this to the parameter
-        if 'SPEED_UP' in operations:
-            service['speed_factor'] = 2
-        else:
-            service['speed_factor'] = None
-        return service
-
-    def generate_updates_for_vnf_fg(self, vnf_fg):
-        vnf_fg_list_updates = []
-        number_of_changes = generate_number_of_updates(self.max_number_of_changes)
-        for i in range(0, number_of_changes):
-            wait_period = generate_waiting_period()
-            vnf_index_to_change = generate_index_to_change_by_value(len(vnf_fg) - 1)
-            index_to_change = generate_index_to_change()
-            value_to_change = ''
-            if index_to_change == 0:
-                value_to_change = 'name'
-            elif index_to_change == 1:
-                value_to_change = 'first_connection_point'
-            elif index_to_change == 2:
-                value_to_change = 'second_connection_point'
-
-            new_value = generate_random_string_value()
-            orchestrator = generate_random_orchestrator_index()
-            vnf_fg_update_entry = dict()
-            vnf_fg_update_entry['wait_period'] = wait_period
-            vnf_fg_update_entry['vnf_index_to_change'] = vnf_index_to_change
-            vnf_fg_update_entry['value_to_change'] = value_to_change
-            vnf_fg_update_entry['new_value'] = new_value
-            vnf_fg_update_entry['orchestrator'] = orchestrator
-            vnf_fg_list_updates.append(vnf_fg_update_entry)
-        return vnf_fg_list_updates
-
-    def initialize_parameters(self, parameters):
-        parameters['annotation'] = None
-        parameters['crop'] = None
-        parameters['fade_in'] = None
-        parameters['fade_out'] = None
-        parameters['resize'] = None
-        parameters['speed_up'] = None
-        return parameters
-
-
-def main():
-    number_of_experiments = 10
-    number_of_services = 10
-    length_of_vnfs = 4
-    video_definition = 480
-    delay = [0, 20]
-    bandwidth = [0, 70]
-    loss = [0, 10]
-    jitter = [0, 10]
-    random_seed_list = None
-    random_np_seed_list = None
-
-    if length_of_vnfs == 4:
-        random_seed_list = [915079, 103325, 559869, 675171, 995719, 363117, 343184, 419122, 266230, 142585]
-        random_np_seed_list = [195144, 566204, 794644, 260097, 390724, 355203, 896144, 958085, 487911, 291244]
-
-    if length_of_vnfs == 5:
-        random_seed_list = [70293, 294020, 660707, 500796, 915766, 976451, 628093, 879378, 197748, 774728]
-        random_np_seed_list = [70771, 976140, 735573, 368811, 825713, 13711, 718981, 52465, 371367, 597550]
-
-    if length_of_vnfs == 6:
-        random_seed_list = [980344, 524550, 34272, 206324, 547154, 620900, 212556, 720587, 411835, 416558]
-        random_np_seed_list = [961746, 551665, 16940, 431629, 442351, 135882, 943199, 765013, 351824, 376447]
-
-    if length_of_vnfs == 8:
-        random_seed_list = [2940627, 3717510, 4651201, 5211310, 8760564]
-        random_np_seed_list = [3060307, 3953270, 5291516, 7353312, 8607401]
-
-    if length_of_vnfs == 10:
-        random_seed_list = [42191, 41898, 41358, 91689, 36924, 89787, 52971, 88074, 12951, 79798]
-        random_np_seed_list = [72023, 75939, 31797, 34039, 41622, 16211, 31596, 84615, 31047, 59125]
-
-    experiment_path = '../first/' + str(video_definition) +'/exp_1_' + str(length_of_vnfs) + '/experiments/'
-    max_number_of_changes = 20
-
-    print('Begin experiment generator')
-    exp_gen = ExperimentGenerator(number_of_experiments,
-                                  number_of_services,
-                                  length_of_vnfs,
-                                  experiment_path,
-                                  delay,
-                                  bandwidth,
-                                  loss,
-                                  jitter,
-                                  random_seed_list,
-                                  random_np_seed_list,
-                                  max_number_of_changes)
-    list_name_experiments = exp_gen.generate_experiment()
-    print('End experiment generation')
-
-    for experiment_file in list_name_experiments:
-        print('Begin docker commands')
-        dock_gen = DockerCommandsGenerator(experiment_path,
-                                           delay,
-                                           bandwidth,
-                                           loss,
-                                           jitter,
-                                           experiment_file,
-                                           length_of_vnfs)
-        dock_gen.generate_commands()
-        print('End docker commands')
-
-    for experiment_file in list_name_experiments:
-        print('Begin applying migration information ....')
-        up_service = UpdateServiceWithMigrationGenerator(experiment_path, experiment_file)
-        up_service.add_migration_information_to_services()
-        print('Finish applying migration information ....')
-
-    # for experiment_file in list_name_experiments:
-    #     print('Begin valid generation')
-    #     val_gen = ValidatorGenerator(experiment_file, experiment_path)
-    #     val_gen.validate_experiment()
-    #     print('End valid generation')
-
-    # for experiment_file in list_name_experiments:
-    #     print('Begin docker commands')
-    #     dock_gen = DockerCommandsGenerator(experiment_path,
-    #                                        delay,
-    #                                        bandwidth,
-    #                                        loss,
-    #                                        jitter,
-    #                                        experiment_file,
-    #                                        length_of_vnfs)
-    #     dock_gen.generate_commands()
-    #     print('End docker commands')
-
-    for experiment_file in list_name_experiments:
-        print('Begin migration message generator')
-        message_gen = MigrationMessageGenerator(path=experiment_path,
-                                                name_of_experiment=experiment_file)
-        message_gen.generate()
-        print('End migration message generator')
-
-    # with open(experiment_path + 'experiment_0.json') as jsonfile:
-    #     parsed = json.load(jsonfile)
-    # print(json.dumps(parsed, indent=2, sort_keys=True))
-
-    with open(experiment_path + 'vnf_info.json') as jsonfile:
-        parsed = json.load(jsonfile)
-    print(json.dumps(parsed, indent=2, sort_keys=True))
-
-    # print('------------------------------------------------------------------')
-    # print('                      VALIDATION                                  ')
-    # print('------------------------------------------------------------------')
-    #
-    # with open(experiment_path + experiment_file + '_validate.json') as jsonfile:
-    #     parsed = json.load(jsonfile)
-    # print(json.dumps(parsed, indent=2, sort_keys=True))
-
-    print('Finish setting up experiment!')
-
-
-if __name__ == "__main__":
-    main()
+    def clear_orchestrator_vnfs(self):
+        for orchestrator in self.list_orchestrators:
+            orchestrator.clear_all()

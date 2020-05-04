@@ -1,0 +1,21 @@
+ {
+  "operation": "MIRROR_Y",
+  "server": "10.0.0.16",
+  "port": 4437,
+  "queue_p": [37],
+  "queue_q": [38],
+  "queue_r": [39],
+  "delay": 0.0,
+  "bandwidth": 0.0,
+  "loss": 0.0,
+  "jitter": 0.0,
+  "orchestrator": 0,
+  "migration_vnf_ip": null,
+  "entry_connection_point": "mirrory_in",
+  "exit_connection_point": "mirrory_out",
+  "id": "mirror_y_vnf ",
+  "parameters":
+  {
+    "extra": "None"
+  }
+ }

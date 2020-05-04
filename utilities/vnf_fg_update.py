@@ -25,4 +25,7 @@ def generate_random_orchestrator_index():
 
 def generate_random_string_value():
     letters = string.ascii_lowercase
-    return ''.join(random.choice(letters) for i in range(10))
+    name = ''
+    for i in range(10):
+        name += random.choice(letters)
+    return name

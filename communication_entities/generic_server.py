@@ -3,7 +3,7 @@ import socket
 
 from communication_entities.messages.abstract_message import AbstractMessage
 from communication_entities.messages.topology_message import TopologyMessage
-from entities.parameter_package import ParameterPackage
+from entities.parameters.parameter_package import ParameterPackage
 from entities.topology import Topology
 from utilities.logger import log
 from utilities.message_type import MessageType
@@ -38,7 +38,7 @@ class GenericServer:
                 message.client_socket = client_socket
                 message.process_by_command_line()
                 log.info("CONNECTIONS ENDED")
-                self.orchestrator.print_state_vnf()
+                # self.orchestrator.print_state_vnf()
             except KeyboardInterrupt:
                 log.exception("Keyboard interruption")
                 if client_socket:
@@ -58,19 +58,16 @@ class GenericServer:
         self.send_channel.connect((server.host, int(server.port)))
 
     def connect_to_another_server_raw(self, host, port):
-        # self.connect_channel_to_server(server, self.send_channel)
         self.send_channel = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         log.info(''.join(["Send Channel Host: ", host, " Port: ", port]))
         self.send_channel.connect((host, int(port)))
 
     def connect_to_orchestrator(self, server):
-        # self.connect_channel_to_server(server, self.send_orchestrator_channel)
         self.send_orchestrator_channel = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         log.info(''.join(["Orchestrator Host: ", server.host, " Port: ", str(server.port)]))
         self.send_orchestrator_channel.connect((server.host, server.port))
 
     def connect_to_another_server_virtual(self, server):
-        # self.connect_channel_to_server(server, self.send_virtual_channel)
         self.send_virtual_channel = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         self.send_virtual_channel.connect((server.host, server.port))
 
@@ -124,7 +121,6 @@ class GenericServer:
         return new_message
 
     def send_message(self, message):
-        # log.info("Sending Message using send_channel")
         str_log = 'Sending Message using send_channel of type:' + str(type(message))
         log.info(str_log)
         data_string = pickle.dumps(message)
@@ -150,7 +146,6 @@ class GenericServer:
         self.send_virtual_channel.sendall(data_string)
 
     def send_message_query_vnf(self, message):
-        # log.info("Sending Message using send_channel")
         str_log = 'Sending Message using send_channel of type: ' + str(type(message))
         log.info(str_log)
         data_string = pickle.dumps(message)

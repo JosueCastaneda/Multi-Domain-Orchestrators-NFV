@@ -1,0 +1,21 @@
+{
+  "operation": "MIRROR_X",
+  "server": "10.0.0.17",
+  "port": 4437,
+  "queue_p": [19],
+  "queue_q": [20],
+  "queue_r": [21],
+  "delay": 0.0,
+  "bandwidth": 0.0,
+  "loss": 0.0,
+  "jitter": 0.0,
+  "orchestrator": 0,
+  "migration_vnf_ip": null,
+  "entry_connection_point": "mirrorx_in",
+  "exit_connection_point": "mirrorx_out",
+  "id": "mirror_vnf",
+  "parameters":
+  {
+    "extra": "None"
+  }
+}

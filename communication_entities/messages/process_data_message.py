@@ -2,9 +2,9 @@ import pickle
 
 from communication_entities.messages.abstract_message import AbstractMessage
 from communication_entities.messages.data_video_message import DataVideoMessage
-from communication_entities.messages.all_queue_information import AllQueueInformation
+from communication_entities.messages.queue_processing.all_queue_information import AllQueueInformation
 from entities.communication_entity_package import CommunicationEntityPackage
-from entities.vnf_generator import VNFGenerator
+from entities.vnf_entities.vnf_generator import VNFGenerator
 from utilities.logger import log
 
 

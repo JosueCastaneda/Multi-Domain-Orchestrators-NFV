@@ -2,7 +2,7 @@ import random
 import time
 
 from communication_entities.messages.abstract_message import AbstractMessage
-from communication_entities.messages.migration_ack_message import MigrationAckMessage
+from communication_entities.messages.lcm_messages.migration.migration_ack_message import MigrationAckMessage
 from utilities.logger import log
 
 

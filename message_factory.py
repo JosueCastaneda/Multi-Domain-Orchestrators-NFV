@@ -5,24 +5,17 @@ import sys
 
 sys.path.append('../')
 
-
 from entities.message_generator import MessageGenerator
-from entities.command_package import CommandPackage
+from utilities.command_package import CommandPackage
 from utilities.logger import log
 
 
 def main(argv):
     command = read_parameters(argv)
-    # file = 'experiments/first/1920/exp_1_3/parameters.json'
-    # file = 'experiments/first/480/exp_1_4/experiments/experiment_0.json'
-    # file = 'experiments/first/1920/exp_1_5/parameters.json'
-    #file = 'experiments/first/1920/exp_1_6/parameters.json'
-    # print('Filename:', file)
     if command.is_valid():
         messages = generate_messages(command)
         if isinstance(messages, list):
             log.info(''.join(["Number of messages", str(len(messages))]))
-            # send_message(command, messages[0])
             for m in messages:
                 send_message(command, m)
         else:
@@ -54,7 +47,7 @@ def read_parameters(argv):
     debug = False
 
     try:
-        opts, args = getopt.getopt(argv, "t:h:p:n:m:v:w:e:s",
+        opts, args = getopt.getopt(argv, "t:h:p:n:m:v:w:e:s:i:x:",
                                    ["type=",
                                     "host=",
                                     "port=",
@@ -63,7 +56,9 @@ def read_parameters(argv):
                                     "vnf_host=",
                                     "vnf_port=",
                                     "experiment=",
-                                    "seed="])
+                                    "seed=",
+                                    "service_id=",
+                                    "orchestrator_id="])
     except getopt.GetoptError:
         print(command.help_message)
         sys.exit(2)
@@ -84,11 +79,17 @@ def read_parameters(argv):
             command.vnf_host = arg
         elif opt in ("-w", "--vnf_port"):
             command.vnf_port = arg
+            print('VNF PORT: ' + arg)
         elif opt in ("-e", "--experiment"):
-            str_exp = 'experiments/first/480/exp_1_8/experiments/experiment_' + arg +'.json'
+            str_exp = 'experiments/first/480/exp_1_8/experiments/experiment_' + arg + '.json'
             command.experiment = str_exp
         elif opt in ("-s", "--seed"):
             command.seed = arg
+        elif opt in ("-i", "--service_id"):
+            command.service_id = arg
+        elif opt in ("-x", "--orchestrator_id"):
+            command.orchestrator_id = arg
+            print('ORCHESTRATOR ID: ' + arg)
     return command
 
 

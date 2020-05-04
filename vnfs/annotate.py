@@ -1,7 +1,7 @@
 from moviepy.editor import VideoFileClip, TextClip, CompositeVideoClip, vfx
 
 from communication_entities.messages.abstract_message import AbstractMessage
-from entities.parameter_package import ParameterPackage
+from entities.parameters.parameter_package import ParameterPackage
 from entities.parameters.annotation import AnnotationParameters
 from utilities.logger import log
 

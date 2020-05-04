@@ -1,0 +1,21 @@
+{
+  "operation": "ROTATE",
+  "server": "10.0.0.13",
+  "port": 4437,
+  "queue_p": [1],
+  "queue_q": [2],
+  "queue_r": [3],
+  "delay": 0.0,
+  "bandwidth": 0.0,
+  "loss": 0.0,
+  "jitter": 0.0,
+  "orchestrator": 0,
+  "migration_vnf_ip": null,
+  "entry_connection_point": "rot_in",
+  "exit_connection_point": "rot_out",
+  "id": "rotate_vnf",
+  "parameters":
+  {
+    "angle":90
+  }
+}

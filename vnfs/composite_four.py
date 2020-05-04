@@ -1,9 +1,7 @@
-import os
-
 from moviepy.editor import VideoFileClip, clips_array, vfx
 
 from communication_entities.messages.abstract_message import AbstractMessage
-from entities.parameter_package import ParameterPackage
+from entities.parameters.parameter_package import ParameterPackage
 from utilities.logger import log
 
 

@@ -1,0 +1,21 @@
+{
+  "operation": "SPEED_UP",
+  "server": "10.0.0.68",
+  "port": 4437,
+  "queue_p": [28],
+  "queue_q": [29],
+  "queue_r": [30],
+  "delay": 0.0,
+  "bandwidth": 0.0,
+  "loss": 0.0,
+  "jitter": 0.0,
+  "orchestrator": 0,
+  "migration_vnf_ip": null,
+  "entry_connection_point": "speed_in",
+  "exit_connection_point": "speed_out",
+  "id": "speed_out_vnf",
+  "parameters":
+  {
+      "factor": 2
+  }
+}

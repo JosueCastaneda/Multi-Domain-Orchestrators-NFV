@@ -1,0 +1,24 @@
+{
+  "operation": "COMPOSITE",
+  "server": "10.0.0.100",
+  "port": 4437,
+  "queue_p": [34],
+  "queue_q": [35],
+  "queue_r": [36],
+  "delay": 0.0,
+  "bandwidth": 0.0,
+  "loss": 0.0,
+  "jitter": 0.0,
+  "orchestrator": 0,
+  "migration_vnf_ip": null,
+  "entry_connection_point": "composite_in",
+  "exit_connection_point": "composite_out",
+  "id": "composite_vnf",
+  "parameters":
+  {
+    "rotate": 90,
+    "margin": 10,
+    "resize": 0.60,
+    "width": 480
+  }
+}

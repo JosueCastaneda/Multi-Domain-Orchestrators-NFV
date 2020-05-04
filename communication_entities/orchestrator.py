@@ -4,40 +4,66 @@ import random
 import sys
 import threading
 
-from communication_entities.messages.update_vnf_info_after_internal_operation import UpdateVnfInfoAfterInternalOperation
+from communication_entities.generic_service import GenericService
+from communication_entities.life_cycle_management import LifeCycleManagement
+from communication_entities.messages.all_dependencies_are_registered import AllDependenciesAreRegistered
+from communication_entities.messages.vnf_information.update_vnf_info_after_internal_operation import \
+    UpdateVnfInfoAfterInternalOperation
 
 sys.path.append('../')
 
 from communication_entities.generic_server import GenericServer
 from entities.communication_entity_package import CommunicationEntityPackage
-from communication_entities.messages.vnf_found_message import VNFFound
+from communication_entities.messages.vnf_information.vnf_found_message import VNFFound
 from utilities.logger import *
 
 
 class Orchestrator:
 
-    def __init__(self, server, path, experiment_name, orchestrator_list=None, topology=None, name=""):
+    def __init__(self, experiment_index, orchestrator_index):
+        self.experiment_name = 'experiment_' + experiment_index + '.json'
+        self.name = 'orch_' + orchestrator_index
         self.list_vnf = dict()
         self.list_old_vnfs = []
-        self.list_orchestrator = orchestrator_list
+        self.list_orchestrator = list()
         if self.list_orchestrator is None:
             self.list_orchestrator = []
-        self.topology = topology
-        self.server = GenericServer(self, server)
-        self.name = name
-        self.server_orchestrator = server
-        self.experiment_path = path
-        self.experiment_name = experiment_name
-        self.services = None
+        self.topology = None
+        communication_entity_pacakge = self.load_server_information()
+        self.server = GenericServer(self, communication_entity_pacakge)
+        self.services = list()
+        self.vnfs = list()
         self.vnf_fg_information = []
         self.vnf_fg_update_information = []
         self.logical_clock = dict()
         self.set_up_logical_clocks()
         self.add_service_information()
-        log.info(''.join(["Orchestrator: ", self.name, " is running!"]))
         self.updates_remaining = 0
         self.inconsistencies = 0
         self.messages_sent = 0
+        self.services_to_scale_unique = set()
+        self.life_cycle_manager = LifeCycleManagement(self, self.vnfs, self.services)
+        log.info(''.join(["Orchestrator: ", self.name, " is running!"]))
+
+    # TODO: This function is too big with a lot of responsabilities...
+    def load_server_information(self):
+        str_new_file_name = 'experiments/experiment_generator/experiments/' + self.experiment_name
+        with open(str_new_file_name) as json_file:
+            raw_data = json.load(json_file)
+        orchestrator_number = self.name.find('_')
+        orchestrator_index = int(self.name[orchestrator_number + 1:])
+        print('NAME: ' + str(self.name))
+        print('ORCHESTRATOR INDEX: ' + str(orchestrator_index))
+        print('IP: ' + str(raw_data['orchestrators'][orchestrator_index]['ip']))
+        print('PORT: ' + str(raw_data['orchestrators'][orchestrator_index]['port']))
+        print('IDS: ' + str(raw_data['orchestrators'][orchestrator_index]['id']))
+        server = CommunicationEntityPackage(raw_data['orchestrators'][orchestrator_index]['ip'],
+                                            int(raw_data['orchestrators'][orchestrator_index]['port']))
+        self.id = raw_data['orchestrators'][orchestrator_index]['id']
+        self.ip = raw_data['orchestrators'][orchestrator_index]['ip']
+        self.port = raw_data['orchestrators'][orchestrator_index]['port']
+        self.location = raw_data['orchestrators'][orchestrator_index]['location']
+        return server
 
     def set_up_logical_clocks(self):
         self.logical_clock['ANNOTATE'] = 0
@@ -57,9 +83,20 @@ class Orchestrator:
     def serve_clients(self):
         self.server.serve_clients()
 
+    def find_orchestrator_by_id(self, orch_id):
+        for orchestrator in self.list_orchestrator:
+            if orchestrator['id'] == orch_id:
+                return orchestrator
+        my_orchestrator = dict()
+        my_orchestrator['ip'] = self.ip
+        my_orchestrator['port'] = self.port
+        my_orchestrator['name'] = self.name
+        my_orchestrator['id'] = self.id
+        return my_orchestrator
+
     def add_service_information(self):
-        self.load_services_information()
-        self.add_virtual_network_function_forwarding_graph_information()
+        self.load_vnf_components()
+        # self.add_virtual_network_function_forwarding_graph_information()
 
     def send_update_message(self, service_index, vnf_index_to_change, value_to_change, new_value, wait_period):
         print("Changes: ", vnf_index_to_change, ' ', value_to_change, ' ', new_value)
@@ -80,11 +117,6 @@ class Orchestrator:
             self.server.connect_to_another_server_raw(orchestrator[0], orchestrator[1])
             self.server.send_message(s)
 
-            # x = self.server.send_channel.recv(SocketSize.RECEIVE_BUFFER.value)
-            # answer_message = pickle.loads(x)
-            # str_log = 'Received answer from new VNF TYPE: ' + str(type(answer_message))
-            # self.server.disconnect_send_channel()
-
     def update_vnf_info(self, service_index, vnf_index_to_change, value_to_change, new_value, clock, name):
         log.info('Called after trigger ')
         my_clock = self.logical_clock[name] + 1
@@ -94,8 +126,79 @@ class Orchestrator:
         self.updates_remaining -= 1
         self.print_vnf_fg_information()
 
+    def send_lcm_message(self, message, destinatary):
+        new_sender = dict()
+        new_sender['ip'] = self.ip
+        new_sender['port'] = self.port
+        new_sender['id'] = self.id
+        self.send_message_to_orchestrator(message, destinatary)
+
+    def send_message_to_orchestrator(self, message, destinatary):
+        vnf_server = CommunicationEntityPackage(destinatary['ip'], destinatary['port'])
+        self.server.connect_to_another_server(vnf_server)
+        self.server.send_message(message)
+        self.server.disconnect_send_channel()
+
+    def request_service_scale(self, service_id):
+        log.info('Requested Scaling of service ' + str(service_id))
+        for service in self.services:
+            if service.id == service_id:
+                service_as_dictionary = service.format_as_a_dictionary(is_first=True)
+                for dependency in service.dependencies:
+                    new_dependency_as_dictionary = dict()
+                    new_dependency_as_dictionary['id'] = dependency['id']
+                    new_dependency_as_dictionary['type'] = dependency['type']
+                    new_dependency_as_dictionary['first_operation'] = True
+                    service_as_dictionary['pending_operations'].append(new_dependency_as_dictionary)
+                self.life_cycle_manager.add_new_service_to_scale(service.id, service_as_dictionary)
+                service.scale()
+
+    def get_orchestrator_information_by_id(self, orchestrator_id):
+        for orchestrator in self.list_orchestrator:
+            if orchestrator['id'] == orchestrator_id:
+                return orchestrator
+        my_orchestrator = dict()
+        my_orchestrator['ip'] = self.ip
+        my_orchestrator['port'] = self.port
+        my_orchestrator['name'] = self.name
+        my_orchestrator['id'] = self.id
+        return my_orchestrator
+
+    def entry_as_dictionary(self):
+        orchestrator_format = dict()
+        orchestrator_format['ip'] = self.ip
+        orchestrator_format['port'] = self.port
+        orchestrator_format['id'] = self.id
+        return orchestrator_format
+
+    def validate_service_scaling(self, service_id):
+        is_ok_to_scale = None
+        no_dependencies = None
+        for service in self.services:
+            if service.id == service_id:
+                is_ok_to_scale, no_dependencies = service.validate_scaling()
+                return is_ok_to_scale, no_dependencies
+        return is_ok_to_scale, no_dependencies
+
+    def get_service_by_id(self, service_id):
+        for service in self.services:
+            if service.id == service_id:
+                return service
+
+    def grant_lcm_operation(self, vnf_component_to_scale_id, operation, original_service):
+        if operation == 'scaling':
+            service_to_scale = self.get_service_by_id(vnf_component_to_scale_id)
+            self.life_cycle_manager.add_new_service_to_scale(vnf_component_to_scale_id, original_service)
+            is_ok_to_scale, no_dependencies = service_to_scale.validate_scaling()
+            if is_ok_to_scale:
+                service_to_scale.independent_scale(vnf_component_to_scale_id)
+            else:
+                print('ERROR IN SCALING :(')
+
+    def remove_service_to_scale(self, service):
+        self.services_to_scale_unique.remove(service)
+
     def update_vnf_info_with_clocks(self, service_index, vnf_index_to_change, value_to_change, new_value, clock, name):
-        # name_vnf_to_update = self.vnf_fg_information[service_index][vnf_index_to_change]['name']
         lock = threading.Lock()
         lock.acquire()
         try:
@@ -118,7 +221,6 @@ class Orchestrator:
         finally:
             lock.release()
 
-
     def print_vnf_fg_information(self):
         log.info('Services left to update: ' + str(self.updates_remaining))
         if self.updates_remaining == 0:
@@ -132,12 +234,10 @@ class Orchestrator:
             log.info(str_message_overhead)
 
     def update_vnf_info_timer(self, service_index, vnf_index_to_change, value_to_change, new_value, clock, wait_period, name_vnf_to_update):
-        #wait_period += random.randint(0, 5)
         wait_period = random.randint(0, 40)
         str_log_wait = 'Waiting period: ' + str(wait_period)
         log.info(str_log_wait)
         other_algorithm = True
-
         if other_algorithm:
             t = threading.Timer(wait_period, self.update_vnf_info, [service_index,
                                                                     vnf_index_to_change,
@@ -150,7 +250,6 @@ class Orchestrator:
                                                                     value_to_change,
                                                                     new_value,
                                                                     clock, name_vnf_to_update])
-
         self.updates_remaining += 1
         t.start()
 
@@ -177,14 +276,21 @@ class Orchestrator:
             new_value = service['new_value']
             wait_period = service['wait_period']
             self.send_update_message(2, vnf_index_to_change, value_to_change, new_value, wait_period)
-
         print('Finish sending messages')
-        # t = threading.Timer(3.0, self.hello, [0, 1, 2, 'SAS'])
 
-    def load_services_information(self):
-        with open('experiments/' + self.experiment_path + self.experiment_name) as json_file:
+    def load_vnf_components(self):
+        str_new_file_name = 'experiments/experiment_generator/experiments/'+ self.experiment_name
+        with open(str_new_file_name) as json_file:
             raw_data = json.load(json_file)
-            self.services = raw_data['services']
+        orchestrator_number = self.name.find('_')
+        orchestrator_index = int(self.name[orchestrator_number+1:])
+        self.instantiate_services(raw_data['orchestrators'][orchestrator_index]['services'])
+        self.vnfs = raw_data['orchestrators'][orchestrator_index]['vnfs']
+
+    def instantiate_services(self, services):
+        for service in services:
+            new_service = GenericService(service['id'], self, service['dependencies'])
+            self.services.append(new_service)
 
     def add_virtual_network_function_forwarding_graph_information(self):
         for service in self.services:
@@ -211,22 +317,41 @@ class Orchestrator:
 
     # TODO: Handle more cases of migration and the orchestrator requires to update his managed vnfs
     def get_local_vnf(self, vnf_name):
-        # # First check if the name is present in old ones to update
-        # for old_vnfs in self.list_old_vnfs:
-        #     if old_vnfs['name'] == vnf_name:
-        # # If not then use the normal list
-
         return self.list_vnf.get(vnf_name)
 
     # Todo: Implement this function to handle dynamic orchestrator
-    def add_orchestrator(self, o_host, o_port, o_name=""):
-        self.list_orchestrator.append((o_host, o_port, o_name))
+    def add_orchestrator(self, o_host, o_port, o_name='', id=''):
+        new_orchestrator = dict()
+        new_orchestrator['ip'] = o_host
+        new_orchestrator['port'] = o_port
+        new_orchestrator['name'] = o_name
+        new_orchestrator['id'] = id
+        self.list_orchestrator.append(new_orchestrator)
 
     # TODO: Use a dictionary, is more expressive than using indexes
     def add_vnf(self, vnf_information):
         self.list_vnf[vnf_information.name] = vnf_information
+        # self.mark_dependency_for_services(vnf_information.id)
         log.info('Add following VNF: ')
-        self.list_vnf[vnf_information.name].print_information()
+        # self.list_vnf[vnf_information.name].print_information()
+
+    def mark_dependency_for_services(self, dependency_id):
+        for service in self.services:
+            self.mark_dependency_for_service(service, dependency_id)
+
+    def mark_dependency_for_service(self, service, dependency_id):
+        for dependency in service.dependencies:
+            if dependency['id'] == dependency_id:
+                self.decrease_dependencies_and_check_if_all_dependencies_are_registered(service)
+
+    def decrease_dependencies_and_check_if_all_dependencies_are_registered(self, service):
+        service.remaining_acknoledgments -= 1
+        if service.remaining_acknoledgments == 0:
+            self.acknowledge_other_orchestrators_that_all_dependencies_are_registered(service.id)
+
+    def acknowledge_other_orchestrators_that_all_dependencies_are_registered(self, service_id):
+        ack_message = AllDependenciesAreRegistered(service_id)
+        self.send_message_to_orchestrators(ack_message)
 
     def remove_vnf(self, vnf_name):
         self.list_vnf.remove(vnf_name)
@@ -252,13 +377,12 @@ class Orchestrator:
                 old_vnf['name'] = vnf
                 old_vnf['ip'] = vnf_host
                 self.list_old_vnfs.append(old_vnf)
-                # SEND TO ALL ORCHESTRATORS MESSAGES
                 for orquestrator in self.list_orchestrator:
                     print('Orchestrator: ', orquestrator)
                 break
 
     def send_message_to_vnf(self, vnf, message):
-        vnf_server = CommunicationEntityPackage(vnf[0], vnf[1])
+        vnf_server = CommunicationEntityPackage(vnf['server'], int(vnf['port']))
         self.server.connect_to_another_server(vnf_server)
         self.server.send_message(message)
         self.server.disconnect_send_channel()
@@ -273,14 +397,14 @@ class Orchestrator:
     def send_message_to_orchestrators(self, message):
         message.source_server = self.server
         for o in self.list_orchestrator:
-            log.info(''.join(["Log Querying Orchestrator: ", str(o[0]), " ", str(o[1])]))
-            orchestrator_server = CommunicationEntityPackage(o[0], o[1])
+            log.info(''.join(["Log Querying Orchestrator: ", str(o['ip']), " ", str(o['port'])]))
+            orchestrator_server = CommunicationEntityPackage(o['ip'], o['port'])
             self.server.connect_to_another_server(orchestrator_server)
             message.source_server = None
             answer_message = self.server.send_message_query_vnf(message)
             self.server.disconnect_send_channel()
             if isinstance(answer_message, VNFFound):
-                log.info(''.join(["Querying Orchestrator: ", str(o[0]), " ", str(o[1]), " has it"]))
+                log.info(''.join(["Querying Orchestrator: ", str(o['ip']), " ", str(o['port']), " has it"]))
                 return answer_message
-            log.info(''.join(["Querying Orchestrator: ", str(o[0]), " ", str(o[1]), " does not have it"]))
+            log.info(''.join(["Querying Orchestrator: ", str(o['ip']), " ", str(o['port']), " does not have it"]))
         return None

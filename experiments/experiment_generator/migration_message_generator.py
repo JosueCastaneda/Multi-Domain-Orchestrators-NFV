@@ -105,7 +105,7 @@ class MigrationMessageGenerator:
         for line in file_container:
             if 'vim-emu' in line:
                 vnf = dict()
-                vnf['datacenter'] = JsonParser.parse_for_datacenter(line)
+                vnf['datacenter'] = JsonParser.parse_for_data_center(line)
                 vnf['name'] = JsonParser.parse_for_name_vnf_data_center(line)
                 vnf['ip'] = JsonParser.parse_for_ip_vnf_data_center(line)
                 self.list_datacenters_of_vnfs.append(vnf)
