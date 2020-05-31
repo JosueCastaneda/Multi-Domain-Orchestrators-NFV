@@ -310,9 +310,9 @@ class GenericVNF:
         self.server.send_message(m2)
         self.collect_data_to_queue(self.configuration.get_state().get_p())
 
-    def scale(self, vnfc_id, original_sender, service_id):
+    def scale(self, vnfc_id, original_sender, service_id, original_service_id):
         print('Scaled: ' + str(self.id))
-        acknowledge_message = ScaleConfirmationMessage(self.id, service_id)
+        acknowledge_message = ScaleConfirmationMessage(self.id, service_id, original_service_id)
         original_orchestrator = CommunicationEntityPackage(original_sender['ip'], int(original_sender['port']))
         self.server.connect_to_orchestrator(original_orchestrator)
         self.server.send_message_to_orchestrator(acknowledge_message)

@@ -32,13 +32,10 @@ class GenericServer:
             client_socket, address = self.receive_channel.accept()
             try:
                 message = self.get_message(client_socket)
-                log.info(type(message))
                 message.current_server = self
                 message.client_address = address
                 message.client_socket = client_socket
                 message.process_by_command_line()
-                log.info("CONNECTIONS ENDED")
-                # self.orchestrator.print_state_vnf()
             except KeyboardInterrupt:
                 log.exception("Keyboard interruption")
                 if client_socket:

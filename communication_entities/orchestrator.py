@@ -3,12 +3,16 @@ import pickle
 import random
 import sys
 import threading
+import time
 
 from communication_entities.generic_service import GenericService
 from communication_entities.life_cycle_management import LifeCycleManagement
 from communication_entities.messages.all_dependencies_are_registered import AllDependenciesAreRegistered
+from communication_entities.messages.lcm_messages.notification_lcm_operation import NotificationLCMOperation
 from communication_entities.messages.vnf_information.update_vnf_info_after_internal_operation import \
     UpdateVnfInfoAfterInternalOperation
+from communication_entities.orchestrator_classes.pending_lcm_scaling_operation import PendingLCMScalingOperation
+from communication_entities.vector_clock import VectorClock
 
 sys.path.append('../')
 
@@ -20,12 +24,13 @@ from utilities.logger import *
 
 class Orchestrator:
 
-    def __init__(self, experiment_index, orchestrator_index):
+    def __init__(self, experiment_index, orchestrator_index, causal_delivery=True):
         self.experiment_name = 'experiment_' + experiment_index + '.json'
         self.name = 'orch_' + orchestrator_index
         self.list_vnf = dict()
         self.list_old_vnfs = []
         self.list_orchestrator = list()
+        self.pending_lcm_operations = list()
         if self.list_orchestrator is None:
             self.list_orchestrator = []
         self.topology = None
@@ -43,6 +48,9 @@ class Orchestrator:
         self.messages_sent = 0
         self.services_to_scale_unique = set()
         self.life_cycle_manager = LifeCycleManagement(self, self.vnfs, self.services)
+        self.vector_clock = VectorClock(self.id)
+        self.causal_delivery = causal_delivery
+        self.pending_lcm_notifications = list()
         log.info(''.join(["Orchestrator: ", self.name, " is running!"]))
 
     # TODO: This function is too big with a lot of responsabilities...
@@ -96,7 +104,6 @@ class Orchestrator:
 
     def add_service_information(self):
         self.load_vnf_components()
-        # self.add_virtual_network_function_forwarding_graph_information()
 
     def send_update_message(self, service_index, vnf_index_to_change, value_to_change, new_value, wait_period):
         print("Changes: ", vnf_index_to_change, ' ', value_to_change, ' ', new_value)
@@ -127,20 +134,19 @@ class Orchestrator:
         self.print_vnf_fg_information()
 
     def send_lcm_message(self, message, destinatary):
-        new_sender = dict()
-        new_sender['ip'] = self.ip
-        new_sender['port'] = self.port
-        new_sender['id'] = self.id
         self.send_message_to_orchestrator(message, destinatary)
 
+    # TODO: Lets try to wait here
     def send_message_to_orchestrator(self, message, destinatary):
         vnf_server = CommunicationEntityPackage(destinatary['ip'], destinatary['port'])
         self.server.connect_to_another_server(vnf_server)
+        time.sleep(.5)
         self.server.send_message(message)
         self.server.disconnect_send_channel()
 
     def request_service_scale(self, service_id):
         log.info('Requested Scaling of service ' + str(service_id))
+        self.vector_clock.increment_clock(self.id)
         for service in self.services:
             if service.id == service_id:
                 service_as_dictionary = service.format_as_a_dictionary(is_first=True)
@@ -169,31 +175,81 @@ class Orchestrator:
         orchestrator_format['ip'] = self.ip
         orchestrator_format['port'] = self.port
         orchestrator_format['id'] = self.id
+        orchestrator_format['name'] = self.name
         return orchestrator_format
-
-    def validate_service_scaling(self, service_id):
-        is_ok_to_scale = None
-        no_dependencies = None
-        for service in self.services:
-            if service.id == service_id:
-                is_ok_to_scale, no_dependencies = service.validate_scaling()
-                return is_ok_to_scale, no_dependencies
-        return is_ok_to_scale, no_dependencies
 
     def get_service_by_id(self, service_id):
         for service in self.services:
             if service.id == service_id:
                 return service
 
-    def grant_lcm_operation(self, vnf_component_to_scale_id, operation, original_service):
-        if operation == 'scaling':
-            service_to_scale = self.get_service_by_id(vnf_component_to_scale_id)
-            self.life_cycle_manager.add_new_service_to_scale(vnf_component_to_scale_id, original_service)
-            is_ok_to_scale, no_dependencies = service_to_scale.validate_scaling()
-            if is_ok_to_scale:
-                service_to_scale.independent_scale(vnf_component_to_scale_id)
-            else:
-                print('ERROR IN SCALING :(')
+    def notification_of_lcm(self, vector_clock, sender_id):
+        if sender_id == self.id:
+            difference_in_vectors = 0
+        else:
+            difference_in_vectors = self.vector_clock.compare_clocks(vector_clock, sender_id, self.causal_delivery)
+        if difference_in_vectors <= 1:
+            self.vector_clock.update_clock(vector_clock, sender_id, self.causal_delivery)
+            self.do_pending_lcm_notifications()
+        else:
+            if self.vector_clock.are_different(vector_clock.clock_list):
+                new_pending_operation = PendingLCMScalingOperation('', 'notification', sender_id, vector_clock)
+                self.pending_lcm_operations.append(new_pending_operation)
+
+    def do_pending_lcm_notifications(self):
+        for pending_operation in self.pending_lcm_operations:
+            print('Do Pending operation')
+
+    def grant_lcm_operation(self, vnf_component_to_scale_id, operation, original_service, sender_vector_clock=None):
+        if original_service['orchestrator_id'] == self.id:
+            difference_in_vectors = 0
+        else:
+            difference_in_vectors = self.vector_clock.compare_clocks(sender_vector_clock, original_service['orchestrator_id'], self.causal_delivery)
+        if difference_in_vectors <= 1:
+            if original_service['orchestrator_id'] != self.id:
+                self.vector_clock.update_clock(sender_vector_clock,original_service['orchestrator_id'], self.causal_delivery)
+            if operation == 'scaling':
+                if not self.causal_delivery:
+                    self.vector_clock.increment_clock(self.id)
+                self.scale_vnfc_operation(vnf_component_to_scale_id, original_service)
+            self.do_pending_operations(sender_vector_clock)
+        else:
+            self.add_pending_operation(vnf_component_to_scale_id, operation, original_service, sender_vector_clock)
+
+    def add_pending_operation(self, vnf_component_to_scale_id, operation, original_service, sender_vector_clock):
+        new_operation = PendingLCMScalingOperation(vnf_component_to_scale_id,
+                                                   operation,
+                                                   original_service,
+                                                   sender_vector_clock)
+        self.pending_lcm_operations.append(new_operation)
+
+    def scale_vnfc_operation(self, vnf_component_to_scale_id, original_service):
+        service_to_scale = self.get_service_by_id(vnf_component_to_scale_id)
+        self.life_cycle_manager.add_new_service_to_scale(vnf_component_to_scale_id, original_service)
+        is_ok_to_scale, no_dependencies = service_to_scale.validate_scaling()
+        if is_ok_to_scale:
+            service_to_scale.independent_scale(vnf_component_to_scale_id, original_service['original_service_id'])
+        else:
+            print('ERROR IN SCALING :(')
+
+    def do_pending_operations(self, sender_vector_clock):
+        operations_to_remove = list()
+        clock_was_updated = True
+        while clock_was_updated:
+            at_least_one_clock_changed = False
+            for operation in self.pending_lcm_operations:
+                if operation.is_not_done and self.vector_clock.compare_stored_clock(operation.sender_vector_clock, self.causal_delivery):
+                    self.vector_clock.update_clock(operation.sender_vector_clock, operation.original_service,
+                                                   self.causal_delivery)
+                    if operation.operation != 'notification':
+                        self.scale_vnfc_operation(operation.vnf_component_to_scale_id, operation.original_service)
+                    # self.vector_clock.update_clock(operation.sender_vector_clock, operation.original_service, self.causal_delivery)
+                    operations_to_remove.append(operation)
+                    operation.is_not_done = False
+                    at_least_one_clock_changed = True
+            clock_was_updated = at_least_one_clock_changed
+        for operation in operations_to_remove:
+            self.pending_lcm_operations.remove(operation)
 
     def remove_service_to_scale(self, service):
         self.services_to_scale_unique.remove(service)
@@ -327,13 +383,12 @@ class Orchestrator:
         new_orchestrator['name'] = o_name
         new_orchestrator['id'] = id
         self.list_orchestrator.append(new_orchestrator)
+        self.vector_clock.add_clock(id)
 
     # TODO: Use a dictionary, is more expressive than using indexes
     def add_vnf(self, vnf_information):
         self.list_vnf[vnf_information.name] = vnf_information
-        # self.mark_dependency_for_services(vnf_information.id)
         log.info('Add following VNF: ')
-        # self.list_vnf[vnf_information.name].print_information()
 
     def mark_dependency_for_services(self, dependency_id):
         for service in self.services:

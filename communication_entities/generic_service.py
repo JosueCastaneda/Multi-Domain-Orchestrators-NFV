@@ -1,4 +1,5 @@
 from communication_entities.messages.lcm_messages.grant_lcm_message import GrantLCMMessage
+from communication_entities.messages.lcm_messages.notification_lcm_operation import NotificationLCMOperation
 from utilities.logger import log
 
 
@@ -22,7 +23,6 @@ class GenericService:
             if dependency['type'] == 'Service':
                 no_dependencies = False
                 break
-
         return is_valid, no_dependencies
 
     # TODO: RENAME TO first_scale or something like that
@@ -34,6 +34,7 @@ class GenericService:
         services_ids = list()
         services_ids.append(self.id)
         services_to_scale = list()
+        exclude_list_of_orchestrators = list()
         for dependency in self.dependencies:
             if dependency['type'] == 'VNF':
                 vnfs_to_scale[self.id].append(dependency)
@@ -50,27 +51,42 @@ class GenericService:
                                                   vnfs_to_scale,
                                                   services_ids,
                                                   current_service=0,
-                                                  original_service=service_definition)
+                                                  original_service=service_definition,
+                                                  vector_clock=self.orchestrator.vector_clock)
                 orchestrator = self.orchestrator.get_orchestrator_information_by_id(dependency['orchestrator_id'])
+                exclude_list_of_orchestrators.append(orchestrator)
                 self.orchestrator.send_lcm_message(scaling_message, orchestrator)
 
-    def independent_scale(self, service_id=''):
+            exclude_list_of_orchestrators.append(self.orchestrator.entry_as_dictionary())
+            new_message = NotificationLCMOperation(self.orchestrator.vector_clock, self.orchestrator.id)
+            for orchestrator in self.orchestrator.list_orchestrator:
+                if self.is_orchestrator_included_for_notification(orchestrator['id'], exclude_list_of_orchestrators):
+                    self.orchestrator.send_message_to_orchestrator(new_message, orchestrator)
+
+    def is_orchestrator_included_for_notification(self, id_orch, excluding_list):
+        for orchestrator in excluding_list:
+            if isinstance(orchestrator, str):
+                if id_orch == orchestrator:
+                    return False
+            elif id_orch == orchestrator['id']:
+                return False
+        return True
+
+    def independent_scale(self, service_id='', original_service_id=''):
         if service_id == '':
             self.orchestrator.life_cycle_manager.scale_vnfs(self.dependencies, service_id)
         else:
-            # vnfs_to_scale = list()
+            exclude_list_of_orchestrators = list()
+            self.orchestrator.vector_clock.increment_clock(self.orchestrator.id)
             for dependency in self.dependencies:
-                self.orchestrator.life_cycle_manager.scale_vnf_component(dependency,service_id)
-
-    def scale_with_grant(self, original_sender, original_service_id):
-        new_operation = self.orchestrator.life_cycle_manager.create_new_operation(self.id, original_service_id)
-        self.orchestrator.life_cycle_manager.pending_operations.append(new_operation)
-        for dependency in self.dependencies:
-            new_operation['pending_dependencies'].append(dependency.id)
-            if dependency.type == 'vnf':
-                dependency.scale(self.orchestrator, self.id)
-            else:
-                dependency.scale_with_grant(self.orchestrator, self.id)
+                external_orchestrator = self.orchestrator.life_cycle_manager.scale_vnf_component(dependency,service_id, original_service_id)
+                if external_orchestrator != '':
+                    exclude_list_of_orchestrators.append(external_orchestrator)
+            exclude_list_of_orchestrators.append(self.orchestrator.entry_as_dictionary())
+            new_message = NotificationLCMOperation(self.orchestrator.vector_clock, self.orchestrator.id)
+            for orchestrator in self.orchestrator.list_orchestrator:
+                if self.is_orchestrator_included_for_notification(orchestrator['id'], exclude_list_of_orchestrators):
+                    self.orchestrator.send_message_to_orchestrator(new_message, orchestrator)
 
     def format_as_a_dictionary(self, vnf_component_id='', vnf_component_type='', is_first=False):
         service_format = dict()

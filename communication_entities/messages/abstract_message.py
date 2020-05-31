@@ -8,7 +8,7 @@ class AbstractMessage:
         have the process_message function and override it with
         their own implementation
     """
-    def __init__(self, data, client=None, source_server=None):
+    def __init__(self, data, client=None, source_server=None, vector_clock=None):
         self.data = data
         self.client = client
         self.source_server = source_server
@@ -16,6 +16,7 @@ class AbstractMessage:
         self.client_socket = None
         self.client_address = None
         self.test_server = None
+        self.vector_clock = vector_clock
 
     def process_by_command_line(self):
         pass

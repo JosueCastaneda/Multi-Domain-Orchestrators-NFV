@@ -10,8 +10,9 @@ class GrantLCMMessage(AbstractMessage):
                  vnfs_to_scale=None,
                  services_ids=None,
                  current_service=0,
-                 original_service=None):
-        super().__init__(None)
+                 original_service=None,
+                 vector_clock=None):
+        super().__init__(data=None, vector_clock=vector_clock)
         self.vnf_component_to_scale_id = vnf_component_to_scale_id
         self.operation = operation
         self.vnfs_to_scale = vnfs_to_scale
@@ -24,4 +25,5 @@ class GrantLCMMessage(AbstractMessage):
         print('Coming from service: ' + str(self.original_service['original_service_id']))
         self.current_server.orchestrator.grant_lcm_operation(self.vnf_component_to_scale_id,
                                                              self.operation,
-                                                             self.original_service)
+                                                             self.original_service,
+                                                             self.vector_clock)

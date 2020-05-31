@@ -11,8 +11,8 @@ def main(argv):
     experiment_index = 0
 
     if debug:
-        orchestrator_index = 0
-        vnf_index = 1
+        orchestrator_index = 1
+        vnf_index = 0
         experiment_index = 0
 
     try:
