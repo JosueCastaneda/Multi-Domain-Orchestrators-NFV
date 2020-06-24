@@ -13,7 +13,7 @@ class UpdateVnfInfoAfterMigration(AbstractMessage):
 
     def process_by_command_line(self):
         log.info("UpdateVnfInfoAfterMigration...")
-        self.current_server.orchestrator.update_vnf_after_migration(self.previous_vnf,
-                                                                    self.new_vnf,
-                                                                    self.new_vnf_topology)
-        log.info("Finish processing message")
+        # self.current_server.orchestrator.update_vnf_after_migration(self.previous_vnf,
+        #                                                             self.new_vnf,
+        #                                                             self.new_vnf_topology)
+        # log.info("Finish processing message")

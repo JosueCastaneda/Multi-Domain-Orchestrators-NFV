@@ -11,5 +11,5 @@ class AllDependenciesAreRegistered(AbstractMessage):
 
     def process_by_command_line(self):
         log.info('Received new Service (ID):' + str(self.service_id))
-        self.current_server.orchestrator.mark_dependency_for_services(self.service_id)
+        # self.current_server.orchestrator.mark_dependency_for_services(self.service_id)
 

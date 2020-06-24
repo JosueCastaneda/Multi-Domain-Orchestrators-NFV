@@ -89,7 +89,7 @@ class GenericService:
             orchestrator = self.orchestrator.get_orchestrator_information_by_id(dependency['orchestrator_id'])
             data = dict()
             data['vnf_component_to_scale_id'] = dependency['id']
-            data['operation'] = 'scaling'
+            data['operation'] = 'scale'
             data['vnfs_to_scale'] = vnfs_to_scale
             data['services_ids'] = services_ids
             data['current_service'] = 0

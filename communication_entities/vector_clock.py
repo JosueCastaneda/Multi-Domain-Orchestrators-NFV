@@ -6,6 +6,7 @@ from utilities.logger import log
 class VectorClock(dict):
 
     def __init__(self, orchestrator_id=''):
+        super().__init__()
         self.clock_list = list()
         if orchestrator_id != '':
             self.add_clock(orchestrator_id)
@@ -60,8 +61,6 @@ class VectorClock(dict):
         return False
 
     def is_equal(self, other_clock):
-        # log.info('My clock: ' + self.as_string())
-        # log.info('Other clock: ' +  other_clock.as_string())
         for i in range(len(self.clock_list)):
             my_clock_value = self.clock_list[i]
             other_clock_value = other_clock.clock_list[i]
@@ -126,7 +125,7 @@ class VectorClock(dict):
 
     def compare_stored_clock(self, other_clock, is_causal_delivery=False):
         if is_causal_delivery:
-            return self.causal_ordering_stored_check(other_clock)
+            return self.is_equal(other_clock) or self.causal_ordering_stored_check(other_clock)
         else:
             return True
 
