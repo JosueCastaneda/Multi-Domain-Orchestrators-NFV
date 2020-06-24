@@ -1,6 +1,8 @@
 import logging
 
 log_dir = '/test/vnfs_deploy'
+# logging.basicConfig(filename='test/vnfs_deploy/file.log')
+
 # os.chmod(log_dir, 0o777)
 
 log = logging.getLogger('logger')

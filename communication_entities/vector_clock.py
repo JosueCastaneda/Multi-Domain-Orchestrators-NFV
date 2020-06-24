@@ -1,16 +1,33 @@
-class VectorClock:
+import json
 
-    def __init__(self, orchestrator_id):
+from utilities.logger import log
+
+
+class VectorClock(dict):
+
+    def __init__(self, orchestrator_id=''):
         self.clock_list = list()
-        self.add_clock(orchestrator_id)
+        if orchestrator_id != '':
+            self.add_clock(orchestrator_id)
 
-    def add_clock(self, orchestrator_id):
+    def create_from_list(self, vector_string) -> None:
+        vector_without_brackets = vector_string.strip('][').split(',')
+        correct_index = 0
+        for i in range(int(len(vector_without_brackets)/2)):
+            id_string = vector_without_brackets[correct_index].strip('"{id":" "')
+            id_value = vector_without_brackets[correct_index + 1].strip(' "value":}')
+            self.add_clock(id_string, int(id_value))
+            correct_index += 2
+
+    def to_json(self):
+        return json.dumps(self.clock_list, default=lambda o: o.__dict__)
+
+    def add_clock(self, orchestrator_id, value=0):
         clock_dictionary = dict()
         clock_dictionary['id'] = orchestrator_id
-        clock_dictionary['value'] = 0
+        clock_dictionary['value'] = value
         self.clock_list.append(clock_dictionary)
         self.clock_list = sorted(self.clock_list, key=lambda k: k['id'])
-        # self.clock_list.sort(key=clock_dictionary['id'])
 
     def causal_ordering_check(self, other_clock, id_sender):
         for index in range(len(other_clock.clock_list)):
@@ -42,7 +59,29 @@ class VectorClock:
                 return True
         return False
 
+    def is_equal(self, other_clock):
+        # log.info('My clock: ' + self.as_string())
+        # log.info('Other clock: ' +  other_clock.as_string())
+        for i in range(len(self.clock_list)):
+            my_clock_value = self.clock_list[i]
+            other_clock_value = other_clock.clock_list[i]
+            if my_clock_value != other_clock_value:
+                return False
+        return True
+
+    def is_greater_than_other(self, other_clock):
+        for i in range(len(self.clock_list)):
+            my_value = self.clock_list[i]['value']
+            other_value = other_clock.clock_list[i]['value']
+            if my_value < other_value:
+                return False
+        return True
+
     def compare_clocks(self, other_clock, id_sender, is_causal_delivery=False):
+        if self.is_equal(other_clock):
+            return 0
+        if self.is_greater_than_other(other_clock):
+            return 0
         if is_causal_delivery:
             return self.causal_ordering_check(other_clock, id_sender)
         else:
@@ -56,13 +95,34 @@ class VectorClock:
     def update_clock(self, other_vector_clock, id_sender, is_causal_delivery=False):
         if is_causal_delivery:
             for i in range(len(self.clock_list)):
-                if id_sender == self.clock_list[i]['id']:
+                if id_sender == self.clock_list[i]['id'] and self.clock_list[i]['value'] < other_vector_clock.clock_list[i]['value']:
                     self.clock_list[i]['value'] += 1
         else:
             for clock in self.clock_list:
                 for other_clock in other_vector_clock.clock_list:
                     if clock['id'] == other_clock['id'] and other_clock['value'] > clock['value']:
                         clock['value'] = other_clock['value']
+        log.info('Updated VT: ' + self.as_string())
+
+    def as_string(self):
+        str_log = 'Vector clock: ['
+        for clock in self.clock_list:
+            str_log += str(clock['value']) + ','
+        str_log += ']'
+        return str_log
+
+    def check_single_difference(self, other_clock):
+        differences = 0
+        orchestrator_sender_id = ''
+        for i in range(len(self.clock_list)):
+            my_value = self.clock_list[i]['value']
+            other_value = other_clock.clock_list[i]['value']
+            if other_value > my_value and other_value == (my_value + 1):
+                differences+=1
+                orchestrator_sender_id = self.clock_list[i]['id']
+        if differences == 1:
+            return differences, orchestrator_sender_id
+        return differences, ''
 
     def compare_stored_clock(self, other_clock, is_causal_delivery=False):
         if is_causal_delivery:

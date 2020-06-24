@@ -12,7 +12,7 @@ class VnfInformation:
                  topology_migration,
                  connection_points,
                  dependency_list,
-                 id):
+                 unique_id):
         self.host = host
         self.port = port
         self.name = name
@@ -21,7 +21,7 @@ class VnfInformation:
         self.topology_migration = topology_migration
         self.connection_points = connection_points
         self.dependency_list = dependency_list
-        self.id = id
+        self.id = unique_id
 
     def print_information(self):
         str_log = 'VNF Name: ' \

@@ -31,11 +31,11 @@ def main(argv) -> None:
     debug = True
 
     if debug:
-        orchestrator_index = '2'
+        orchestrator_index = '1'
         experiment_index = '0'
         server_host = '127.0.0.1'
-        vnf_index = '4'
-        server_port = 3008
+        vnf_index = '1'
+        server_port = 3007
     try:
         opts, args = getopt.getopt(argv, "v:o:e:h:p:", ["vnf_id=","orchestrator_id=", "experiment_id=", "host=", "port="])
     except getopt.GetoptError:

@@ -25,6 +25,17 @@ class AddVNF(AbstractMessage):
         self.topology_migration_vnf = topology_migration_vnf
         self.connection_points = connection_points
         self.dependency_list = dependency_list
+        self.message_type = 'add_vnf'
+        self.data = dict()
+        self.data['ip'] = self.vnf_host
+        self.data['port'] = self.vnf_port
+        self.data['name'] = self.vnf_name
+        self.data['topology'] = self.vnf_topology
+        self.data['migration_vnf_ip'] = self.migration_vnf_ip
+        self.data['topology_migration_vnf'] = self.topology_migration_vnf
+        self.data['connection_points'] = self.connection_points
+        self.data['dependency_list'] = self.dependency_list
+        self.data['id'] = self.id
 
     def process_by_command_line(self):
         vnf_information = VnfInformation(self.vnf_host,

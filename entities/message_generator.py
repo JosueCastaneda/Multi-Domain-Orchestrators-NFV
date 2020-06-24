@@ -3,15 +3,15 @@ import json
 from communication_entities.messages.add_orchestrator_message import AddOrchestratorMessage
 from communication_entities.messages.add_vnf_message import AddVNF
 from communication_entities.messages.add_vnf_to_chain_message import AddVNFToChainMessage
-from communication_entities.messages.vnf_forwarding_graph.initiate_vnffg_updates_message import InitiateVNFFGUpdatesMessage
-from communication_entities.messages.lcm_messages.request_service_scale_message import RequestServiceScaleMessage
 from communication_entities.messages.lcm_messages.migration.migration_message import MigrationMessage
+from communication_entities.messages.lcm_messages.request_service_scale_message import RequestServiceScaleMessage
 from communication_entities.messages.process_data_message import ProcessDataMessage
 from communication_entities.messages.request_update_message import RequestUpdateMessage
+from communication_entities.messages.vnf_forwarding_graph.initiate_vnffg_updates_message import \
+    InitiateVNFFGUpdatesMessage
 from entities.communication_entity_package import CommunicationEntityPackage
 from entities.parameters.parameter_generator import ParameterGenerator
 from entities.parameters.parameter_package import ParameterPackage
-from entities.vnf_entities.vnf_package import VnfPackage
 from utilities.logger import log
 from utilities.message_type import MessageType
 
@@ -42,7 +42,7 @@ class MessageGenerator:
             m = InitiateVNFFGUpdatesMessage()
         elif self.command.message_type == "request_update":
             m = RequestUpdateMessage(self.command.seed)
-        elif self.command.message_type == "request_scale":
+        elif self.command.message_type == "request_scaling_of_service":
             m = RequestServiceScaleMessage(self.command.service_id, self.command.seed)
         return m
 
@@ -56,7 +56,7 @@ class MessageGenerator:
 
     @staticmethod
     def generate_chain_message(vnf_host, vnf_port):
-        return AddVNFToChainMessage(VnfPackage(vnf_host, vnf_port))
+        return AddVNFToChainMessage(vnf_host, vnf_port)
 
     def generate_process_message(self):
         messages = list()

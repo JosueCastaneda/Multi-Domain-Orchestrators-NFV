@@ -1,3 +1,4 @@
+import datetime
 import json
 
 from utilities.json_parser import JsonParser
@@ -36,3 +37,8 @@ class JsonLoader:
                 vnf['topology'] = JsonParser.parse_for_vnf_topology(line)
                 list_of_vnf_topology.append(vnf)
         return list_of_vnf_topology
+
+
+def my_date_converter(o):
+    if isinstance(o, datetime.datetime):
+        return o.__str__()

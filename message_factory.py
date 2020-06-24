@@ -1,27 +1,13 @@
+import asyncio
 import getopt
-import pickle
-import socket
 import sys
+
+import aiohttp
 
 sys.path.append('../')
 
 from entities.message_generator import MessageGenerator
 from utilities.command_package import CommandPackage
-from utilities.logger import log
-
-
-def main(argv):
-    command = read_parameters(argv)
-    if command.is_valid():
-        messages = generate_messages(command)
-        if isinstance(messages, list):
-            log.info(''.join(["Number of messages", str(len(messages))]))
-            for m in messages:
-                send_message(command, m)
-        else:
-            send_message(command, messages)
-    else:
-        print(command.help_message)
 
 
 def generate_messages(command):
@@ -29,22 +15,19 @@ def generate_messages(command):
     return m.generate_message()
 
 
-def send_message(command, message):
-    send_channel = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-    print('Host: ', command.host, ' Port: ', command.port)
-    send_channel.connect((command.host, command.port))
-    log.info('Connected!')
-    data_string = pickle.dumps(message)
-    log.info('Data string created!')
-    send_channel.send(data_string)
-    log.info('Sent!')
-    send_channel.close()
-    log.info('Closing channel!')
-
-
 def read_parameters(argv):
     command = CommandPackage()
-    debug = False
+    debug = True
+
+    if debug:
+        command.host = '127.0.0.1'
+        command.port = 5002
+        command.name = None
+        command.new_name = None
+        command.vnf_host = '127.0.0.1'
+        command.vnf_port = 5002
+        command.orchestrator_id = 'e5ea698b-8a3d-11ea-aa9d-04ea56f99520'
+        command.message_type = 'request_sc'
 
     try:
         opts, args = getopt.getopt(argv, "t:h:p:n:m:v:w:e:s:i:x:",
@@ -89,9 +72,30 @@ def read_parameters(argv):
             command.service_id = arg
         elif opt in ("-x", "--orchestrator_id"):
             command.orchestrator_id = arg
-            print('ORCHESTRATOR ID: ' + arg)
     return command
 
 
+async def send_message(command, message):
+    url = 'http://' + command.host + ':' + str(command.port) + '/' + command.message_type
+    print(url)
+    async with aiohttp.ClientSession() as session:
+        async with session.post(url, data=message.data) as resp:
+            print(resp.status)
+            print(await resp.text())
+
+
+async def main(argv):
+    command = read_parameters(argv)
+    if command.is_valid():
+        messages = generate_messages(command)
+        if isinstance(messages, list):
+            for m in messages:
+                await send_message(command, m)
+        else:
+            await send_message(command, messages)
+    else:
+        print(command.help_message)
+
+
 if __name__ == "__main__":
-    main(sys.argv[1:])
+    asyncio.run(main(sys.argv[1:]))

@@ -8,3 +8,5 @@ venv/
 *.pk
 *.log
 Pip*
+env/
+my_env/
