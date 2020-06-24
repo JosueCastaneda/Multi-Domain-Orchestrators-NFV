@@ -255,57 +255,87 @@ class LifeCycleManagement:
                 if difference_in_clocks == 1:
                     orchestrator_sender_id = real_orchestrator_sender_id
 
-        if difference_in_vectors <= 1 or my_clock_is_bigger:
-            if not my_clock_is_bigger:
-                self.orchestrator.vector_clock.update_clock(sender_vector_clock, orchestrator_sender_id,
-                                                            self.orchestrator.causal_delivery)
-            if vnf_component_id == '':
-                log.info('Scaling operation of VNF has finished')
-            else:
-                operation = self.get_operation_by_id_and_original_service_id(vnf_component_id, original_service_id,
-                                                                             service_sender_id)
-                if operation['pending_operations']:
-                    dependency = self.remove_dependency_from_service(operation, vnf_component_id)
-                    if self.no_more_dependencies_to_scale(operation, dependency['type']):
-                        await self.end_scaling(operation)
-                        empty_pending_operations = list()
-                        for op in self.pending_operations:
-                            if len(op['pending_operations']) == 0:
-                                empty_pending_operations.append(op)
-
-                        for op in empty_pending_operations:
-                            self.pending_operations.remove(op)
-                else:
-                    str_log = 'Scaling of operation ' + vnf_component_id + ' from ' + original_service_id + ' has finished'
-                    log.info(str_log)
-            if not was_called_by_pending_operations:
-                log.info('Scaling - Do Pending Operations - ')
-                if self.are_there_pending_operations():
-                    await self.orchestrator.do_pending_operations()
-                self.orchestrator.pending_operations_repetitions = 0
+        if not self.orchestrator.causal_delivery:
+            if difference_in_vectors > 1:
+                str_log = 'A new inconsistency because Sender VT' + sender_vector_clock.as_string() + ' > '
+                str_log_2 = str_log + self.orchestrator.vector_clock.as_string()
+                log.info(str_log_2)
+                self.orchestrator.inconsistencies += 1
+            await self.check_if_clocks_are_valid_and_do_operation(vnf_component_id=vnf_component_id,
+                                                                  original_service_id=original_service_id,
+                                                                  orchestrator_sender_id=orchestrator_sender_id,
+                                                                  service_sender_id=service_sender_id,
+                                                                  was_called_by_pending_operations=was_called_by_pending_operations,
+                                                                  my_clock_is_bigger=my_clock_is_bigger,
+                                                                  sender_vector_clock=sender_vector_clock)
         else:
-            log.info(
-                'Added to pending operations because ' + self.orchestrator.vector_clock.as_string() + ' < ' + sender_vector_clock.as_string())
-            original_service = dict()
-            original_service['id'] = vnf_component_id
-            original_service['original_service_id'] = original_service_id
-            original_service['ip'] = ''
-            original_service['port'] = ''
-            original_service['orchestrator_id'] = orchestrator_sender_id
-            original_service['pending_operations'] = list()
-            original_service['type'] = 'XXX'
-            original_service['is_first_operation'] = False
-            self.orchestrator.pending_operations_repetitions += 1
-            new_operation = PendingLCMScalingOperation(vnf_component_to_scale_id=vnf_component_id,
-                                                       operation='scale',
-                                                       original_service_id=original_service_id,
-                                                       orchestrator_sender_id=orchestrator_sender_id,
-                                                       original_orchestrator_id=original_orchestrator_id,
-                                                       sender_vector_clock=sender_vector_clock,
-                                                       service_sender_id=service_sender_id,
-                                                       original_service=original_service)
-            self.orchestrator.add_pending_operation(new_operation)
+            if difference_in_vectors <= 1 or my_clock_is_bigger:
+                await self.check_if_clocks_are_valid_and_do_operation(vnf_component_id=vnf_component_id,
+                                                                      original_service_id=original_service_id,
+                                                                      orchestrator_sender_id=orchestrator_sender_id,
+                                                                      service_sender_id=service_sender_id,
+                                                                      was_called_by_pending_operations=was_called_by_pending_operations,
+                                                                      my_clock_is_bigger=my_clock_is_bigger,
+                                                                      sender_vector_clock=sender_vector_clock)
+            else:
+                log.info(
+                    'Added to pending operations because ' + self.orchestrator.vector_clock.as_string() + ' < ' + sender_vector_clock.as_string())
+                original_service = dict()
+                original_service['id'] = vnf_component_id
+                original_service['original_service_id'] = original_service_id
+                original_service['ip'] = ''
+                original_service['port'] = ''
+                original_service['orchestrator_id'] = orchestrator_sender_id
+                original_service['pending_operations'] = list()
+                original_service['type'] = 'XXX'
+                original_service['is_first_operation'] = False
+                self.orchestrator.pending_operations_repetitions += 1
+                new_operation = PendingLCMScalingOperation(vnf_component_to_scale_id=vnf_component_id,
+                                                           operation='scale',
+                                                           original_service_id=original_service_id,
+                                                           orchestrator_sender_id=orchestrator_sender_id,
+                                                           original_orchestrator_id=original_orchestrator_id,
+                                                           sender_vector_clock=sender_vector_clock,
+                                                           service_sender_id=service_sender_id,
+                                                           original_service=original_service)
+                self.orchestrator.add_pending_operation(new_operation)
         return return_success()
+
+    async def check_if_clocks_are_valid_and_do_operation(self,
+                                                         vnf_component_id,
+                                                         original_service_id,
+                                                         orchestrator_sender_id,
+                                                         service_sender_id,
+                                                         was_called_by_pending_operations,
+                                                         my_clock_is_bigger,
+                                                         sender_vector_clock):
+        if not my_clock_is_bigger:
+            self.orchestrator.vector_clock.update_clock(sender_vector_clock, orchestrator_sender_id,
+                                                        self.orchestrator.causal_delivery)
+        if vnf_component_id == '':
+            log.info('Scaling operation of VNF has finished')
+        else:
+            operation = self.get_operation_by_id_and_original_service_id(vnf_component_id, original_service_id,
+                                                                         service_sender_id)
+            if operation['pending_operations']:
+                dependency = self.remove_dependency_from_service(operation, vnf_component_id)
+                if self.no_more_dependencies_to_scale(operation, dependency['type']):
+                    await self.end_scaling(operation)
+                    empty_pending_operations = list()
+                    for op in self.pending_operations:
+                        if len(op['pending_operations']) == 0:
+                            empty_pending_operations.append(op)
+
+                    for op in empty_pending_operations:
+                        self.pending_operations.remove(op)
+            else:
+                str_log = 'Scaling of operation ' + vnf_component_id + ' from ' + original_service_id + ' has finished'
+                log.info(str_log)
+        if not was_called_by_pending_operations:
+            log.info('Scaling - Do Pending Operations - ')
+            if self.are_there_pending_operations():
+                await self.orchestrator.do_pending_operations()
+            self.orchestrator.pending_operations_repetitions = 0
 
     def are_there_pending_operations(self):
         return len(self.pending_operations) > 0 or len(self.orchestrator.pending_lcm_operations) > 0
@@ -333,7 +363,7 @@ class LifeCycleManagement:
         acknowledge_message = ScaleConfirmationMessage(host=service['ip'], port=int(service['port']), data=data)
         await send_message(acknowledge_message)
         log_str = 'End external scaling of service:' + service['id'] + ' requested from service: ' + service[
-            'original_service_id']
+            'original_service_id'] + ' Inconsistencies: ' + str(self.orchestrator.inconsistencies)
         log.info(log_str)
 
     async def end_scaling(self, service):
