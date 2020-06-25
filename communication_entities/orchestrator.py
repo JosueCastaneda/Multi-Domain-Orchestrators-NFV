@@ -46,7 +46,7 @@ class Orchestrator:
         self.add_service_information()
         self.life_cycle_manager = LifeCycleManagement(self, self.vnfs, self.services)
         self.vector_clock = VectorClock(self.id)
-        self.causal_delivery = causal_delivery
+        self.causal_delivery = False
         # self.causal_delivery = causal_delivery
         self.random_seed = 1000
         self.pending_operations_repetitions = 0
