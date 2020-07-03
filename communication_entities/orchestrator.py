@@ -28,7 +28,8 @@ def is_orchestrator_included_for_notification(id_orch, excluding_list):
 class Orchestrator:
 
     def __init__(self, experiment_index, orchestrator_index, server_host, server_port, causal_delivery=True):
-        self.experiment_name = 'experiment_' + experiment_index + '.json'
+        self.experiment_name = 'experiment_' + experiment_index
+        self.experiment_index = experiment_index
         self.name = 'orch_' + orchestrator_index
         self.id = ''
         self.location = ''
@@ -54,8 +55,8 @@ class Orchestrator:
         log.info(''.join(["Orchestrator: ", self.name, " is running on host ", self.ip, ' port: ', str(self.port)]))
 
     def load_server_information(self):
-        str_new_file_name = 'experiments/experiment_generator/experiments/' + self.experiment_name
-        with open(str_new_file_name) as json_file:
+        directory_path = 'experiments/experiment_generator/experiments/experiment_' + self.experiment_index + '/'
+        with open(directory_path + self.experiment_name+ '.json') as json_file:
             raw_data = json.load(json_file)
         orchestrator_number = self.name.find('_')
         orchestrator_index = int(self.name[orchestrator_number + 1:])
@@ -352,8 +353,8 @@ class Orchestrator:
         log.info('End pending operations')
 
     def load_vnf_components(self):
-        str_new_file_name = 'experiments/experiment_generator/experiments/' + self.experiment_name
-        with open(str_new_file_name) as json_file:
+        directory_path = 'experiments/experiment_generator/experiments/experiment_' + self.experiment_index + '/'
+        with open(directory_path + self.experiment_name + '.json') as json_file:
             raw_data = json.load(json_file)
         orchestrator_number = self.name.find('_')
         orchestrator_index = int(self.name[orchestrator_number + 1:])

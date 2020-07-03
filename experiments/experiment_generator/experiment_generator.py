@@ -23,7 +23,7 @@ class ExperimentGenerator():
         self.random_seed_list = configuration.random_seed_list
         self.random_np_seed_list = configuration.random_np_seed_list
         self.number_of_vnfs_per_orchestrator = configuration.number_of_vnfs_per_orchestrator
-        self.list_orchestrators = load_orchestrators(True)
+        self.list_orchestrators = load_orchestrators(local_deployment)
         self.current_queues_number = 0
         self.list_vnf_components = list()
         self.vnf_data = load_vnf_raw_data()
@@ -31,6 +31,7 @@ class ExperimentGenerator():
         # TODO: This is only for local deployments
         self.vnf_port = 5500
         self.local_deployment = local_deployment
+        self.port_vnfs = 3000
 
     def add_vnfs_to_orchestrators(self):
         for orchestrator in self.list_orchestrators:
@@ -50,12 +51,13 @@ class ExperimentGenerator():
             vnf_blue_print = json.load(json_file)
         vnf_configuration = VNFDefinitionConfiguration(vnf_blue_print['operation'],
                                                        orchestrator.get_new_ip(),
-                                                       vnf_blue_print['port'],
+                                                       self.port_vnfs,
                                                        orchestrator.id,
                                                        self.current_queues_number,
                                                        orchestrator.constraints)
         new_vnf = VNFDefinition(vnf_configuration)
         self.current_queues_number += 3
+        self.port_vnfs += 1
         return new_vnf
 
     def generate_random_vnf_local(self, orchestrator):
@@ -99,7 +101,7 @@ class ExperimentGenerator():
         return new_list_of_components
 
     def create_json_file_for_experiment(self, experiment_number):
-        dir_name = 'experiments'
+        dir_name = 'experiments/experiment_' + str(experiment_number)
         file_name = dir_name + '/experiment_' + str(experiment_number) + '.json'
         if not os.path.exists(dir_name):
             os.makedirs(dir_name)

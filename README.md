@@ -1,4 +1,5 @@
-# vnfs_deploy
+# Multi-domain Orchestrators
+## Description
 
 This vnfs are simple video processing functions to test the chaining of VNFs.
 
@@ -6,6 +7,7 @@ Supports multi-domain using OSM emulator
 
 This files are used to generate experiments.
 
+## Old way to deploy experiment
 To deploy experiment, the order of execution is the following
 
 1) Run experiment_generator.py

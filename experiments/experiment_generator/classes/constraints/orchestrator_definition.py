@@ -48,12 +48,13 @@ class OrchestratorDefinition:
         return self.services
 
     def get_new_ip(self):
-        last_ip = self.ip
-        x = last_ip.split('.')
-        x[3] = str(int(x[3]) + self.current_ip)
-        new_ip = '.'.join(x)
-        self.current_ip += 1
-        return new_ip
+        return '0.0.0.0'
+        # last_ip = self.ip
+        # x = last_ip.split('.')
+        # x[3] = str(int(x[3]) + self.current_ip)
+        # new_ip = '.'.join(x)
+        # self.current_ip += 1
+        # return new_ip
 
     def increase_current_ip(self):
         self.current_ip += 1

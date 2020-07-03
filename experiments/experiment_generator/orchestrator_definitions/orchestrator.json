@@ -3,13 +3,14 @@
   [
     {
       "id":"82b5bb4e-7fc5-11ea-8736-04ea56f99520",
+      "ip": "40.127.108.223",
       "type": "orchestrator",
-      "ip": "10.0.0.2",
-      "port": "4437",
+      "port": "5001",
       "vnfs": [],
       "services": [],
-      "location": "East-US",
+      "location": "North Europe",
       "current_ip": 1,
+      "name": "claire",
       "vnf_constraints":
       {
         "delay": 20,
@@ -21,11 +22,12 @@
     {
       "id":"b97e2c9c-7fc5-11ea-8736-04ea56f99520",
       "type": "orchestrator",
-      "ip": "10.0.1.2",
-      "port": "4437",
+      "name": "duracell",
+      "ip": "52.229.37.237",
+      "port": "5002",
       "vnfs": [],
       "services": [],
-      "location": "West-US",
+      "location": "West US 2",
       "current_ip": 1,
       "vnf_constraints":
       {
@@ -38,11 +40,12 @@
     {
       "id":"d48989be-7fc5-11ea-8736-04ea56f99520",
       "type": "orchestrator",
-      "ip": "10.0.2.2",
-      "port": "4437",
+      "name": "jill",
+      "ip": "52.141.61.172",
+      "port": "5003",
       "vnfs": [],
       "services": [],
-      "location": "North UK",
+      "location": "Korea Central",
       "current_ip": 1,
       "vnf_constraints":
       {
@@ -55,11 +58,12 @@
     {
       "id":"fc46f8ba-7fc5-11ea-8736-04ea56f99520",
       "type": "orchestrator",
-      "ip": "10.0.3.2",
-      "port": "4437",
+      "ip": "20.185.45.222",
+      "port": "5004",
+      "name": "ada",
       "vnfs": [],
       "services": [],
-      "location": "South Korea",
+      "location": "East US",
       "current_ip": 1,
       "vnf_constraints":
       {
@@ -72,11 +76,12 @@
     {
       "id":"15d4de14-7fc6-11ea-8736-04ea56f99520",
       "type": "orchestrator",
-      "ip": "10.0.4.2",
-      "port": "4437",
+      "ip": "52.151.70.54",
+      "port": "5005",
+      "name": "rebecca",
       "vnfs": [],
       "services": [],
-      "location": "Brazil",
+      "location": "UK South",
       "current_ip": 1,
       "vnf_constraints":
       {

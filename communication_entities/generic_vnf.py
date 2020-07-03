@@ -36,7 +36,8 @@ from utilities.life_cycle_management_update import return_success, send_message
 class GenericVNF:
 
     def __init__(self, experiment_index,  orchestrator_index, vnf_index, server_host, server_port):
-        self.experiment_name = 'experiment_' + str(experiment_index) + '.json'
+        self.experiment_name = 'experiment_' + str(experiment_index)
+        self.experiment_index = experiment_index
         self.orchestrator_index = int(orchestrator_index)
         self.vnf_index = int(vnf_index)
         self.ip = server_host
@@ -49,8 +50,8 @@ class GenericVNF:
         self.migration_vnf_ip = None
 
     def load_text_data(self):
-        str_new_file_name = 'experiments/experiment_generator/experiments/' + self.experiment_name
-        with open(str_new_file_name) as json_file:
+        directory_path = 'experiments/experiment_generator/experiments/experiment_' + self.experiment_index + '/'
+        with open(directory_path + self.experiment_name + '.json') as json_file:
             raw_data = json.load(json_file)
         vnf_information = raw_data['orchestrators'][self.orchestrator_index]['vnfs'][self.vnf_index]
         orchestrator_information = raw_data['orchestrators'][self.orchestrator_index]

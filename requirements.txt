@@ -1,0 +1,3 @@
+numpy~=1.18.5
+moviepy~=1.0.3
+aiohttp~=3.6.2
