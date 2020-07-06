@@ -11,6 +11,7 @@ import traceback
 import json
 from utilities.json_loader import my_date_converter
 
+
 class OrchestratorHandler:
 
     def __init__(self, orchestrator, ):
@@ -19,8 +20,8 @@ class OrchestratorHandler:
 
     async def index(self, request: web.Request) -> Response:
         data = self.orchestrator.name
-        data_json = {'name': data}
-        return web.json_response(data_json)
+        # data_json = {'name': data}
+        return web.json_response(self.orchestrator.entry_as_dictionary())
 
     async def get_services(self, request: web.Request) -> Response:
         log.info('Getting services')
@@ -29,9 +30,7 @@ class OrchestratorHandler:
             answer = {'status': 'Good', 'result': result}
             return web.json_response(answer)
         except Exception as e:
-            response = {'status': 'failed', 'message': str(e)}
-            print(traceback.format_exc())
-            return web.json_response(response)
+            self.print_generic_exception(e)
 
     async def add_orchestrator(self, request: web.Request) -> Response:
         log.info('Adding orchestrator')
@@ -43,9 +42,7 @@ class OrchestratorHandler:
             answer = {'status': 'Good', 'result': result}
             return web.json_response(answer)
         except Exception as e:
-            response = {'status': 'failed', 'message': str(e)}
-            print(traceback.format_exc())
-            return response
+            self.print_generic_exception(e)
 
     async def add_vnf(self, request: web.Request) -> Response:
         log.info('Adding VNF')
@@ -64,9 +61,7 @@ class OrchestratorHandler:
             answer = {'status': 'Good', 'result': result}
             return web.json_response(answer)
         except Exception as e:
-            response = {'status': 'failed', 'message': str(e)}
-            print(traceback.format_exc())
-            return web.json_response(response)
+            self.print_generic_exception(e)
 
     async def grant_service_migration(self, request: web.Request) -> Response:
         log.info('Granting to service')
@@ -85,9 +80,7 @@ class OrchestratorHandler:
             answer = {'status': 'Good', 'result': result}
             return web.json_response(answer)
         except Exception as e:
-            response = {'status': 'failed', 'message': str(e)}
-            print(traceback.format_exc())
-            return web.json_response(response)
+            self.print_generic_exception(e)
 
     async def request_scaling_of_service(self, request: web.Request) -> Response:
         log.info('Requesting to scale service')
@@ -98,9 +91,7 @@ class OrchestratorHandler:
             answer = {'status': 'Good', 'result': result}
             return web.json_response(answer)
         except Exception as e:
-            response = {'status': 'failed', 'message': str(e)}
-            print(traceback.format_exc())
-            return web.json_response(response)
+            self.print_generic_exception(e)
 
     async def notify_scaling_has_ended(self, request: web.Request) -> Response:
         log.info('Notifying...')
@@ -111,9 +102,7 @@ class OrchestratorHandler:
             answer = {'status': 'Good', 'result': result}
             return web.json_response(answer)
         except Exception as e:
-            response = {'status': 'failed', 'message': str(e)}
-            print(traceback.format_exc())
-            return web.json_response(response)
+            self.print_generic_exception(e)
 
     async def notify_update_of_vector_clock(self, request: web.Request) -> Response:
         log.info('Notifying update of clock...')
@@ -121,12 +110,9 @@ class OrchestratorHandler:
             data = await request.post()
             result = await self.orchestrator.wait_before_notification(data['vector_clock'],
                                                                       data['orchestrator_sender_id'])
-            answer = {'status': 'Good', 'result': result}
-            return web.json_response(answer)
+            self.print_good_result(result)
         except Exception as e:
-            response = {'status': 'failed', 'message': str(e)}
-            print(traceback.format_exc())
-            return web.json_response(response)
+            self.print_generic_exception(e)
 
     async def scale_of_service_has_ended(self, request: web.Request) -> Response:
         try:
@@ -137,9 +123,56 @@ class OrchestratorHandler:
                                                                                    data['original_orchestrator_id'],
                                                                                    data['vector_clock'],
                                                                                    data['service_sender_id'])
-            answer = {'status': 'Good', 'result': result}
-            return web.json_response(answer)
+            self.print_good_result(result)
         except Exception as e:
-            response = {'status': 'failed', 'message': str(e)}
-            print(traceback.format_exc())
-            return web.json_response(response)
+            self.print_generic_exception(e)
+
+    async def get_vnfs(self, request: web.Request) -> Response:
+        try:
+            data = await request.post()
+            result = await self.orchestrator.get_vnfs()
+            return self.print_good_result(result)
+        except Exception as e:
+            self.print_generic_exception(e)
+
+    async def get_orchestrators(self, request: web.Request) -> Response:
+        try:
+            data = await request.post()
+            result = await self.orchestrator.get_orchestrators()
+            return self.print_good_result(result)
+        except Exception as e:
+            self.print_generic_exception(e)
+
+    async def clear_inconsistencies(self, request: web.Request) -> Response:
+        try:
+            data = await request.post()
+            self.orchestrator.inconsistencies = 0
+            result = await self.orchestrator.entry_as_dictionary()
+            return self.print_good_result(result)
+        except Exception as e:
+            self.print_generic_exception(e)
+
+    async def get_log_file(self, request: web.Request) -> Response:
+        try:
+            data = await request.post()
+            result = await self.orchestrator.get_log_file()
+            return self.print_good_result(result)
+        except Exception as e:
+            self.print_generic_exception(e)
+
+    async def get_vector_clock(self, request: web.Request) -> Response:
+        try:
+            data = await request.post()
+            result = await self.orchestrator.vector_clock.as_string()
+            return self.print_good_result(result)
+        except Exception as e:
+            self.print_generic_exception(e)
+
+    def print_good_result(self, result) -> Response:
+        answer = {'status': 'Good', 'result': result}
+        return web.json_response(answer)
+
+    def print_generic_exception(self, e) -> Response:
+        response = {'status': 'failed', 'message': str(e)}
+        print(traceback.format_exc())
+        return web.json_response(response)

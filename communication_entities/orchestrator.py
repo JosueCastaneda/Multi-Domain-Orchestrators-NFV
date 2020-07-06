@@ -1,5 +1,6 @@
 import asyncio
 import json
+import os
 import random
 import sys
 
@@ -31,6 +32,8 @@ class Orchestrator:
         self.experiment_name = 'experiment_' + experiment_index
         self.experiment_index = experiment_index
         self.name = 'orch_' + orchestrator_index
+        # self.directory_path = 'experiments/experiment_generator/experiments/experiment_' + self.experiment_index + '/'
+        self.directory_path = '../../experiments/experiment_generator/experiments/experiment_' + self.experiment_index + '/'
         self.id = ''
         self.location = ''
         self.ip = server_host
@@ -48,16 +51,17 @@ class Orchestrator:
         self.life_cycle_manager = LifeCycleManagement(self, self.vnfs, self.services)
         self.vector_clock = VectorClock(self.id)
         self.causal_delivery = False
-        # self.causal_delivery = causal_delivery
+        self.causal_delivery = causal_delivery
         self.random_seed = 1000
         self.pending_operations_repetitions = 0
         random.seed(self.random_seed)
         log.info(''.join(["Orchestrator: ", self.name, " is running on host ", self.ip, ' port: ', str(self.port)]))
 
     def load_server_information(self):
-        directory_path = 'experiments/experiment_generator/experiments/experiment_' + self.experiment_index + '/'
-        with open(directory_path + self.experiment_name+ '.json') as json_file:
+        print('Current directory: ' + os.getcwd())
+        with open(self.directory_path + self.experiment_name+ '.json') as json_file:
             raw_data = json.load(json_file)
+
         orchestrator_number = self.name.find('_')
         orchestrator_index = int(self.name[orchestrator_number + 1:])
         self.id = raw_data['orchestrators'][orchestrator_index]['id']
@@ -107,6 +111,10 @@ class Orchestrator:
         orchestrator_format['port'] = self.port
         orchestrator_format['id'] = self.id
         orchestrator_format['name'] = self.name
+        orchestrator_format['vector_clock'] = self.vector_clock.as_string()
+        orchestrator_format['inconsistencies'] = self.inconsistencies
+        orchestrator_format['random_seed'] = self.random_seed
+        orchestrator_format['messages_sent'] = self.messages_sent
         return orchestrator_format
 
     def get_service_by_id(self, service_id):
@@ -243,28 +251,6 @@ class Orchestrator:
             await self.grant_lcm_operation_normal(vnf_component_to_scale_id, operation, original_service,
                                                   sender_vector_clock)
 
-    # async def grant_lcm_operation_normal(self, vnf_component_to_scale_id, operation, original_service,
-    #                                      sender_vector_clock=None):
-    #     difference_in_vectors = self.vector_clock.compare_clocks(sender_vector_clock,
-    #                                                              original_service['orchestrator_id'],
-    #                                                              self.causal_delivery)
-    #     if difference_in_vectors > 1:
-    #         self.inconsistencies += 1
-    #
-    #     if original_service['orchestrator_id'] != self.id:
-    #         self.vector_clock.update_clock(sender_vector_clock, original_service['orchestrator_id'],
-    #                                        self.causal_delivery)
-    #     if operation == 'scaling':
-    #         service_to_scale = self.get_service_by_id(vnf_component_to_scale_id)
-    #         self.life_cycle_manager.add_new_service_to_scale(vnf_component_to_scale_id, original_service)
-    #         is_ok_to_scale, no_dependencies = service_to_scale.validate_scaling()
-    #         if is_ok_to_scale:
-    #             service_to_scale.independent_scale_normal(vnf_component_to_scale_id,
-    #                                                       original_service['original_service_id'],
-    #                                                       original_service['orchestrator_id'])
-    #         else:
-    #             print('ERROR IN SCALING :(')
-
     def compute_difference_in_vectors(self, original_service, sender_vector_clock) -> int:
         if original_service['orchestrator_id'] != self.id:
             return self.vector_clock.compare_clocks(sender_vector_clock, original_service['orchestrator_id'],
@@ -353,8 +339,7 @@ class Orchestrator:
         log.info('End pending operations')
 
     def load_vnf_components(self):
-        directory_path = 'experiments/experiment_generator/experiments/experiment_' + self.experiment_index + '/'
-        with open(directory_path + self.experiment_name + '.json') as json_file:
+        with open(self.directory_path + self.experiment_name + '.json') as json_file:
             raw_data = json.load(json_file)
         orchestrator_number = self.name.find('_')
         orchestrator_index = int(self.name[orchestrator_number + 1:])
@@ -388,3 +373,17 @@ class Orchestrator:
     async def add_vnf(self, vnf_information):
         self.list_vnf[vnf_information.name] = vnf_information
         return return_success()
+
+    async def get_vnfs(self):
+        log.info('VNFs...')
+        return self.vnfs
+
+    async def get_orchestrators(self):
+        return self.list_orchestrator
+
+    async def get_log_file(self) -> str:
+        file_name = 'test.log'
+        with open(file_name, 'r') as file:
+            # data = file.read().replace('\n', '')
+            data = file.read()
+        return data
