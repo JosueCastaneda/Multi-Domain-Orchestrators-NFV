@@ -1,4 +1,11 @@
-from experiments.experiment_generator.classes.experiment_configuration import ExperimentConfiguration
+import os
+import sys
+
+
+# To add the correct path and not get a ModuleNotFoundError
+sys.path.append(os.path.join(os.path.dirname(__file__), "..", ".."))
+
+from experiments.experiment_generator.experiment_configuration import ExperimentConfiguration
 from experiments.experiment_generator.docker_script_generator_external import DockerScriptGeneratorExternal
 from experiments.experiment_generator.docker_script_generator_local import DockerScriptGeneratorLocal
 from experiments.experiment_generator.experiment_generator import ExperimentGenerator
@@ -6,6 +13,8 @@ from experiments.experiment_generator.experiment_generator import ExperimentGene
 
 def main():
     local_deployment = False
+    if len(sys.argv) >= 2 and sys.argv[1] == 'local':
+        local_deployment = True
     experiment_configuration = ExperimentConfiguration('experiment_constraint.json')
     exp_gen = ExperimentGenerator(experiment_configuration, local_deployment)
     list_name_experiments = exp_gen.generate_experiment()

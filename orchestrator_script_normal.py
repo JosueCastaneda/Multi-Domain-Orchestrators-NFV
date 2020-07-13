@@ -15,7 +15,7 @@ async def init_app(experiment_index, orchestrator_index, server_host, server_por
                                 experiment_index=experiment_index,
                                 server_host=server_host,
                                 server_port=server_port,
-                                causal_delivery=True)
+                                causal_delivery=False)
     handler = OrchestratorHandler(orchestrator)
     init_routes(app, handler)
     return app

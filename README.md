@@ -3,9 +3,14 @@
 
 This vnfs are simple video processing functions to test the chaining of VNFs.
 
-Supports multi-domain using OSM emulator
+Supports multi-domain using OSM emulator for local tests
 
 This files are used to generate experiments.
+
+## New way to deploy experiments
+0) Edit file experiment_constraint.json in path "experiments/experiment_generator/experiment_constraint.json"
+1) Run create_experiments.sh (local, external)
+2) Run run.sh by specifying experiment and orchestrator
 
 ## Old way to deploy experiment
 To deploy experiment, the order of execution is the following

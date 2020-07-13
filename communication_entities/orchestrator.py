@@ -1,6 +1,5 @@
 import asyncio
 import json
-import os
 import random
 import sys
 
@@ -9,6 +8,7 @@ from communication_entities.life_cycle_management import LifeCycleManagement
 from communication_entities.messages.lcm_messages.notification_lcm_operation import NotificationLCMOperation
 from communication_entities.orchestrator_classes.pending_lcm_scaling_operation import PendingLCMScalingOperation
 from communication_entities.vector_clock import VectorClock
+from definitions import ROOT_DIR
 from utilities.life_cycle_management_update import return_success, return_failure, return_in_process, send_message
 
 sys.path.append('../')
@@ -32,8 +32,8 @@ class Orchestrator:
         self.experiment_name = 'experiment_' + experiment_index
         self.experiment_index = experiment_index
         self.name = 'orch_' + orchestrator_index
-        # self.directory_path = 'experiments/experiment_generator/experiments/experiment_' + self.experiment_index + '/'
-        self.directory_path = '../../experiments/experiment_generator/experiments/experiment_' + self.experiment_index + '/'
+        self.directory_path = 'experiments/experiment_generator/experiments/experiment_' + self.experiment_index + '/'
+        # self.directory_path = '../../experiments/experiment_generator/experiments/experiment_' + self.experiment_index + '/'
         self.id = ''
         self.location = ''
         self.ip = server_host
@@ -54,12 +54,13 @@ class Orchestrator:
         self.causal_delivery = causal_delivery
         self.random_seed = 1000
         self.pending_operations_repetitions = 0
+        self.time_elapsed_in_reconfiguration = 0.0
         random.seed(self.random_seed)
         log.info(''.join(["Orchestrator: ", self.name, " is running on host ", self.ip, ' port: ', str(self.port)]))
 
     def load_server_information(self):
-        print('Current directory: ' + os.getcwd())
-        with open(self.directory_path + self.experiment_name+ '.json') as json_file:
+        all_route = ROOT_DIR + '/' + self.directory_path+ self.experiment_name +'.json'
+        with open(all_route) as json_file:
             raw_data = json.load(json_file)
 
         orchestrator_number = self.name.find('_')
@@ -81,7 +82,15 @@ class Orchestrator:
     def add_service_information(self):
         self.load_vnf_components()
 
+    async def get_inconsistencies(self):
+        return self.inconsistencies
+
+    async def get_time_elapsed_reconfiguration(self):
+        return self.time_elapsed_in_reconfiguration
+
     async def request_service_scale(self, service_id) -> json:
+        log.info('Please scale service: ' + str(service_id))
+        self.time_elapsed_in_reconfiguration = 0.0
         self.life_cycle_manager.are_VNFs_scaled = False
         self.vector_clock.increment_clock(self.id)
         self.pending_operations_repetitions = 0
@@ -115,6 +124,7 @@ class Orchestrator:
         orchestrator_format['inconsistencies'] = self.inconsistencies
         orchestrator_format['random_seed'] = self.random_seed
         orchestrator_format['messages_sent'] = self.messages_sent
+        orchestrator_format['time_elapsed_in_last_reconfiguration'] = self.time_elapsed_in_reconfiguration
         return orchestrator_format
 
     def get_service_by_id(self, service_id):
@@ -339,12 +349,16 @@ class Orchestrator:
         log.info('End pending operations')
 
     def load_vnf_components(self):
-        with open(self.directory_path + self.experiment_name + '.json') as json_file:
+        all_route = ROOT_DIR + '/' + self.directory_path + self.experiment_name + '.json'
+        with open(all_route) as json_file:
             raw_data = json.load(json_file)
         orchestrator_number = self.name.find('_')
         orchestrator_index = int(self.name[orchestrator_number + 1:])
         self.instantiate_services(raw_data['orchestrators'][orchestrator_index]['services'])
         self.vnfs = raw_data['orchestrators'][orchestrator_index]['vnfs']
+        if self.ip == '127.0.0.1':
+            for vnf in self.vnfs:
+                vnf['server'] = self.ip
 
     def instantiate_services(self, services):
         for service in services:
@@ -366,6 +380,7 @@ class Orchestrator:
             new_orchestrator['id'] = orchestrator_information['id']
             self.list_orchestrator.append(new_orchestrator)
             self.vector_clock.add_clock(orchestrator_information['id'])
+            log.info(' My clock ' + self.vector_clock.as_string())
             return return_success()
         except Exception as e:
             return return_failure(str(e))
@@ -375,7 +390,6 @@ class Orchestrator:
         return return_success()
 
     async def get_vnfs(self):
-        log.info('VNFs...')
         return self.vnfs
 
     async def get_orchestrators(self):
@@ -384,6 +398,5 @@ class Orchestrator:
     async def get_log_file(self) -> str:
         file_name = 'test.log'
         with open(file_name, 'r') as file:
-            # data = file.read().replace('\n', '')
             data = file.read()
         return data

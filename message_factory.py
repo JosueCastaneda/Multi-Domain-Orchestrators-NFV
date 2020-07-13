@@ -1,6 +1,7 @@
 import asyncio
 import getopt
 import sys
+import json
 
 import aiohttp
 
@@ -17,7 +18,7 @@ def generate_messages(command):
 
 def read_parameters(argv):
     command = CommandPackage()
-    debug = True
+    debug = False
 
     if debug:
         command.host = '127.0.0.1'
@@ -28,9 +29,10 @@ def read_parameters(argv):
         command.vnf_port = 5002
         command.orchestrator_id = 'e5ea698b-8a3d-11ea-aa9d-04ea56f99520'
         command.message_type = 'request_sc'
+        command.results = 'local'
 
     try:
-        opts, args = getopt.getopt(argv, "t:h:p:n:m:v:w:e:s:i:x:",
+        opts, args = getopt.getopt(argv, "t:h:p:n:m:v:w:e:s:i:x:r:",
                                    ["type=",
                                     "host=",
                                     "port=",
@@ -41,7 +43,8 @@ def read_parameters(argv):
                                     "experiment=",
                                     "seed=",
                                     "service_id=",
-                                    "orchestrator_id="])
+                                    "orchestrator_id=",
+                                    "results="])
     except getopt.GetoptError:
         print(command.help_message)
         sys.exit(2)
@@ -72,6 +75,8 @@ def read_parameters(argv):
             command.service_id = arg
         elif opt in ("-x", "--orchestrator_id"):
             command.orchestrator_id = arg
+        elif opt in ("-r", "--results"):
+            command.results = arg
     return command
 
 
@@ -84,8 +89,63 @@ async def send_message(command, message):
             print(await resp.text())
 
 
+async def get_results_local(orchestrator_ip='127.0.0.1', orchestrator_port=5001):
+    total_inconsistencies = 0
+    initial_port = 5001
+    for i in range(5):
+        url = 'http://127.0.0.1:' + str(initial_port) + '/get_inconsistencies'
+        async with aiohttp.ClientSession() as session:
+            async with session.post(url, data='') as resp:
+                inconsistency_as_text = await resp.text()
+                inconsistency_decoded = json.loads(inconsistency_as_text)
+                total_inconsistencies += int(inconsistency_decoded['result'])
+        initial_port += 1
+
+    url = 'http://'+ str(orchestrator_ip) + ':'+ str(orchestrator_port) + '/get_time_elapsed'
+    async with aiohttp.ClientSession() as session:
+        async with session.post(url, data='') as resp:
+            elapsed_time_encoded = await resp.text()
+    elapsed_time_decoded = json.loads(elapsed_time_encoded)
+    elapsed_time = elapsed_time_decoded['result']
+    print('Inconsistencies: ' + str(total_inconsistencies) + ' elapsed time: '+ str(elapsed_time) + ' seconds')
+
+async def get_results_external(orchestrator_ip='0.0.0.0', orchestrator_port=5001):
+    total_inconsistencies = 0
+    initial_port = 5001
+    url_list = list()
+    url_list.append('40.127.108.223')
+    url_list.append('52.229.37.237')
+    url_list.append('52.141.61.172')
+    url_list.append('20.185.45.222')
+    url_list.append('52.151.70.54')
+    for i in range(5):
+        url = 'http://' + str(url_list[i])+ ':' + str(initial_port) + '/get_inconsistencies'
+        async with aiohttp.ClientSession() as session:
+            async with session.post(url, data='') as resp:
+                inconsistency_as_text = await resp.text()
+                inconsistency_decoded = json.loads(inconsistency_as_text)
+                total_inconsistencies += int(inconsistency_decoded['result'])
+        initial_port += 1
+
+    url = 'http://'+ str(orchestrator_ip) + ':'+ str(orchestrator_port) + '/get_time_elapsed'
+    async with aiohttp.ClientSession() as session:
+        async with session.post(url, data='') as resp:
+            elapsed_time_encoded = await resp.text()
+    elapsed_time_decoded = json.loads(elapsed_time_encoded)
+    elapsed_time = elapsed_time_decoded['result']
+    print('Inconsistencies: ' + str(total_inconsistencies) + ' elapsed time: '+ str(elapsed_time) + ' seconds')
+
+
 async def main(argv):
     command = read_parameters(argv)
+    if command.results:
+        if command.results == 'local':
+            await get_results_local(command.host, command.port)
+            return
+        elif command.results == 'external':
+            await get_results_external(command.host, command.port)
+            return
+
     if command.is_valid():
         messages = generate_messages(command)
         if isinstance(messages, list):

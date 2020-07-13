@@ -18,7 +18,6 @@ class AddVNFConstraints:
         self.jitter_low = jitter[0]
         self.jitter_high = jitter[1]
 
-
     def add_constraints(self):
         print('Adding constraints')
         self.load_vnfs()

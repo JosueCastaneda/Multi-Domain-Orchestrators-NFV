@@ -25,6 +25,7 @@ from communication_entities.messages.state_management.terminate_message import T
 from communication_entities.messages.state_management.terminate_message_without_recursion import \
     TerminateMessageWithoutRecursion
 from communication_entities.messages.vnf_information.update_vnf_info_after_migration import UpdateVnfInfoAfterMigration
+from definitions import ROOT_DIR
 from entities.communication_entity_package import CommunicationEntityPackage
 from entities.topology import Topology
 from entities.vnf_entities.vnf_package import VnfPackage
@@ -41,16 +42,20 @@ class GenericVNF:
         self.orchestrator_index = int(orchestrator_index)
         self.vnf_index = int(vnf_index)
         self.ip = server_host
+        self.name = ''
         self.port = server_port
         vnf_information, orchestrator_information = self.load_text_data()
         self.id = vnf_information['id']
         self.list_affected_vnf = []
         self.orchestrator_ip = orchestrator_information['ip']
+        if self.ip == '127.0.0.1':
+            self.orchestrator_ip = '127.0.0.1'
         self.orchestrator_port = int(orchestrator_information['port'])
         self.migration_vnf_ip = None
 
     def load_text_data(self):
-        directory_path = 'experiments/experiment_generator/experiments/experiment_' + self.experiment_index + '/'
+        # all_route = ROOT_DIR + '/' + self.directory_path + self.experiment_name + '.json'
+        directory_path = ROOT_DIR + '/' + 'experiments/experiment_generator/experiments/experiment_' + self.experiment_index + '/'
         with open(directory_path + self.experiment_name + '.json') as json_file:
             raw_data = json.load(json_file)
         vnf_information = raw_data['orchestrators'][self.orchestrator_index]['vnfs'][self.vnf_index]
@@ -373,3 +378,11 @@ class GenericVNF:
             file.write(str(total_time))
             file.write('\n')
             file.close()
+
+    def entry_as_dictionary(self):
+        orchestrator_format = dict()
+        orchestrator_format['ip'] = self.ip
+        orchestrator_format['port'] = self.port
+        orchestrator_format['id'] = self.id
+        orchestrator_format['name'] = self.name
+        return orchestrator_format

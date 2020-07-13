@@ -4,12 +4,13 @@ import traceback
 from aiohttp import web
 from aiohttp.web_response import Response
 
+from communication_entities.generic_vnf import GenericVNF
 from utilities.logger import log
 
 
 class VirtualNetworkFunctionHandler:
 
-    def __init__(self, virtual_network_function):
+    def __init__(self, virtual_network_function: GenericVNF):
         self.virtual_network_function = virtual_network_function
         self._loop = asyncio.get_event_loop()
 
@@ -43,3 +44,6 @@ class VirtualNetworkFunctionHandler:
             print(traceback.format_exc())
             return web.json_response(response)
 
+    async def index(self, request: web.Request) -> Response:
+        data = self.virtual_network_function.name
+        return web.json_response(self.virtual_network_function.entry_as_dictionary())

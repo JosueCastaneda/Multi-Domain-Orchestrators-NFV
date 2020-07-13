@@ -388,6 +388,7 @@ class LifeCycleManagement:
                         log.info(
                             str_log_1 + str_log_2 + str_log_3 + ' End Scaling: VT- ' + self.orchestrator.vector_clock.as_string())
                         log.info('Are VNFs SCALED? ' + str(self.are_VNFs_scaled))
+                        self.orchestrator.time_elapsed_in_reconfiguration = elapsed.total_seconds()
                         self.has_finished = True
                         # log.info(' End Scaling: VT- ' + self.orchestrator.vector_clock.as_string())
 

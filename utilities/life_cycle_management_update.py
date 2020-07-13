@@ -36,11 +36,8 @@ async def send_message(message):
     log.info(url)
     async with aiohttp.ClientSession() as session:
         async with session.post(url, data=message.data) as resp:
-            # log.info(str(resp.status))
-            # str_log = await asyncio.create_task(resp.text())
             str_log = await (resp.text())
-            # log.info(str_log)
-
+            log.info(str_log)
 
 def return_failure(message):
     data = dict()

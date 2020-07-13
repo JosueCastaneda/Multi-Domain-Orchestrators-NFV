@@ -10,6 +10,7 @@ class CommandPackage:
         self.vnf_port = None
         self.experiment = ''
         self.seed = None
+        self.results = None
         self.orchestrator_id = None
         self.help_message = "message_factory.py -t <message_type> -h <host> -p <port>" \
                             " -n <name> -m <new_name> -v <vnf_host> -w <vnf_port>"
