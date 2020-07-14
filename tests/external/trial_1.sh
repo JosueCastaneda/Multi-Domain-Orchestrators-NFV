@@ -10,7 +10,8 @@ python message_factory.py -t add_orchestrator -h 0.0.0.0 -p 5002 -n none -m none
 python message_factory.py -t add_orchestrator -h 0.0.0.0 -p 5002 -n none -m none --vnf_host 52.151.70.54 --vnf_port 5005 -x 000f6098-c031-11ea-b335-04ea56f99520
 
 # Instantiate the orchestrator's VNFs
-python vnf_script.py -i 0 -o 1 -e 0 &
-python vnf_script.py -i 1 -o 1 -e 0 &
-python vnf_script.py -i 2 -o 1 -e 0 &
-python vnf_script.py -i 3 -o 1 -e 0 &
+python vnf_script.py -i 0 -o 1 -e 0 -h '0.0.0.0' -p 3010 &
+python vnf_script.py -i 1 -o 1 -e 0 -h '0.0.0.0' -p 3011 &
+python vnf_script.py -i 2 -o 1 -e 0 -h '0.0.0.0' -p 3012 &
+python vnf_script.py -i 3 -o 1 -e 0 -h '0.0.0.0' -p 3013 &
+python vnf_script.py -i 4 -o 1 -e 0 -h '0.0.0.0' -p 3014 &
