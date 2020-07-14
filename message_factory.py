@@ -88,6 +88,14 @@ async def send_message(command, message):
             print(resp.status)
             print(await resp.text())
 
+async def send_message_local(port):
+    url = 'http://0.0.0.0:' + str(port) + '/'
+    url2 = 'http://52.141.61.172:' + str(port) + '/'
+    print(url)
+    async with aiohttp.ClientSession() as session:
+        async with session.get(url) as resp:
+            print(resp.status)
+            print(await resp.text())
 
 async def get_results_local(orchestrator_ip='127.0.0.1', orchestrator_port=5001):
     total_inconsistencies = 0
@@ -144,6 +152,9 @@ async def main(argv):
             return
         elif command.results == 'external':
             await get_results_external(command.host, command.port)
+            return
+        elif command.results == 'test':
+            await send_message_local(command.port)
             return
 
     if command.is_valid():
