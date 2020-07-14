@@ -108,6 +108,7 @@ class LifeCycleManagement:
         log.info('Checking if no more dependencies to scale')
         no_services = self.no_more_service_dependencies_to_scale(operation)
         if self.is_simple_scaling(type, no_services, operation['is_first_operation'], operation['pending_operations']):
+            log.info('Is simple scaling')
             return True
         at_least_one_vnf = self.are_there_still_vnfs_to_scale(operation)
         if no_services and not at_least_one_vnf:
@@ -320,6 +321,7 @@ class LifeCycleManagement:
             if operation['pending_operations']:
                 dependency = self.remove_dependency_from_service(operation, vnf_component_id)
                 if self.no_more_dependencies_to_scale(operation, dependency['type']):
+                    log.info('No more dependencies to scale')
                     await self.end_scaling(operation)
                     empty_pending_operations = list()
                     for op in self.pending_operations:
@@ -366,14 +368,18 @@ class LifeCycleManagement:
         log.info(log_str)
 
     async def end_scaling(self, service):
+        log.info('End Scaling')
         if self.is_external_vnf_component(service['original_service_id']):
+            log.info('Is external VNF Component')
             await self.send_confirmation_to_end_scaling(service)
         else:
             if self.is_internal_pending_operation(service):
+                log.info('Is internal pending operation')
                 await self.send_confirmation_to_end_scaling(service)
             else:
                 if service['id'] == '' and self.only_pending_vnfs() and not self.are_VNFs_scaled and len(
                         service['pending_operations']) > 0:
+                    log.info('Only pending VNFs, not scaled and there are pending operations')
                     await self.scale_vnfs(service['pending_operations'], service['original_service_id'],
                                           service['original_service_id'])
                     # self.are_VNFs_scaled = True
