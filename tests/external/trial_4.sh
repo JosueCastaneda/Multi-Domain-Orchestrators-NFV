@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # Launch orchestrator
-python orchestrator_script.py -i 4 -e 0 &
+python orchestrator_script.py -i 4 -e 0 -h '0.0.0.0' -p 5005 &
 
 # Add orchestrator's informaton to my orchestrator
 python message_factory.py -t add_orchestrator -h 0.0.0.0 -p 5005 -n none -m none --vnf_host 40.127.108.223 --vnf_port 5001 -x 000f6094-c031-11ea-b335-04ea56f99520
