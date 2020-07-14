@@ -37,7 +37,7 @@ class GenericService:
         return is_valid, no_dependencies
 
     async def scale(self):
-        log.info('Beginning to scale service: ' + str(self.id))
+        log.info('Beginning to scale service: ' + str(self.id)[0:8])
         vnfs_to_scale = dict()
         vnfs_to_scale[self.id] = list()
         services_ids = list()
@@ -66,7 +66,7 @@ class GenericService:
     async def send_grant_messages_to_dependencies(self, data_list):
         asynchronous_tasks = list()
         for data in data_list:
-            log.info('Sending grant to ' + data['vnf_component_to_scale_id'])
+            log.info('Sending grant to ' + data['vnf_component_to_scale_id'][0:8])
             scaling_message = GrantLCMMessage(host=data['host_dependency'], port=data['port_dependency'], data=data)
             asynchronous_tasks.append(send_message(scaling_message))
         await asyncio.gather(*asynchronous_tasks)
@@ -128,7 +128,7 @@ class GenericService:
         old_value = self.orchestrator.vector_clock
         self.orchestrator.vector_clock.increment_clock(self.orchestrator.id)
         current_vector_clock = self.orchestrator.vector_clock
-        log.info('Old Value VT: ' + old_value.as_string() + ' New Value VT: ' + current_vector_clock.as_string())
+        log.info('Old Value: ' + old_value.as_string() + ' New Value: ' + current_vector_clock.as_string())
         exclude_list_of_orchestrators = self.gather_external_dependencies()
         await asyncio.gather(self.scale_dependencies(service_id, original_service_id, original_service_orchestrator_id),
                              self.orchestrator.notify_all_orchestrators_of_change(exclude_list_of_orchestrators,
@@ -143,19 +143,6 @@ class GenericService:
             await self.scale_from_external_orchestrator(service_id,
                                                         original_service_id,
                                                         original_service_orchestrator_id)
-
-    # def independent_scale_normal(self, service_id='', original_service_id='', original_service_orchestrator_id=''):
-    #     log.info('Old Value VT: ' + self.orchestrator.vector_clock.as_string())
-    #     self.orchestrator.vector_clock.increment_clock(self.orchestrator.id)
-    #     log.info('New Value VT: ' + self.orchestrator.vector_clock.as_string())
-    #     if service_id == '':
-    #         self.orchestrator.life_cycle_manager.scale_vnfs(self.dependencies, service_id)
-    #     else:
-    #         for dependency in self.dependencies:
-    #             self.orchestrator.life_cycle_manager.scale_vnf_component(dependency,
-    #                                                                      service_id,
-    #                                                                      original_service_id,
-    #                                                                      original_service_orchestrator_id)
 
     def format_as_a_dictionary_json(self, vnf_component_id='', vnf_component_type='', is_first=False):
         service_format = dict()

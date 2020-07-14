@@ -22,7 +22,6 @@ class OrchestratorHandler:
         return web.json_response(self.orchestrator.entry_as_dictionary())
 
     async def get_services(self, request: web.Request) -> Response:
-        log.info('Getting services')
         try:
             result = await self.orchestrator.get_services()
             answer = {'status': 'Good', 'result': result}
@@ -32,7 +31,6 @@ class OrchestratorHandler:
             return web.json_response(response)
 
     async def add_orchestrator(self, request: web.Request) -> Response:
-        log.info('Adding orchestrator')
         try:
             data = await request.post()
             result = await self.orchestrator.add_orchestrator(data)
@@ -45,7 +43,6 @@ class OrchestratorHandler:
             return web.json_response(response)
 
     async def add_vnf(self, request: web.Request) -> Response:
-        log.info('Adding VNF')
         try:
             data = await request.post()
             vnf_information = VnfInformation(host=data['ip'],
@@ -65,7 +62,6 @@ class OrchestratorHandler:
             return web.json_response(response)
 
     async def grant_service_migration(self, request: web.Request) -> Response:
-        log.info('Granting to service')
         try:
             data = await request.post()
             original_service_data = data['original_service']
@@ -85,10 +81,8 @@ class OrchestratorHandler:
             return web.json_response(response)
 
     async def request_scaling_of_service(self, request: web.Request) -> Response:
-        log.info('Requesting to scale service')
         try:
             data = await request.post()
-            log.info('Requested Scaling of service ' + str(data['service_id']))
             result = await self.orchestrator.request_service_scale(data['service_id'])
             answer = {'status': 'Good', 'result': result}
             return web.json_response(answer)
@@ -97,7 +91,6 @@ class OrchestratorHandler:
             return web.json_response(response)
 
     async def notify_scaling_has_ended(self, request: web.Request) -> Response:
-        log.info('Notifying...')
         try:
             data = await request.post()
             result = await self.orchestrator.wait_before_notification(data['vector_clock'],
@@ -109,7 +102,6 @@ class OrchestratorHandler:
             return web.json_response(response)
 
     async def notify_update_of_vector_clock(self, request: web.Request) -> Response:
-        log.info('Notifying update of clock...')
         try:
             data = await request.post()
             result = await self.orchestrator.wait_before_notification(data['vector_clock'],
@@ -122,7 +114,6 @@ class OrchestratorHandler:
             return web.json_response(response)
 
     async def scale_of_service_has_ended(self, request: web.Request) -> Response:
-        log.info('Llamado')
         try:
             data = await request.post()
             result = await self.orchestrator.life_cycle_manager.scale_confirmation(data['vnf_component_id'],
@@ -141,7 +132,6 @@ class OrchestratorHandler:
             # self.print_generic_exception(e)
 
     async def get_vnfs(self, request: web.Request) -> Response:
-        log.info('Llamado VNFS')
         try:
             data = await request.post()
             result = await self.orchestrator.get_vnfs()

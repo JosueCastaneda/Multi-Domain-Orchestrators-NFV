@@ -1,12 +1,11 @@
-import asyncio
 import json
+import random
+import string
 
 import aiohttp
 
 from utilities.logger import log
 from utilities.random_integer_generation import generate_random_integer
-import random
-import string
 
 
 def generate_number_of_updates(value):
@@ -36,8 +35,11 @@ async def send_message(message):
     log.info(url)
     async with aiohttp.ClientSession() as session:
         async with session.post(url, data=message.data) as resp:
-            str_log = await (resp.text())
-            log.info(str_log)
+            str_log_encoded = await (resp.text())
+            str_log_decoded = json.loads(str_log_encoded)
+            log.info('Result of message:')
+            log.info(str_log_decoded['result'])
+
 
 def return_failure(message):
     data = dict()

@@ -104,7 +104,7 @@ class VectorClock(dict):
         log.info('Updated VT: ' + self.as_string())
 
     def as_string(self):
-        str_log = 'Vector clock: ['
+        str_log = 'VT: ['
         for clock in self.clock_list:
             str_log += str(clock['value']) + ','
         str_log += ']'

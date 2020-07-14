@@ -314,7 +314,7 @@ class GenericVNF:
         self.collect_data_to_queue(self.configuration.get_state().get_p())
 
     async def scale(self, vnfc_id, original_service_id, orchestrator_sender_id, original_orchestrator_id, sender_vector_clock, service_sender_id):
-        log.info('VNF ' + str(self.id) + ' has scaled: ' + str(self.id))
+        log.info('VNF ' + str(self.id[0:8]) + ' has scaled: ' + str(self.id))
         data = dict()
         data['vnf_component_id'] = self.id
         data['original_service_id'] = original_service_id

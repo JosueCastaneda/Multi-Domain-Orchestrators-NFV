@@ -15,7 +15,6 @@ class VirtualNetworkFunctionHandler:
         self._loop = asyncio.get_event_loop()
 
     async def scale_vnf(self, request: web.Request) -> Response:
-        log.info('Request to scale VNF...')
         try:
             data = await request.post()
             result = await self.virtual_network_function.scale(data['vnf_component_id'],
@@ -32,7 +31,6 @@ class VirtualNetworkFunctionHandler:
             return web.json_response(response)
 
     async def add_chain(self, request: web.Request) -> Response:
-        log.info('Adding VNF to chain...')
         try:
             data = await request.post()
             result = await self.virtual_network_function.add_affected_vnf(data['ip'],

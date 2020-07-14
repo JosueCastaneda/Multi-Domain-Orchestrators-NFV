@@ -37,7 +37,7 @@ def main(argv) -> None:
     experiment_index = '0'
     server_host = ''
     server_port = 0
-    debug = False
+    debug = True
 
     if debug:
         orchestrator_index = '0'

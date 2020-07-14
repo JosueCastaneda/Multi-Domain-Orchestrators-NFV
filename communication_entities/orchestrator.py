@@ -33,7 +33,6 @@ class Orchestrator:
         self.experiment_index = experiment_index
         self.name = 'orch_' + orchestrator_index
         self.directory_path = 'experiments/experiment_generator/experiments/experiment_' + self.experiment_index + '/'
-        # self.directory_path = '../../experiments/experiment_generator/experiments/experiment_' + self.experiment_index + '/'
         self.id = ''
         self.location = ''
         self.ip = server_host
@@ -56,7 +55,6 @@ class Orchestrator:
         self.pending_operations_repetitions = 0
         self.time_elapsed_in_reconfiguration = 0.0
         random.seed(self.random_seed)
-        log.info(''.join(["Orchestrator: ", self.name, " is running on host ", self.ip, ' port: ', str(self.port)]))
 
     def load_server_information(self):
         all_route = ROOT_DIR + '/' + self.directory_path+ self.experiment_name +'.json'
@@ -128,9 +126,7 @@ class Orchestrator:
         return orchestrator_format
 
     def get_service_by_id(self, service_id):
-        log.info('Get service id: ' + str(service_id))
         for service in self.services:
-            log.info('Service id: ' + str(service.id))
             if service.id == service_id:
                 return service
 
@@ -142,8 +138,8 @@ class Orchestrator:
     async def notification_of_lcm(self, vector_clock_string, orchestrator_sender_id):
         vector_clock = VectorClock()
         vector_clock.create_from_list(vector_clock_string)
-        log.info('Received ' + vector_clock.as_string() + ' from orchestrator: ' + str(
-            orchestrator_sender_id) + ' My clock ' + self.vector_clock.as_string())
+        log.info('Received ' + vector_clock.as_string() + ' from: ' + str(
+            orchestrator_sender_id[0:8]) + ' My clock ' + self.vector_clock.as_string())
         if orchestrator_sender_id == self.id:
             difference_in_vectors = 0
         else:
@@ -164,10 +160,9 @@ class Orchestrator:
                                                                    sender_vector_clock=vector_clock,
                                                                    service_sender_id='')
                 self.pending_lcm_operations.append(new_pending_operation)
-        log.info('Orchestrator Pending Operations in ' + str(
-            len(self.pending_lcm_operations)) + ' Lifecycle management pending operations: ' + str(
-            len(self.life_cycle_manager.pending_operations)))
-        log.info('Vector Clock: ' + self.vector_clock.as_string())
+        log.info('Orch operations in ' + str(
+            len(self.pending_lcm_operations)) + ' LCM operations: ' + str(
+            len(self.life_cycle_manager.pending_operations)) + ' My ' + self.vector_clock.as_string())
         self.pending_operations_repetitions = 0
         return_success()
 
@@ -190,8 +185,8 @@ class Orchestrator:
             change_took_place = False
             repetitions_message = 0
             total_pending_operations = len(self.pending_lcm_operations)
-            log.info('Total pending operations: ' + str(total_pending_operations) + ' Pending LCM operations' + str(
-                len(self.pending_lcm_operations)))
+            # log.info('Total pending operations: ' + str(total_pending_operations) + ' Pending LCM operations' + str(
+            #     len(self.pending_lcm_operations)))
             while self.pending_lcm_operations and repetitions_message < total_pending_operations and self.pending_operations_repetitions < total_pending_operations:
                 repetitions_message += 1
                 pending_operation = self.pending_lcm_operations.pop(0)
@@ -199,11 +194,11 @@ class Orchestrator:
                     new_vector_clock = VectorClock()
                     new_vector_clock.create_from_list(pending_operation.sender_vector_clock)
                     pending_operation.sender_vector_clock = new_vector_clock
-                log.info('Pending operation' + str(pending_operation) + ' Repetition: ' + str(
-                    self.pending_operations_repetitions) + ' Total pending: ' + str(total_pending_operations))
-                log.info('Orchestrator sender ID: ' + str(
-                    pending_operation.orchestrator_sender_id) + ' VT: ' + pending_operation.sender_vector_clock.as_string())
-                log.info('My vector clock: ' + self.vector_clock.as_string())
+                # log.info('Pending operation' + str(pending_operation) + ' Repetition: ' + str(
+                #     self.pending_operations_repetitions) + ' Total pending: ' + str(total_pending_operations))
+                # log.info('Orchestrator sender ID: ' + str(
+                #     pending_operation.orchestrator_sender_id) + ' VT: ' + pending_operation.sender_vector_clock.as_string())
+                # log.info('My vector clock: ' + self.vector_clock.as_string())
                 difference_in_clocks = self.vector_clock.compare_clocks(pending_operation.sender_vector_clock,
                                                                         pending_operation.orchestrator_sender_id,
                                                                         self.causal_delivery)
@@ -249,15 +244,13 @@ class Orchestrator:
 
     async def grant_lcm_operation_of_service(self, vnf_component_to_scale_id, operation, original_service,
                                              sender_vector_clock=None):
-        log.info('Can you please scale: ' + str(vnf_component_to_scale_id) + ' originally from ' + str(
-            original_service['original_service_id']))
+        log.info('Can you please scale: ' + str(vnf_component_to_scale_id)[0:8] + ' originally from ' + str(
+            original_service['original_service_id'][0:8]))
         log.info('Received ' + sender_vector_clock.as_string() + ' My clock ' + self.vector_clock.as_string())
         if self.causal_delivery:
-            log.info('Causal')
             await self.grant_lcm_operation_causal(vnf_component_to_scale_id, operation, original_service,
                                                   sender_vector_clock)
         else:
-            log.info('Normal')
             await self.grant_lcm_operation_normal(vnf_component_to_scale_id, operation, original_service,
                                                   sender_vector_clock)
 
@@ -315,8 +308,8 @@ class Orchestrator:
                                                             original_service['orchestrator_id'])
 
     async def do_pending_operations(self):
-        log.info('Grant LCM Causal Entry Pending Operations ' + str(
-            self.pending_operations_repetitions) + 'Are VNFs SCALED? ' + str(self.life_cycle_manager.are_VNFs_scaled))
+        log.info('Grant Pending Operations ' + str(
+            self.pending_operations_repetitions) + ' are VNFs SCALED? ' + str(self.life_cycle_manager.are_VNFs_scaled))
         self.pending_operations_repetitions += 1
         clock_was_updated = True
         while clock_was_updated:
@@ -328,9 +321,9 @@ class Orchestrator:
                 operation = self.pending_lcm_operations.pop(0)
                 clock_difference = self.vector_clock.compare_stored_clock(operation.sender_vector_clock,
                                                                           self.causal_delivery)
-                log.info('My Clock: ' + str(self.vector_clock.as_string()) + 'Sender Vector clock: ' + str(
+                log.info('My Clock: ' + str(self.vector_clock.as_string()) + ' Sender Vector clock: ' + str(
                     operation.sender_vector_clock.as_string()))
-                log.info('Clock difference: ' + str(clock_difference))
+                # log.info('Clock difference: ' + str(clock_difference))
                 if operation.is_not_done and self.vector_clock.compare_stored_clock(operation.sender_vector_clock,
                                                                                     self.causal_delivery):
                     if operation.operation != 'notification':
@@ -346,7 +339,6 @@ class Orchestrator:
                     self.pending_lcm_operations.append(operation)
             clock_was_updated = at_least_one_clock_changed
         self.pending_operations_repetitions = 0
-        log.info('End pending operations')
 
     def load_vnf_components(self):
         all_route = ROOT_DIR + '/' + self.directory_path + self.experiment_name + '.json'
@@ -380,7 +372,6 @@ class Orchestrator:
             new_orchestrator['id'] = orchestrator_information['id']
             self.list_orchestrator.append(new_orchestrator)
             self.vector_clock.add_clock(orchestrator_information['id'])
-            log.info(' My clock ' + self.vector_clock.as_string())
             return return_success()
         except Exception as e:
             return return_failure(str(e))
