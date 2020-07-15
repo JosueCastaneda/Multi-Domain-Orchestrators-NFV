@@ -352,6 +352,12 @@ class Orchestrator:
             for vnf in self.vnfs:
                 vnf['server'] = self.ip
 
+    async def get_pending_operations(self):
+        pending_operations =  self.life_cycle_manager.pending_operations
+        for operation in pending_operations:
+            operation['start_time'] = ''
+        return pending_operations
+
     def instantiate_services(self, services):
         for service in services:
             new_service = GenericService(service['id'], self, service['dependencies'])

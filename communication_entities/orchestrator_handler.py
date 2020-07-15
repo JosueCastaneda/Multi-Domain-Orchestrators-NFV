@@ -140,6 +140,15 @@ class OrchestratorHandler:
             response = {'status': 'failed', 'message': str(e)}
             return web.json_response(response)
 
+    async def get_pending_operations(self, request: web.Request) -> Response:
+        try:
+            data = await request.post()
+            result = await self.orchestrator.get_pending_operations()
+            return self.print_good_result(result)
+        except Exception as e:
+            response = {'status': 'failed', 'message': str(e)}
+            return web.json_response(response)
+
     async def get_orchestrators(self, request: web.Request) -> Response:
         try:
             data = await request.post()

@@ -37,13 +37,13 @@ def main(argv) -> None:
     experiment_index = '0'
     server_host = ''
     server_port = 0
-    debug = True
+    debug = False
 
     if debug:
         orchestrator_index = '0'
         experiment_index = '0'
         server_host = '127.0.0.1'
-        server_port = 5001
+        server_port = 5002
     try:
         opts, args = getopt.getopt(argv, "i:e:h:p:", ["service_id=", "experiment_id=", "host=", "port="])
     except getopt.GetoptError:

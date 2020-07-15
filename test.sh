@@ -64,7 +64,7 @@ case $TEST_TYPE in
     path_4="tests/local/trial_4.sh"
 
     # Activate the virtual environment
-    source my_env/bin/activate
+    #source my_env/bin/activate
 
     # Run all the python files
     ./$path_0
