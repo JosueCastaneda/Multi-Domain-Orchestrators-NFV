@@ -96,7 +96,7 @@ class Orchestrator:
             if service.id == service_id:
                 service_as_dictionary = service.create_service_as_dictionary_and_add_pending_operations_to_service()
                 self.life_cycle_manager.add_new_service_to_scale(service.id, service_as_dictionary)
-                # await service.scale()
+                await service.scale()
                 return return_success()
         return return_failure('Service requested to scale not found')
 
