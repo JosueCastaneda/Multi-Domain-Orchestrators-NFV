@@ -45,8 +45,18 @@ case $TEST in
     ;;
 
   all)
-    message=$'All not implemented\n'
+    message=$'All!\n'
     echo -n "$message"
+    python3 message_factory.py -t request_scaling_of_service -h 52.141.61.172 -p 5003 -i 000f60b3-c031-11ea-b335-04ea56f99520 --seed 857280
+    python3 message_factory.py -h 52.141.61.172 -p 5003 -r external
+    python3 message_factory.py -t request_scaling_of_service -h 52.229.37.237 -p 5002 -i 000f60b4-c031-11ea-b335-04ea56f99520 --seed 857280
+    python3 message_factory.py -h 52.229.37.237 -p 5002 -r external
+    python3 message_factory.py -t request_scaling_of_service -h 52.229.37.237 -p 5002 -i 000f60b7-c031-11ea-b335-04ea56f99520 --seed 857280
+    python3 message_factory.py -h 52.229.37.237 -p 5002 -r external
+    python3 message_factory.py -t request_scaling_of_service -h 52.229.37.237 -p 5002 -i 000f60b8-c031-11ea-b335-04ea56f99520 --seed 857280
+    python3 message_factory.py -h 52.229.37.237 -p 5002 -r external
+    python3 message_factory.py -t request_scaling_of_service -h 52.151.70.54 -p 5005 -i 000f60b9-c031-11ea-b335-04ea56f99520 --seed 857280
+    python3 message_factory.py -h 52.151.70.54 -p 5005 -r external
     ;;
 
   *)
