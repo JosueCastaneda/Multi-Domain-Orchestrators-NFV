@@ -1,20 +1,21 @@
 import asyncio
 import datetime
+import json
 
 from communication_entities.messages.lcm_messages.grant_lcm_message import GrantLCMMessage
-from communication_entities.messages.lcm_messages.notification_lcm_operation import NotificationLCMOperation
+from utilities.json_loader import my_date_converter
 from utilities.life_cycle_management_update import send_message
 from utilities.logger import log
-from utilities.json_loader import my_date_converter
-import json
 
 
 class GenericService:
 
-    def __init__(self, unique_id, orchestrator, dependencies):
+    def __init__(self, unique_id, orchestrator, dependencies, ip, port):
         self.id = unique_id
         self.orchestrator = orchestrator
         self.max_delay = 0
+        self.ip = ip
+        self.port = port
         self.max_jitter = 0
         self.max_throughput = 0
         self.loss_ratio = 0
@@ -24,6 +25,14 @@ class GenericService:
     def as_string(self):
         dictionary_string = dict()
         dictionary_string['id'] = self.id
+        dictionary_string['max_delay'] = self.max_delay
+        dictionary_string['ip'] = self.ip
+        dictionary_string['port'] = self.port
+        dictionary_string['max_jitter'] = self.max_jitter
+        dictionary_string['max_throughput'] = self.max_throughput
+        dictionary_string['loss_ratio'] = self.loss_ratio
+        dictionary_string['dependencies'] = self.dependencies
+
         return dictionary_string
 
     # TODO: Implement the validation code
@@ -148,8 +157,8 @@ class GenericService:
         service_format = dict()
         service_format['id'] = vnf_component_id
         service_format['original_service_id'] = self.id
-        service_format['ip'] = self.orchestrator.ip
-        service_format['port'] = self.orchestrator.port
+        service_format['ip'] = self.ip
+        service_format['port'] = self.port
         service_format['orchestrator_id'] = self.orchestrator.id
         service_format['pending_operations'] = list()
         service_format['type'] = vnf_component_type
@@ -161,8 +170,8 @@ class GenericService:
         service_format = dict()
         service_format['id'] = vnf_component_id
         service_format['original_service_id'] = self.id
-        service_format['ip'] = self.orchestrator.ip
-        service_format['port'] = self.orchestrator.port
+        service_format['ip'] = self.ip
+        service_format['port'] = self.port
         service_format['orchestrator_id'] = self.orchestrator.id
         service_format['pending_operations'] = list()
         service_format['type'] = vnf_component_type

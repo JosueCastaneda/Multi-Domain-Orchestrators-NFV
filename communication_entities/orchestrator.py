@@ -96,7 +96,7 @@ class Orchestrator:
             if service.id == service_id:
                 service_as_dictionary = service.create_service_as_dictionary_and_add_pending_operations_to_service()
                 self.life_cycle_manager.add_new_service_to_scale(service.id, service_as_dictionary)
-                await service.scale()
+                # await service.scale()
                 return return_success()
         return return_failure('Service requested to scale not found')
 
@@ -346,11 +346,16 @@ class Orchestrator:
             raw_data = json.load(json_file)
         orchestrator_number = self.name.find('_')
         orchestrator_index = int(self.name[orchestrator_number + 1:])
-        self.instantiate_services(raw_data['orchestrators'][orchestrator_index]['services'])
+        my_orchestrator = raw_data['orchestrators'][orchestrator_index]
+        my_ip = my_orchestrator['ip']
         self.vnfs = raw_data['orchestrators'][orchestrator_index]['vnfs']
         if self.ip == '127.0.0.1':
+            my_ip = self.ip
             for vnf in self.vnfs:
                 vnf['server'] = self.ip
+        else:
+            my_ip = str(my_orchestrator['ip'])
+        self.instantiate_services(my_orchestrator['services'], my_ip)
 
     async def get_pending_operations(self):
         pending_operations =  self.life_cycle_manager.pending_operations
@@ -358,9 +363,13 @@ class Orchestrator:
             operation['start_time'] = ''
         return pending_operations
 
-    def instantiate_services(self, services):
+    def instantiate_services(self, services, ip):
         for service in services:
-            new_service = GenericService(service['id'], self, service['dependencies'])
+            new_service = GenericService(service['id'],
+                                         self,
+                                         service['dependencies'],
+                                         ip,
+                                         self.port)
             self.services.append(new_service)
 
     def print_state_vnf(self):
