@@ -4,15 +4,17 @@ import random
 
 
 class DockerScriptGeneratorExternal:
-
-    def __init__(self, experiment_index, configuration):
+    def __init__(self, experiment_index, configuration, random_running_index):
         self.experiment_index = experiment_index
         self.configuration = configuration
         self.data = self.load_all_required_data()
         self.all_dependencies = self.get_all_vnf_dependencies()
         self.all_services = self.get_all_services()
         self.orchestrator_index = 0
-        self.file_commands = None
+        self.file_commands_causal = None
+        self.file_commands_normal = None
+        self.running_experiment = 0
+        self.random_running_index = random_running_index
 
     def set_index(self, index):
         self.orchestrator_index = index
@@ -20,24 +22,28 @@ class DockerScriptGeneratorExternal:
     def create_orchestrator_file(self):
         file_directory = 'experiments/experiment_' + self.experiment_index + '/docker_files/'
         file_name = 'docker_commands_' + str(self.orchestrator_index) + '.sh'
+        file_name_normal = 'docker_commands_normal_' + str(self.orchestrator_index) + '.sh'
         if not os.path.exists(file_directory):
             os.makedirs(file_directory)
-        self.file_commands = open(file_directory + file_name, 'w+')
+        self.file_commands_causal = open(file_directory + file_name, 'w+')
+        self.file_commands_normal = open(file_directory + file_name_normal, 'w+')
 
     def create_client_file(self):
         file_directory = 'experiments/experiment_' + self.experiment_index + '/'
         file_name = 'client_commands.sh'
         if not os.path.exists(file_directory):
             os.makedirs(file_directory)
-        self.file_commands = open(file_directory + file_name, 'w+')
+        self.file_commands_causal = open(file_directory + file_name, 'w+')
 
-    def generate_orchestrator_commands(self):
+    def generate_orchestrator_commands(self, running_experiment):
+        self.running_experiment = running_experiment
         self.create_orchestrator_file()
         self.write_first_line_to_file()
         self.set_up_run_orchestrators()
         self.set_up_chain_orchestrators()
         self.set_up_running_vnf()
         self.close_file()
+        return self.random_running_index
 
     def generate_client_commands(self):
         self.create_client_file()
@@ -72,15 +78,25 @@ class DockerScriptGeneratorExternal:
 
     def write_first_line_to_file(self):
         header = '#!/bin/sh' + '\n'
-        self.file_commands.write(header + '\n')
+        self.file_commands_causal.write(header + '\n')
+        self.file_commands_normal.write(header + '\n')
+
+    def get_port_based_on_index(self):
+        return 5001 + self.orchestrator_index
 
     def set_up_run_orchestrators_external(self):
+        random_seed = self.configuration.random_seed_list[self.running_experiment]
         first_string = 'python orchestrator_script.py -i ' + str(self.orchestrator_index)
-        second_string = ' -e ' + str(self.experiment_index) + ' &'
-        self.file_commands.write(first_string + second_string + '\n')
+        first_string_normal = 'python orchestrator_script_normal.py -i ' + str(self.orchestrator_index)
+        second_string = ' -e ' + str(self.experiment_index) + ' -h \'0.0.0.0\' -p '
+        third_string = str(self.get_port_based_on_index()) + ' -r ' + str(random_seed) + ' &'
+        self.file_commands_causal.write(first_string + second_string + third_string + '\n')
+        self.file_commands_normal.write(first_string_normal + second_string + third_string + '\n')
+        print('Seed list: ' + str(len(self.configuration.random_seed_list)) + ' Running experiment: ' + str(self.running_experiment))
 
     def set_up_run_orchestrators(self):
-        self.file_commands.write('# Launch orchestrator' + '\n')
+        self.file_commands_causal.write('# Launch orchestrator' + '\n')
+        self.file_commands_normal.write('# Launch orchestrator' + '\n')
         self.set_up_run_orchestrators_external()
         self.write_new_line_to_file()
 
@@ -93,28 +109,35 @@ class DockerScriptGeneratorExternal:
                 second_string = ' -p ' + current_orchestrator['port']
                 third_string = ' -n none -m none --vnf_host ' + other_orch['ip'] + ' --vnf_port ' + other_orch[
                     'port'] + ' -x ' + other_orch['id']
-                self.file_commands.write(first_string + second_string + third_string + '\n')
+                self.file_commands_causal.write(first_string + second_string + third_string + '\n')
+                self.file_commands_normal.write(first_string + second_string + third_string + '\n')
 
     def set_up_chain_orchestrators(self):
-        self.file_commands.write('# Add orchestrator\'s informaton to my orchestrator' + '\n')
+        self.file_commands_causal.write('# Add orchestrator\'s informaton to my orchestrator' + '\n')
+        self.file_commands_normal.write('# Add orchestrator\'s informaton to my orchestrator' + '\n')
         self.set_up_chain_orchestrators_external()
         self.write_new_line_to_file()
 
     def set_up_running_vnf_external(self):
         current_orchestrator = self.data['orchestrators'][self.orchestrator_index]
+        vnf_port = 3001
         for vnf_index in range(len(current_orchestrator['vnfs'])):
             vnf = current_orchestrator['vnfs'][vnf_index]
             first_string = 'python vnf_script.py -i ' + str(vnf_index) + ' -o ' + str(self.orchestrator_index) + ' -e '
-            third_string = str(self.experiment_index) + ' &'
-            self.file_commands.write(first_string + third_string + '\n')
+            third_string = str(self.experiment_index) + ' -h \'0.0.0.0\' -p ' + str(vnf_port) + ' &'
+            self.file_commands_causal.write(first_string + third_string + '\n')
+            self.file_commands_normal.write(first_string + third_string + '\n')
+            vnf_port += 1
 
     def set_up_running_vnf(self):
-        self.file_commands.write('# Instantiate the orchestrator\'s VNFs \n')
+        self.file_commands_causal.write('# Instantiate the orchestrator\'s VNFs \n')
+        self.file_commands_normal.write('# Instantiate the orchestrator\'s VNFs \n')
         self.set_up_running_vnf_external()
         self.write_new_line_to_file()
 
     def add_vnf_chains(self):
-        self.file_commands.write('#Add chains to services \n')
+        self.file_commands_causal.write('#Add chains to services \n')
+        self.file_commands_normal.write('#Add chains to services \n')
         self.add_vnf_chains_external()
         self.write_new_line_to_file()
 
@@ -130,10 +153,11 @@ class DockerScriptGeneratorExternal:
                     second_dependency = self.get_dependency_connection_point_by_id(
                         service['dependencies'][first_index + 1],
                         False)
-                    first_str = 'python message_factory.py -t add_chain -h ' + orchestrator['ip'] + ' -p '
+                    first_str = '# python message_factory.py -t add_chain -h ' + orchestrator['ip'] + ' -p '
                     second_str = orchestrator['port'] + ' -s ' + first_dependency['id'] + ' -d ' + first_dependency[
                         'id']
-                    self.file_commands.write(first_str + second_str + '\n')
+                    self.file_commands_causal.write(first_str + second_str + '\n')
+                    self.file_commands_normal.write(first_str + second_str + '\n')
                     first_index += 1
                     first_dependency = second_dependency
 
@@ -171,23 +195,27 @@ class DockerScriptGeneratorExternal:
         return new_service
 
     def add_request_of_scaling(self):
-        self.file_commands.write('# Request scaling \n')
+        self.file_commands_causal.write('# Request scaling \n')
+        self.file_commands_normal.write('# Request scaling \n')
         self.add_request_of_scaling_external()
         self.write_new_line_to_file()
 
     def add_request_of_scaling_external(self):
-        for i in range(0, len(self.configuration.random_seed_list)):
-            random_seed = self.configuration.random_seed_list[i]
+        for i in range(0, self.configuration.number_of_scalings):
+            random_seed = self.configuration.random_np_seed_list[self.random_running_index + self.running_experiment]
             random_service_to_scalate = self.get_random_service(random_seed)
             first_str = 'python message_factory.py -t request_scale -h ' + \
                         random_service_to_scalate['orchestrator'][0]
             second_str = ' -p ' + random_service_to_scalate['orchestrator'][1] + ' -i ' + random_service_to_scalate[
                 'service_id']
             third_str = ' --seed ' + str(random_seed)
-            self.file_commands.write(first_str + second_str + third_str + '\n')
+            self.file_commands_causal.write(first_str + second_str + third_str + '\n')
+            self.file_commands_normal.write(first_str + second_str + third_str + '\n')
+            self.random_running_index += 1
 
     def add_request_of_updates(self):
-        self.file_commands.write('# Request updates (Commented) \n')
+        self.file_commands_causal.write('# Request updates (Commented) \n')
+        self.file_commands_normal.write('# Request updates (Commented) \n')
         self.add_request_of_updates_external()
         self.write_new_line_to_file()
 
@@ -200,7 +228,8 @@ class DockerScriptGeneratorExternal:
             second_str = ' -p ' + random_service_to_scalate['orchestrator'][1] + ' -i ' + random_service_to_scalate[
                 'service_id']
             third_str = ' --seed ' + str(random_seed)
-            self.file_commands.write(first_str + second_str + third_str + '\n')
+            self.file_commands_causal.write(first_str + second_str + third_str + '\n')
+            self.file_commands_normal.write(first_str + second_str + third_str + '\n')
 
     def get_random_service(self, seed):
         random.seed(seed)
@@ -214,7 +243,9 @@ class DockerScriptGeneratorExternal:
                     return service['dependencies'][0]
 
     def write_new_line_to_file(self):
-        self.file_commands.write('\n')
+        self.file_commands_causal.write('\n')
+        self.file_commands_normal.write('\n')
 
     def close_file(self):
-        self.file_commands.close()
+        self.file_commands_causal.close()
+        # self.file_commands_normal.close()

@@ -3,14 +3,22 @@
 # This script launches an orchestrator based on the auto-generated experiments
 # In the case of external use (cloud) this is the main file to run orchestrators
 
-experiment=$1
-orchestrator=$2
+echo -n "Please type number of experiment: "
+# shellcheck disable=SC2162
+read EXPERIMENT_NUMBER
+
+echo -n "Please type number of orchestrator: "
+# shellcheck disable=SC2162
+read ORCHESTRATOR_NUMBER
+
+#experiment=$1
+#orchestrator=$2
 
 path_1="experiments/experiment_generator/experiments/experiment_"
 path_2="/docker_files/docker_commands_"
 path_3=".sh"
 
-complete_file=$path_1$experiment$path_2$orchestrator$path_3
+complete_file=$path_1$EXPERIMENT_NUMBER$path_2$ORCHESTRATOR_NUMBER$path_3
 
 # Activate the virtual environment
 source my_env/bin/activate

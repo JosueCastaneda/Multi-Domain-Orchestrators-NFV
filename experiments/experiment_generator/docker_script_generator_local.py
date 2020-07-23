@@ -13,6 +13,7 @@ class DockerScriptGeneratorLocal:
         self.all_services = self.get_all_services()
         self.orchestrator_index = 0
         self.file_commands = None
+        self.random_running_index = 0
 
     def set_index(self, index):
         self.orchestrator_index = index

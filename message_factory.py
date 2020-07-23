@@ -81,6 +81,7 @@ def read_parameters(argv):
 
 
 async def send_message(command, message):
+    print(message)
     url = 'http://' + command.host + ':' + str(command.port) + '/' + command.message_type
     print(url)
     async with aiohttp.ClientSession() as session:

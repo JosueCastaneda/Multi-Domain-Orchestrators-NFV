@@ -18,14 +18,17 @@ def main():
     experiment_configuration = ExperimentConfiguration('experiment_constraint.json')
     exp_gen = ExperimentGenerator(experiment_configuration, local_deployment)
     list_name_experiments = exp_gen.generate_experiment()
+    experiment_index = 0
+    random_running_index = 0
     for experiment_file in list_name_experiments:
         if local_deployment:
             dock_gen = DockerScriptGeneratorLocal(experiment_file, experiment_configuration)
         else:
-            dock_gen = DockerScriptGeneratorExternal(experiment_file, experiment_configuration)
+            dock_gen = DockerScriptGeneratorExternal(experiment_file, experiment_configuration, random_running_index)
         for index in range(len(exp_gen.list_orchestrators)):
             dock_gen.set_index(index)
-            dock_gen.generate_orchestrator_commands()
+            random_running_index += dock_gen.generate_orchestrator_commands(experiment_index)
+            experiment_index += 1
         dock_gen.generate_client_commands()
 
 

@@ -28,7 +28,7 @@ def is_orchestrator_included_for_notification(id_orch, excluding_list):
 
 class Orchestrator:
 
-    def __init__(self, experiment_index, orchestrator_index, server_host, server_port, causal_delivery=True):
+    def __init__(self, experiment_index, orchestrator_index, server_host, server_port, random_seed, causal_delivery=True):
         self.experiment_name = 'experiment_' + experiment_index
         self.experiment_index = experiment_index
         self.name = 'orch_' + orchestrator_index
@@ -51,7 +51,7 @@ class Orchestrator:
         self.vector_clock = VectorClock(self.id)
         self.causal_delivery = False
         self.causal_delivery = causal_delivery
-        self.random_seed = 1000
+        self.random_seed = random_seed
         self.pending_operations_repetitions = 0
         self.time_elapsed_in_reconfiguration = 0.0
         random.seed(self.random_seed)

@@ -18,15 +18,15 @@ def generate_random_seeds(number, number_of_services):
     file_np = open(directory_path + '/np_seed_list.txt', 'r')
     counter = 0
     for line in file:
-        if counter >= number_of_services:
-            counter = 0
-            break
+        # if counter >= number_of_services:
+        #     counter = 0
+        #     break
         random_seed_list.append(int(line))
         counter += 1
 
     for line in file_np:
-        if counter >= number_of_services:
-            break
+        # if counter >= number_of_services:
+        #     break
         random_np_seed_list.append(int(line))
         counter += 1
     return random_seed_list, random_np_seed_list

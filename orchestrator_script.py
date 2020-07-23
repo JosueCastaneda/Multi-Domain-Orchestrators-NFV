@@ -9,12 +9,13 @@ from communication_entities.orchestrator_handler import OrchestratorHandler
 from communication_entities.orchestrator_routes import init_routes
 
 
-async def init_app(experiment_index, orchestrator_index, server_host, server_port) -> web.Application:
+async def init_app(experiment_index, orchestrator_index, server_host, server_port, random_seed) -> web.Application:
     app = web.Application()
     orchestrator = Orchestrator(orchestrator_index=orchestrator_index,
                                 experiment_index=experiment_index,
                                 server_host=server_host,
                                 server_port=server_port,
+                                random_seed=random_seed,
                                 causal_delivery=True)
     handler = OrchestratorHandler(orchestrator)
     init_routes(app, handler)
@@ -37,6 +38,7 @@ def main(argv) -> None:
     experiment_index = '0'
     server_host = ''
     server_port = 0
+    random_seed = 1000
     debug = False
 
     if debug:
@@ -45,7 +47,7 @@ def main(argv) -> None:
         server_host = '127.0.0.1'
         server_port = 5002
     try:
-        opts, args = getopt.getopt(argv, "i:e:h:p:", ["service_id=", "experiment_id=", "host=", "port="])
+        opts, args = getopt.getopt(argv, "i:e:h:p:r:", ["service_id=", "experiment_id=", "host=", "port=", "random_seed="])
     except getopt.GetoptError:
         sys.exit(2)
     for opt, arg in opts:
@@ -57,6 +59,8 @@ def main(argv) -> None:
             server_host = arg
         elif opt in ("-p", "--port"):
             server_port = arg
+        elif opt in ("-r", "--random_seed"):
+            random_seed = arg
 
     if server_host == '' and server_port == 0:
         server_host, server_port = get_server_and_port(experiment_index, orchestrator_index)
@@ -68,7 +72,8 @@ def main(argv) -> None:
     app = loop.run_until_complete(init_app(experiment_index,
                                            orchestrator_index,
                                            server_host,
-                                           server_port))
+                                           server_port,
+                                           random_seed))
     web.run_app(app, host=server_host, port=server_port)
 
 
