@@ -77,6 +77,7 @@ class GenericService:
         for data in data_list:
             log.info('Sending grant to ' + data['vnf_component_to_scale_id'][0:8])
             scaling_message = GrantLCMMessage(host=data['host_dependency'], port=data['port_dependency'], data=data)
+            self.orchestrator.increment_sent_messages()
             asynchronous_tasks.append(send_message(scaling_message))
         await asyncio.gather(*asynchronous_tasks)
 

@@ -20,9 +20,10 @@ def init_routes(app: web.Application, handler: OrchestratorHandler) -> None:
     add_route('POST', '/request_scaling_of_service', handler.request_scaling_of_service,
               name='request_scaling_of_service')
     add_route('POST', '/scale_of_service_has_ended', handler.scale_of_service_has_ended, name='scale_of_service_has_ended')
-    add_route('POST', '/get_inconsistencies', handler.get_inconsistencies, name='get_inconsistencies')
-    add_route('POST', '/get_time_elapsed', handler.get_time_elapsed, name='get_time_elapsed')
-    add_route('POST', '/get_pending_operations', handler.get_pending_operations, name='get_pending_operations')
+    add_route('GET', '/get_inconsistencies', handler.get_inconsistencies, name='get_inconsistencies')
+    add_route('GET', '/get_time_elapsed', handler.get_time_elapsed, name='get_time_elapsed')
+    add_route('GET', '/get_pending_operations', handler.get_pending_operations, name='get_pending_operations')
+    add_route('GET', '/get_messages_sent', handler.get_messages_sent, name='get_messages_sent')
 
 
 

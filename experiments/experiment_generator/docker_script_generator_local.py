@@ -75,10 +75,13 @@ class DockerScriptGeneratorLocal:
         self.file_commands.write(header + '\n')
 
     def set_up_run_orchestrators_local(self):
+        port = 5001
         for index in range(len(self.data['orchestrators'])):
             first_string = 'docker exec -it mn.orch_' + str(index) + ' python orchestrator_script.py -i ' + str(index)
-            second_string = ' -e ' + str(self.experiment_index) + ' &'
-            self.file_commands.write(first_string + second_string + '\n')
+            second_string = ' -e ' + str(self.experiment_index)
+            third_string = ' -h 127.0.0.1' + ' -p ' + str(port)  + ' &'
+            self.file_commands.write(first_string + second_string + third_string + '\n')
+            port += 1
 
     def set_up_run_orchestrators(self):
         self.file_commands.write('# Launch orchestrator' + '\n')

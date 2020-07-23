@@ -18,7 +18,6 @@ class OrchestratorHandler:
         self._loop = asyncio.get_event_loop()
 
     async def index(self, request: web.Request) -> Response:
-        data = self.orchestrator.name
         return web.json_response(self.orchestrator.entry_as_dictionary())
 
     async def get_services(self, request: web.Request) -> Response:
@@ -109,7 +108,6 @@ class OrchestratorHandler:
             answer = {'status': 'Good', 'result': result}
             return web.json_response(answer)
         except Exception as e:
-            # self.print_generic_exception(e)
             response = {'status': 'failed', 'message': str(e)}
             return web.json_response(response)
 
@@ -135,16 +133,17 @@ class OrchestratorHandler:
         try:
             data = await request.post()
             result = await self.orchestrator.get_vnfs()
-            return self.print_good_result(result)
+            answer = {'status': 'Good', 'result': result}
+            return web.json_response(answer)
         except Exception as e:
             response = {'status': 'failed', 'message': str(e)}
             return web.json_response(response)
 
     async def get_pending_operations(self, request: web.Request) -> Response:
         try:
-            data = await request.post()
             result = await self.orchestrator.get_pending_operations()
-            return self.print_good_result(result)
+            answer = {'status': 'Good', 'result': result}
+            return web.json_response(answer)
         except Exception as e:
             response = {'status': 'failed', 'message': str(e)}
             return web.json_response(response)
@@ -192,8 +191,16 @@ class OrchestratorHandler:
 
     async def get_inconsistencies(self, request: web.Request) -> Response:
         try:
-            data = await request.post()
             result = await self.orchestrator.get_inconsistencies()
+            answer = {'status': 'Good', 'result': result}
+            return web.json_response(answer)
+        except Exception as e:
+            response = {'status': 'failed', 'message': str(e)}
+            return web.json_response(response)
+
+    async def get_messages_sent(self, request: web.Request) -> Response:
+        try:
+            result = await self.orchestrator.get_messages_sent()
             answer = {'status': 'Good', 'result': result}
             return web.json_response(answer)
         except Exception as e:
@@ -202,7 +209,6 @@ class OrchestratorHandler:
 
     async def get_time_elapsed(self, request: web.Request) -> Response:
         try:
-            data = await request.post()
             result = await self.orchestrator.get_time_elapsed_reconfiguration()
             answer = {'status': 'Good', 'result': result}
             return web.json_response(answer)

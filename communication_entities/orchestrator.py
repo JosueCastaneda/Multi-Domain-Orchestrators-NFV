@@ -83,6 +83,9 @@ class Orchestrator:
     async def get_inconsistencies(self):
         return self.inconsistencies
 
+    async def get_messages_sent(self):
+        return self.messages_sent
+
     async def get_time_elapsed_reconfiguration(self):
         return self.time_elapsed_in_reconfiguration
 
@@ -176,7 +179,11 @@ class Orchestrator:
                 new_message = NotificationLCMOperation(host=orchestrator['ip'],
                                                        port=str(orchestrator['port']),
                                                        data=data)
+                self.increment_sent_messages()
                 await asyncio.create_task(send_message(new_message))
+
+    def increment_sent_messages(self):
+        self.messages_sent += 1
 
     async def do_pending_lcm_notifications_notifications(self):
         log.info('Do pending LCM NOTIFICATION')

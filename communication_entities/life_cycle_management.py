@@ -41,8 +41,7 @@ class LifeCycleManagement:
 
     def add_pending_operations_to_service(self, vnf_dict, service_id, original_service_id):
         for pending_operation in self.pending_operations:
-            if pending_operation['id'] == service_id and pending_operation[
-                'original_service_id'] == original_service_id:
+            if pending_operation['id'] == service_id and pending_operation['original_service_id'] == original_service_id:
                 new_dependency_as_dictionary = dict()
                 new_dependency_as_dictionary['id'] = vnf_dict['id']
                 new_dependency_as_dictionary['type'] = vnf_dict['type']
@@ -62,6 +61,7 @@ class LifeCycleManagement:
                 data['vector_clock'] = self.orchestrator.vector_clock.to_json()
                 data['service_sender_id'] = service_id
                 message = ScaleVNFMessage(vnf['server'], vnf['port'], data)
+                self.orchestrator.increment_sent_messages()
                 await send_message(message)
 
     async def scale_service(self, vnf_component_id, external_orchestrator_id, original_service_id):
@@ -78,6 +78,7 @@ class LifeCycleManagement:
         data['sender_vector_clock'] = self.orchestrator.vector_clock.to_json()
         message = GrantLCMMessage(host=external_orchestrator_info['ip'], port=external_orchestrator_info['port'],
                                   data=data)
+        self.orchestrator.increment_sent_messages()
         await send_message(message)
 
     async def scale_vnfs(self, vnfs_to_scale, service_id, original_service_id):
@@ -331,7 +332,8 @@ class LifeCycleManagement:
                     for op in empty_pending_operations:
                         self.pending_operations.remove(op)
             else:
-                log.info('Scaling of operation ' + vnf_component_id[0:8] + ' from ' + original_service_id[0:8] + ' has finished')
+                log.info('Scaling of operation ' + vnf_component_id[0:8] + ' from ' + original_service_id[
+                                                                                      0:8] + ' has finished')
         if not was_called_by_pending_operations:
             log.info('Scaling - Do Pending Operations - ')
             if self.are_there_pending_operations():
@@ -364,7 +366,9 @@ class LifeCycleManagement:
         acknowledge_message = ScaleConfirmationMessage(host=service['ip'], port=int(service['port']), data=data)
         await send_message(acknowledge_message)
         log_str = 'End external scaling of service:' + service['id'][0:8] + ' requested from service: ' + service[
-            'original_service_id'][0:8] + ' Inconsistencies: ' + str(self.orchestrator.inconsistencies)
+                                                                                                              'original_service_id'][
+                                                                                                          0:8] + ' Inconsistencies: ' + str(
+            self.orchestrator.inconsistencies)
         log.info(log_str)
 
     async def end_scaling(self, service):
@@ -387,7 +391,8 @@ class LifeCycleManagement:
                     if len(service['pending_operations']) == 0:
                         self.are_VNFs_scaled = False
                         elapsed = datetime.datetime.now() - service['start_time']
-                        str_log_1 = 'End of Scaling of service ' + service['original_service_id'][0:8] + ' time elapsed: '
+                        str_log_1 = 'End of Scaling of service ' + service['original_service_id'][
+                                                                   0:8] + ' time elapsed: '
                         str_log_2 = str(elapsed.total_seconds()) + ' seconds '
                         str_log_3 = ' with ' + str(self.orchestrator.inconsistencies) + ' inconsistencies'
                         log.info(str_log_1 + str_log_2 + str_log_3)
