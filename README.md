@@ -12,6 +12,13 @@ This files are used to generate experiments.
 1) Run create_experiments.sh (local, external)
 2) Run run.sh by specifying experiment and orchestrator
 
+## Orchestrators
+0) Claire 
+1) Duracell
+2) Jill
+3) Ada
+4) Rebecca
+
 ## Old way to deploy experiment
 To deploy experiment, the order of execution is the following
 

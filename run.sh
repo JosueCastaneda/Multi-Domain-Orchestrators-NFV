@@ -24,7 +24,7 @@ complete_file=$path_1$EXPERIMENT_NUMBER$path_2$ORCHESTRATOR_NUMBER$path_3
 source my_env/bin/activate
 
 # Change the permissions of the files
-./setup.sh $experiment
+./setup.sh $EXPERIMENT_NUMBER
 
 # Run all the python files
 ./$complete_file
