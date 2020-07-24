@@ -51,7 +51,21 @@ class DockerScriptGeneratorExternal:
         self.add_vnf_chains()
         self.add_request_of_updates()
         self.add_request_of_scaling()
+        self.add_results()
         self.close_file()
+
+    def add_results(self):
+        self.file_commands_causal.write('# Add results \n')
+        self.file_commands_normal.write('# Add results \n')
+        self.add_results_external()
+        self.write_new_line_to_file()
+
+    def add_results_external(self):
+        for orchestrator in self.data['orchestrators']:
+            first_str = 'python3 message_factory.py -h ' + str(orchestrator['ip'])
+            second_str = ' -p ' + str(orchestrator['port']) + ' -r external'
+            self.file_commands_causal.write(first_str + second_str + '\n')
+            self.file_commands_normal.write(first_str + second_str + '\n')
 
     def get_all_vnf_dependencies(self):
         list_dependencies = list()
@@ -204,7 +218,7 @@ class DockerScriptGeneratorExternal:
         for i in range(0, self.configuration.number_of_scalings):
             random_seed = self.configuration.random_np_seed_list[self.random_running_index + self.running_experiment]
             random_service_to_scalate = self.get_random_service(random_seed)
-            first_str = 'python message_factory.py -t request_scale -h ' + \
+            first_str = 'python message_factory.py -t request_scaling_of_service -h ' + \
                         random_service_to_scalate['orchestrator'][0]
             second_str = ' -p ' + random_service_to_scalate['orchestrator'][1] + ' -i ' + random_service_to_scalate[
                 'service_id']
