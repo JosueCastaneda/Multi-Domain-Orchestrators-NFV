@@ -31,7 +31,7 @@ class ExperimentGenerator():
         # TODO: This is only for local deployments
         self.vnf_port = 5500
         self.local_deployment = local_deployment
-        self.port_vnfs = 3000
+        self.port_vnfs = 3001
 
     def add_vnfs_to_orchestrators(self):
         for orchestrator in self.list_orchestrators:
@@ -43,6 +43,7 @@ class ExperimentGenerator():
                     new_vnf = self.generate_random_vnf(orchestrator)
                 orchestrator.add_vnf(new_vnf)
                 remaining_vnfs_per_orchestrator -= 1
+            self.port_vnfs = 3001
 
     def generate_random_vnf(self, orchestrator):
         random_index = generate_random_integer(0, len(self.vnf_data) - 1)
