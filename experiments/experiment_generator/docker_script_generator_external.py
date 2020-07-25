@@ -48,8 +48,8 @@ class DockerScriptGeneratorExternal:
     def generate_client_commands(self):
         self.create_client_file()
         self.write_first_line_to_file()
-        self.add_vnf_chains()
-        self.add_request_of_updates()
+        # self.add_vnf_chains()
+        # self.add_request_of_updates()
         self.add_request_of_scaling()
         self.add_results()
         self.close_file()
@@ -214,17 +214,29 @@ class DockerScriptGeneratorExternal:
         self.add_request_of_scaling_external()
         self.write_new_line_to_file()
 
+    def is_valid_random_service(self, service, service_list, orchestrator_list):
+        if service in service_list:
+            return False
+        if service['orchestrator'][0] in orchestrator_list:
+            return False
+        return True
+
     def add_request_of_scaling_external(self):
+        service_list = list()
+        orchestrator_list = list()
         for i in range(0, self.configuration.number_of_scalings):
             random_seed = self.configuration.random_np_seed_list[self.random_running_index + self.running_experiment]
             random_service_to_scalate = self.get_random_service(random_seed)
-            first_str = 'python message_factory.py -t request_scaling_of_service -h ' + \
-                        random_service_to_scalate['orchestrator'][0]
-            second_str = ' -p ' + random_service_to_scalate['orchestrator'][1] + ' -i ' + random_service_to_scalate[
-                'service_id']
-            third_str = ' --seed ' + str(random_seed)
-            self.file_commands_causal.write(first_str + second_str + third_str + '\n')
-            self.file_commands_normal.write(first_str + second_str + third_str + '\n')
+            if self.is_valid_random_service(random_service_to_scalate, service_list, orchestrator_list):
+                first_str = 'python message_factory.py -t request_scaling_of_service -h ' + \
+                            random_service_to_scalate['orchestrator'][0]
+                second_str = ' -p ' + random_service_to_scalate['orchestrator'][1] + ' -i ' + random_service_to_scalate[
+                    'service_id']
+                third_str = ' --seed ' + str(random_seed)
+                self.file_commands_causal.write(first_str + second_str + third_str + '\n')
+                self.file_commands_normal.write(first_str + second_str + third_str + '\n')
+                service_list.append(random_service_to_scalate)
+                orchestrator_list.append(random_service_to_scalate['orchestrator'][0])
             self.random_running_index += 1
 
     def add_request_of_updates(self):
