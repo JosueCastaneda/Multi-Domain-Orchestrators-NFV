@@ -363,6 +363,8 @@ class LifeCycleManagement:
         data['original_orchestrator_id'] = service['orchestrator_id']
         data['vector_clock'] = self.orchestrator.vector_clock.to_json()
         data['service_sender_id'] = service['id']
+        if service['ip'] == '0.0.0.0':
+            service['ip'] = self.generate_correct_ip(int(service['port']))
         acknowledge_message = ScaleConfirmationMessage(host=service['ip'], port=int(service['port']), data=data)
         await send_message(acknowledge_message)
         log_str = 'End external scaling of service:' + service['id'][0:8] + ' requested from service: ' + service[
@@ -370,6 +372,19 @@ class LifeCycleManagement:
                                                                                                           0:8] + ' Inconsistencies: ' + str(
             self.orchestrator.inconsistencies)
         log.info(log_str)
+
+    # TODO: THIS SHOULD LOAD THE FILE INSTEAD THE OTHER THINGS
+    def generate_correct_ip(self, port):
+        if port == 5001:
+            return '40.127.108.223'
+        elif port == 5002:
+            return '52.229.37.237'
+        elif port == 5003:
+            return '52.141.61.172'
+        elif port == 5004:
+            return '20.185.45.222'
+        elif port == 5005:
+            return '52.151.70.54'
 
     async def end_scaling(self, service):
         log.info('End Scaling')

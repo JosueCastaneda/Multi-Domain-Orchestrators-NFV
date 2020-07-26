@@ -4,8 +4,8 @@
 python message_factory.py -t request_scaling_of_service -h 20.185.45.222 -p 5004 -i 23d13886-ce65-11ea-9f26-04ea56f99520 --seed 376392
 python message_factory.py -t request_scaling_of_service -h 52.141.61.172 -p 5003 -i 23d1387e-ce65-11ea-9f26-04ea56f99520 --seed 32749
 python message_factory.py -t request_scaling_of_service -h 52.229.37.237 -p 5002 -i 23d13889-ce65-11ea-9f26-04ea56f99520 --seed 422881
-python message_factory.py -t request_scaling_of_service -h 40.127.108.223 -p 5001 -i 23d1388e-ce65-11ea-9f26-04ea56f99520 --seed 413977
-python message_factory.py -t request_scaling_of_service -h 52.151.70.54 -p 5005 -i 23d13882-ce65-11ea-9f26-04ea56f99520 --seed 528013
+#python message_factory.py -t request_scaling_of_service -h 40.127.108.223 -p 5001 -i 23d1388e-ce65-11ea-9f26-04ea56f99520 --seed 413977
+#python message_factory.py -t request_scaling_of_service -h 52.151.70.54 -p 5005 -i 23d13882-ce65-11ea-9f26-04ea56f99520 --seed 528013
 
 # Add results 
 python3 message_factory.py -h 40.127.108.223 -p 5001 -r external
