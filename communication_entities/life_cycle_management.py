@@ -259,10 +259,7 @@ class LifeCycleManagement:
 
         if not self.orchestrator.causal_delivery:
             if difference_in_vectors > 1:
-                str_log = 'A new inconsistency because Sender VT' + sender_vector_clock.as_string() + ' > '
-                str_log_2 = str_log + self.orchestrator.vector_clock.as_string()
-                log.info(str_log_2)
-                self.orchestrator.inconsistencies += 1
+                self.orchestrator.add_inconsistency(sender_vector_clock)
             await self.check_if_clocks_are_valid_and_do_operation(vnf_component_id=vnf_component_id,
                                                                   original_service_id=original_service_id,
                                                                   orchestrator_sender_id=orchestrator_sender_id,

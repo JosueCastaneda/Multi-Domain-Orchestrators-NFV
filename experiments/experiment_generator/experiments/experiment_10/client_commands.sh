@@ -1,4 +1,4 @@
-#!/bin/sh
+  #!/bin/sh
 
 # Request scaling 
 python message_factory.py -t request_scaling_of_service -h 52.229.37.237 -p 5002 -i 23d13845-ce65-11ea-9f26-04ea56f99520 --seed 583195

@@ -2,16 +2,17 @@ import asyncio
 import getopt
 import json
 import sys
+
 from aiohttp import web
 
-from communication_entities.orchestrator import Orchestrator
 from communication_entities.orchestrator_handler import OrchestratorHandler
+from communication_entities.orchestrator_normal import OrchestratorNormal
 from communication_entities.orchestrator_routes import init_routes
 
 
 async def init_app(experiment_index, orchestrator_index, server_host, server_port, random_seed) -> web.Application:
     app = web.Application()
-    orchestrator = Orchestrator(orchestrator_index=orchestrator_index,
+    orchestrator = OrchestratorNormal(orchestrator_index=orchestrator_index,
                                 experiment_index=experiment_index,
                                 server_host=server_host,
                                 server_port=server_port,

@@ -26,7 +26,7 @@ def is_orchestrator_included_for_notification(id_orch, excluding_list):
     return True
 
 
-class Orchestrator:
+class OrchestratorNormal:
 
     def __init__(self, experiment_index, orchestrator_index, server_host, server_port, random_seed, causal_delivery=True):
         self.experiment_name = 'experiment_' + experiment_index
@@ -138,6 +138,12 @@ class Orchestrator:
         await asyncio.sleep(wait_period)
         await self.notification_of_lcm(vector_clock, orchestrator_sender_id)
 
+    def add_inconsistency(self, vector_clock):
+        str_log = 'A new inconsistency because Sender VT' + vector_clock.as_string() + ' > '
+        str_log_2 = str_log + self.vector_clock.as_string()
+        log.info(str_log_2)
+        self.inconsistencies += 1
+
     async def notification_of_lcm(self, vector_clock_string, orchestrator_sender_id):
         vector_clock = VectorClock()
         vector_clock.create_from_list(vector_clock_string)
@@ -148,21 +154,13 @@ class Orchestrator:
         else:
             difference_in_vectors = self.vector_clock.compare_clocks(vector_clock, orchestrator_sender_id,
                                                                      self.causal_delivery)
-        if difference_in_vectors <= 1:
-            if not self.vector_clock.is_equal(vector_clock):
-                self.vector_clock.update_clock(vector_clock, orchestrator_sender_id, self.causal_delivery)
-            await self.do_pending_lcm_notifications_notifications()
-        else:
-            if self.vector_clock.are_different(vector_clock.clock_list):
-                log.info('Saving notification as a pending operation')
-                new_pending_operation = PendingLCMScalingOperation(vnf_component_to_scale_id='',
-                                                                   operation='notification',
-                                                                   original_service_id='',
-                                                                   orchestrator_sender_id=orchestrator_sender_id,
-                                                                   original_orchestrator_id='',
-                                                                   sender_vector_clock=vector_clock,
-                                                                   service_sender_id='')
-                self.add_pending_operation(new_pending_operation)
+        if difference_in_vectors > 1:
+            self.add_inconsistency(vector_clock)
+
+        if not self.vector_clock.is_equal(vector_clock):
+            self.vector_clock.update_clock(vector_clock, orchestrator_sender_id, self.causal_delivery)
+        await self.do_pending_lcm_notifications_notifications()
+
         log.info('Orch operations in ' + str(
             len(self.pending_lcm_operations)) + ' LCM operations: ' + str(
             len(self.life_cycle_manager.pending_operations)) + ' My ' + self.vector_clock.as_string())
@@ -192,8 +190,6 @@ class Orchestrator:
             change_took_place = False
             repetitions_message = 0
             total_pending_operations = len(self.pending_lcm_operations)
-            # log.info('Total pending operations: ' + str(total_pending_operations) + ' Pending LCM operations' + str(
-            #     len(self.pending_lcm_operations)))
             while self.pending_lcm_operations and repetitions_message < total_pending_operations and self.pending_operations_repetitions < total_pending_operations:
                 repetitions_message += 1
                 pending_operation = self.pending_lcm_operations.pop(0)
@@ -201,11 +197,6 @@ class Orchestrator:
                     new_vector_clock = VectorClock()
                     new_vector_clock.create_from_list(pending_operation.sender_vector_clock)
                     pending_operation.sender_vector_clock = new_vector_clock
-                # log.info('Pending operation' + str(pending_operation) + ' Repetition: ' + str(
-                #     self.pending_operations_repetitions) + ' Total pending: ' + str(total_pending_operations))
-                # log.info('Orchestrator sender ID: ' + str(
-                #     pending_operation.orchestrator_sender_id) + ' VT: ' + pending_operation.sender_vector_clock.as_string())
-                # log.info('My vector clock: ' + self.vector_clock.as_string())
                 difference_in_clocks = self.vector_clock.compare_clocks(pending_operation.sender_vector_clock,
                                                                         pending_operation.orchestrator_sender_id,
                                                                         self.causal_delivery)
@@ -216,29 +207,31 @@ class Orchestrator:
                         pending_operation.orchestrator_sender_id = real_orchestrator_sender_id
 
                 log.info('Difference in clocks: ' + str(difference_in_clocks))
-                if difference_in_clocks <= 1:
-                    if pending_operation.operation == 'notification' and pending_operation.is_not_done:
-                        log.info('Notification and pending operation is not done')
-                        self.vector_clock.update_clock(pending_operation.sender_vector_clock,
-                                                       pending_operation.orchestrator_sender_id)
-                        pending_operation.is_not_done = False
-                        change_took_place = True
 
-                    elif pending_operation.operation == 'scale' or pending_operation.operation == 'scaling' and pending_operation.is_not_done:
-                        log.info('Scaling operation and pending operation is not done')
-                        pending_operation.is_not_done = False
-                        change_took_place = True
-                        await self.life_cycle_manager.scale_confirmation(pending_operation.vnf_component_to_scale_id,
-                                                                         pending_operation.original_service_id,
-                                                                         pending_operation.orchestrator_sender_id,
-                                                                         pending_operation.original_orchestrator_id,
-                                                                         pending_operation.sender_vector_clock,
-                                                                         pending_operation.service_sender_id)
-                    else:
-                        log.info('Something went horribly wrong')
+                # INCONSISTENCY
+                if difference_in_clocks > 1:
+                    self.add_inconsistency(pending_operation.sender_vector_clock)
 
+                if pending_operation.operation == 'notification' and pending_operation.is_not_done:
+                    log.info('Notification and pending operation is not done')
+                    self.vector_clock.update_clock(pending_operation.sender_vector_clock,
+                                                   pending_operation.orchestrator_sender_id)
+                    pending_operation.is_not_done = False
+                    change_took_place = True
+
+                elif pending_operation.operation == 'scale' or pending_operation.operation == 'scaling' and pending_operation.is_not_done:
+                    log.info('Scaling operation and pending operation is not done')
+                    pending_operation.is_not_done = False
+                    change_took_place = True
+                    await self.life_cycle_manager.scale_confirmation(pending_operation.vnf_component_to_scale_id,
+                                                                     pending_operation.original_service_id,
+                                                                     pending_operation.orchestrator_sender_id,
+                                                                     pending_operation.original_orchestrator_id,
+                                                                     pending_operation.sender_vector_clock,
+                                                                     pending_operation.service_sender_id)
                 else:
-                    self.add_pending_operation(pending_operation)
+                    log.info('Something went horribly wrong')
+
             at_least_one_clock_changed = change_took_place
 
     async def wait_before_delivery_grant(self, vnf_component_to_scale_id, operation, original_service,
@@ -254,11 +247,7 @@ class Orchestrator:
         log.info('Can you please scale: ' + str(vnf_component_to_scale_id)[0:8] + ' originally from ' + str(
             original_service['original_service_id'][0:8]))
         log.info('Received ' + sender_vector_clock.as_string() + ' My clock ' + self.vector_clock.as_string())
-        if self.causal_delivery:
-            await self.grant_lcm_operation_causal(vnf_component_to_scale_id, operation, original_service,
-                                                  sender_vector_clock)
-        else:
-            await self.grant_lcm_operation_normal(vnf_component_to_scale_id, operation, original_service,
+        await self.grant_lcm_operation_normal(vnf_component_to_scale_id, operation, original_service,
                                                   sender_vector_clock)
 
     def compute_difference_in_vectors(self, original_service, sender_vector_clock) -> int:
@@ -275,30 +264,11 @@ class Orchestrator:
         await asyncio.gather(self.scale_vnfc_operation(vnf_component_to_scale_id, original_service),
                              self.do_pending_operations())
 
-    async def grant_lcm_operation_causal(self, vnf_component_to_scale_id, operation, original_service,
-                                         sender_vector_clock=None):
-        difference_in_vectors = self.compute_difference_in_vectors(original_service, sender_vector_clock)
-        if difference_in_vectors <= 1 or self.vector_clock.is_equal(sender_vector_clock):
-            await self.do_lcm_operation(original_service, sender_vector_clock, operation, vnf_component_to_scale_id)
-        else:
-            new_operation = PendingLCMScalingOperation(vnf_component_to_scale_id,
-                                                       operation,
-                                                       original_service['original_service_id'],
-                                                       self.id,
-                                                       original_service['orchestrator_id'],
-                                                       sender_vector_clock,
-                                                       original_service['id'],
-                                                       original_service)
-            self.add_pending_operation(new_operation)
-
     async def grant_lcm_operation_normal(self, vnf_component_to_scale_id, operation, original_service,
                                          sender_vector_clock=None):
         difference_in_vectors = self.compute_difference_in_vectors(original_service, sender_vector_clock)
         if difference_in_vectors > 1:
-            str_log = 'A new inconsistency because Sender VT' + sender_vector_clock.as_string() + ' > '
-            str_log_2 = str_log + self.vector_clock.as_string()
-            log.info(str_log_2)
-            self.inconsistencies += 1
+            self.add_inconsistency(sender_vector_clock)
         await self.do_lcm_operation(original_service, sender_vector_clock, operation, vnf_component_to_scale_id)
 
     def add_pending_operation(self, new_operation) -> None:
@@ -331,19 +301,15 @@ class Orchestrator:
                 log.info('My Clock: ' + str(self.vector_clock.as_string()) + ' Sender Vector clock: ' + str(
                     operation.sender_vector_clock.as_string()))
                 # log.info('Clock difference: ' + str(clock_difference))
-                if operation.is_not_done and self.vector_clock.compare_stored_clock(operation.sender_vector_clock,
-                                                                                    self.causal_delivery):
+                if operation.is_not_done:
                     if operation.operation != 'notification':
                         operation.is_not_done = False
                         at_least_one_clock_changed = True
                         log.info('Doing pending operation ' + str(
                             operation.vnf_component_to_scale_id) + ' originally from: ' + str(
                             operation.original_service_id))
-                        await self.grant_lcm_operation_causal(operation.vnf_component_to_scale_id, 'scale',
+                        await self.grant_lcm_operation_normal(operation.vnf_component_to_scale_id, 'scale',
                                                               operation.original_service, operation.sender_vector_clock)
-                else:
-                    log.info('Adding operation to LCM Operations')
-                    self.add_pending_operation(operation)
             clock_was_updated = at_least_one_clock_changed
         self.pending_operations_repetitions = 0
 
