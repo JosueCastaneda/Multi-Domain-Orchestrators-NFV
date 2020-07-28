@@ -1,9 +1,11 @@
 import asyncio
 import getopt
-import sys
 import json
+import sys
 
 import aiohttp
+
+from utilities.logger import log
 
 sys.path.append('../')
 
@@ -84,10 +86,27 @@ async def send_message(command, message):
     print(message)
     url = 'http://' + command.host + ':' + str(command.port) + '/' + command.message_type
     print(url)
-    async with aiohttp.ClientSession() as session:
-        async with session.post(url, data=message.data) as resp:
-            print(resp.status)
-            print(await resp.text())
+    try:
+        timeout = aiohttp.ClientTimeout(total=60)
+        async with aiohttp.ClientSession(timeout=timeout) as session:
+            async with session.post(url, data=message.data) as resp:
+                print(resp.status)
+                print(await resp.text())
+        await get_results_external('40.127.108.223', 5001)
+        await get_results_external('52.229.37.237', 5002)
+        await get_results_external('52.141.61.172', 5003)
+        await get_results_external('20.185.45.222', 5004)
+        await get_results_external('52.151.70.54', 5005)
+    except asyncio.TimeoutError as e:
+        log.error('Scaling timeout, requesting results: ')
+        # await get_results_external(command.host, command.port)
+        await get_results_external('40.127.108.223', 5001)
+        await get_results_external('52.229.37.237', 5002)
+        await get_results_external('52.141.61.172', 5003)
+        await get_results_external('20.185.45.222', 5004)
+        await get_results_external('52.151.70.54', 5005)
+        log.error(e)
+
 
 async def send_message_local(port):
     url = 'http://0.0.0.0:' + str(port) + '/'

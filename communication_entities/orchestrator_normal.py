@@ -92,6 +92,7 @@ class OrchestratorNormal:
     async def request_service_scale(self, service_id) -> json:
         log.info('Please scale service: ' + str(service_id))
         self.time_elapsed_in_reconfiguration = 0.0
+        self.inconsistencies = 0
         self.life_cycle_manager.are_VNFs_scaled = False
         self.vector_clock.increment_clock(self.id)
         self.pending_operations_repetitions = 0
