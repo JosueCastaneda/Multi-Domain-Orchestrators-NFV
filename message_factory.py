@@ -12,7 +12,6 @@ sys.path.append('../')
 from entities.message_generator import MessageGenerator
 from utilities.command_package import CommandPackage
 
-
 def generate_messages(command):
     m = MessageGenerator(command, command.experiment)
     return m.generate_message()
@@ -83,11 +82,20 @@ def read_parameters(argv):
 
 
 async def get_all_results():
-    await get_results_external('40.127.108.223', 5001)
-    await get_results_external('52.229.37.237', 5002)
-    await get_results_external('52.141.61.172', 5003)
-    await get_results_external('20.185.45.222', 5004)
-    await get_results_external('52.151.70.54', 5005)
+    first = await get_results_external('40.127.108.223', 5001)
+    second = await get_results_external('52.229.37.237', 5002)
+    third = await get_results_external('52.141.61.172', 5003)
+    fourth = await get_results_external('20.185.45.222', 5004)
+    fifth = await get_results_external('52.151.70.54', 5005)
+    total_inconsistencies = first[0] + second[0] + third[0] + fourth[0] + fifth[0]
+    messages_sent = first[1] + second[1] + third[1] + fourth[1] + fifth[1]
+    elapsed_time = first[2] + second[2] + third[2] + fourth[2] + fifth[2]
+
+    str_result_1 = 'Inconsistencies: ' + str(total_inconsistencies)
+    str_result_2 = ' messages sent: ' + str(messages_sent)
+    str_result_3 = ' elapsed time: ' + str(elapsed_time) + ' seconds'
+    print(str_result_1 + str_result_2 + str_result_3)
+
 
 async def send_message(command, message):
     print(message)
@@ -186,6 +194,7 @@ async def get_results_external(orchestrator_ip='0.0.0.0', orchestrator_port=5001
     str_result_2 = ' messages sent: ' + str(messages_sent)
     str_result_3 = ' elapsed time: ' + str(elapsed_time) + ' seconds'
     print(str_result_1 + str_result_2 + str_result_3)
+    return [total_inconsistencies, messages_sent, elapsed_time]
 
 async def main(argv):
     command = read_parameters(argv)
