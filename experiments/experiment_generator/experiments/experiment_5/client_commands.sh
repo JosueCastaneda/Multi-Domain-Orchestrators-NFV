@@ -2,8 +2,11 @@
 
 # Request scaling 
 python message_factory.py -t request_scaling_of_service -h 52.141.61.172 -p 5003 -i 23d136d9-ce65-11ea-9f26-04ea56f99520 --seed 248587
+python3 message_factory.py -r external
 python message_factory.py -t request_scaling_of_service -h 20.185.45.222 -p 5004 -i 23d136d7-ce65-11ea-9f26-04ea56f99520 --seed 710396
+python3 message_factory.py -r external
 python message_factory.py -t request_scaling_of_service -h 52.151.70.54 -p 5005 -i 23d136e3-ce65-11ea-9f26-04ea56f99520 --seed 136457
+python3 message_factory.py -r external
 
 # Add results 
 #python3 message_factory.py -h 40.127.108.223 -p 5001 -r external
