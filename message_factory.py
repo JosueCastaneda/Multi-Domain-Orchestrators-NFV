@@ -82,6 +82,13 @@ def read_parameters(argv):
     return command
 
 
+async def get_all_results():
+    await get_results_external('40.127.108.223', 5001)
+    await get_results_external('52.229.37.237', 5002)
+    await get_results_external('52.141.61.172', 5003)
+    await get_results_external('20.185.45.222', 5004)
+    await get_results_external('52.151.70.54', 5005)
+
 async def send_message(command, message):
     print(message)
     url = 'http://' + command.host + ':' + str(command.port) + '/' + command.message_type
@@ -92,11 +99,6 @@ async def send_message(command, message):
             async with session.post(url, data=message.data) as resp:
                 print(resp.status)
                 print(await resp.text())
-        await get_results_external('40.127.108.223', 5001)
-        await get_results_external('52.229.37.237', 5002)
-        await get_results_external('52.141.61.172', 5003)
-        await get_results_external('20.185.45.222', 5004)
-        await get_results_external('52.151.70.54', 5005)
     except asyncio.TimeoutError as e:
         log.error('Scaling timeout, requesting results: ')
         # await get_results_external(command.host, command.port)
@@ -192,7 +194,8 @@ async def main(argv):
             await get_results_local(command.host, command.port)
             return
         elif command.results == 'external':
-            await get_results_external(command.host, command.port)
+            await get_all_results()
+            # await get_results_external(command.host, command.port)
             return
         elif command.results == 'test':
             await send_message_local(command.port)
