@@ -20,9 +20,10 @@ class ExperimentConfiguration:
         self.max_number_of_changes = experiment['max_number_of_changes']
         self.constraints = self.create_constraint_configuration(experiment)
         self.number_of_vnfs = experiment['number_of_vnfs']
+        self.max_dependencies = experiment['max_dependencies']
         self.number_of_scalings = experiment['number_of_scalings']
         self.number_of_vnfs_per_orchestrator = experiment['number_of_vnfs_per_orchestrator']
-        self.random_seed_list, self.random_np_seed_list = generate_random_seeds(self.number_of_vnf_components,
+        self.random_seed_list, self.random_np_seed_list, self.collect_random = generate_random_seeds(self.number_of_vnf_components,
                                                                                 self.number_of_services)
 
     def load_configuration_file(self):

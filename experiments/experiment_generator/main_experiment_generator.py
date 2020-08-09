@@ -30,6 +30,7 @@ def main():
             random_running_index += dock_gen.generate_orchestrator_commands(experiment_index)
             experiment_index += 1
         dock_gen.generate_client_commands()
+    dock_gen.generate_second_experiment_client_commands()
 
 
 if __name__ == "__main__":

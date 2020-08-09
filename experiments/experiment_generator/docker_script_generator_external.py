@@ -35,6 +35,13 @@ class DockerScriptGeneratorExternal:
             os.makedirs(file_directory)
         self.file_commands_causal = open(file_directory + file_name, 'w+')
 
+    def create_second_client_file(self, experiment_index):
+        file_directory = 'experiments/experiment_' + str(experiment_index) + '/'
+        file_name = 'client_second_file_commands.sh'
+        if not os.path.exists(file_directory):
+            os.makedirs(file_directory)
+        self.file_commands_causal = open(file_directory + file_name, 'a')
+
     def generate_orchestrator_commands(self, running_experiment):
         self.running_experiment = running_experiment
         self.create_orchestrator_file()
@@ -53,6 +60,25 @@ class DockerScriptGeneratorExternal:
         self.add_request_of_scaling()
         self.add_results()
         self.close_file()
+
+    def generate_second_experiment_client_commands(self):
+        self.add_request_of_scaling_second()
+        for experiment_index in range(0, self.configuration.number_of_experiments):
+            file_directory = 'experiments/experiment_' + str(experiment_index) + '/'
+            file_name = 'client_second_file_commands.sh'
+            if not os.path.exists(file_directory):
+                os.makedirs(file_directory)
+            self.file_commands_causal = open(file_directory + file_name, 'a')
+            self.file_commands_causal.write('# Add results \n')
+            for orchestrator in self.data['orchestrators']:
+                first_str = 'python3 message_factory.py -h ' + str(orchestrator['ip'])
+                second_str = ' -p ' + str(orchestrator['port']) + ' -r external'
+                self.file_commands_causal.write(first_str + second_str + '\n')
+
+            self.close_file()
+
+        # self.add_results()
+        # self.close_file()
 
     def add_results(self):
         self.file_commands_causal.write('# Add results \n')
@@ -214,12 +240,105 @@ class DockerScriptGeneratorExternal:
         self.add_request_of_scaling_external()
         self.write_new_line_to_file()
 
+    def add_request_of_scaling_second(self):
+        self.add_request_of_scaling_external_second_experiment()
+
     def is_valid_random_service(self, service, service_list, orchestrator_list):
         if service in service_list:
             return False
         if service['orchestrator'][0] in orchestrator_list:
             return False
         return True
+
+    def load_service_data_from_experiment(self, experiment_index):
+        list_of_services = list()
+        directory_path = 'experiments/experiment_' + str(experiment_index) + '/'
+        file_name = 'experiment_' + str(experiment_index) + '.json'
+        with open(directory_path + file_name) as json_file:
+            all_data = json.load(json_file)
+        for orchestrator in all_data['orchestrators']:
+            for service in orchestrator['services']:
+                list_of_services.append(service)
+        return list_of_services
+
+    def get_service_by_dependency(self, dependency, service_data):
+        for service in service_data:
+            if dependency['id'] == service['id']:
+                return service
+        print('Error!!!')
+
+    def compute_total_dependencies(self, service, service_data):
+        total_dependencies = 0
+        if service['are_all_dependencies_vnfs'] or service['type'] != 'Service':
+            return 0
+        else:
+            for dependency in service['dependencies']:
+                if dependency['type'] == 'Service':
+                    dependency_as_service = self.get_service_by_dependency(dependency, service_data)
+                    total_dependencies += (1 + self.compute_total_dependencies(dependency_as_service, service_data))
+        return total_dependencies
+
+    def get_list_of_valid_services_by_total_dependencies(self, required_dependencies):
+        list_valid_services = list()
+        for experiment_index in range(0, self.configuration.number_of_experiments):
+            service_data = self.load_service_data_from_experiment(experiment_index)
+            for service in service_data:
+                total_dependencies_per_service = self.compute_total_dependencies(service, service_data)
+                service['experiment_index'] = experiment_index
+                if total_dependencies_per_service == required_dependencies:
+                    list_valid_services.append(service)
+        return list_valid_services
+
+    def get_orchestrator_by_service(self, service):
+        list_orchestrators = list()
+        for experiment_index in range(0, self.configuration.number_of_experiments):
+            directory_path = 'experiments/experiment_' + str(experiment_index) + '/'
+            file_name = 'experiment_' + str(experiment_index) + '.json'
+            with open(directory_path + file_name) as json_file:
+                data_orchetrators = json.load(json_file)
+                list_orchestrators.append(data_orchetrators)
+
+        for orchestrator_list in list_orchestrators:
+            for orchestrator in orchestrator_list['orchestrators']:
+                for data_service in orchestrator['services']:
+                    if data_service['id'] == service['id']:
+                        return orchestrator
+
+    def append_line_to_file_second_experiment(self, service, dependencies):
+        self.create_second_client_file(service['experiment_index'])
+        orchestrator = self.get_orchestrator_by_service(service)
+        header = '#!/bin/sh' + '\n'
+        self.file_commands_causal.write(header + '\n')
+        zero_str = '# Dependencies ' + str(dependencies)
+        self.file_commands_causal.write(zero_str + '\n')
+        first_str = 'python3 message_factory.py -t request_scaling_of_service -h ' + orchestrator['ip']
+        second_str = ' -p ' + orchestrator['port'] + ' -i ' + service['id']
+        self.file_commands_causal.write(first_str + second_str + '\n')
+        fourth_str = 'python3 message_factory.py -r external'
+        self.file_commands_causal.write(fourth_str + '\n')
+        self.close_file()
+
+    def generate_random_list_from_np_seeds(self, index, max_numbers):
+        random.seed(self.configuration.collect_random[index])
+        return random.sample(range(0, max_numbers), 30)
+
+    def add_request_of_scaling_external_second_experiment(self):
+        list_valid_services = list()
+        list_valid_test_experiments = list()
+        random_list_per_experiment = list()
+        for i in range(0, self.configuration.max_dependencies):
+            list_valid_services.append(self.get_list_of_valid_services_by_total_dependencies(i))
+            random_list = self.generate_random_list_from_np_seeds(i, len(list_valid_services[i]))
+            random_list_per_experiment.append(random_list)
+
+        for experiment_list in list_valid_services:
+            print('Length Experiment list: ' + str(len(experiment_list)))
+            sublist =[experiment_list[i] for i in random_list]
+            list_valid_test_experiments.append(sublist)
+
+        for i in range(0, self.configuration.max_dependencies):
+            for service in list_valid_test_experiments[i]:
+                self.append_line_to_file_second_experiment(service, i)
 
     def add_request_of_scaling_external(self):
         service_list = list()
@@ -235,6 +354,9 @@ class DockerScriptGeneratorExternal:
                 third_str = ' --seed ' + str(random_seed)
                 self.file_commands_causal.write(first_str + second_str + third_str + '\n')
                 self.file_commands_normal.write(first_str + second_str + third_str + '\n')
+                fourth_str = 'python3 message_factory.py -r external'
+                self.file_commands_causal.write(fourth_str + '\n')
+                self.file_commands_normal.write(fourth_str + '\n')
                 service_list.append(random_service_to_scalate)
                 orchestrator_list.append(random_service_to_scalate['orchestrator'][0])
             self.random_running_index += 1

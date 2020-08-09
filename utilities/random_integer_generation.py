@@ -14,22 +14,19 @@ def generate_random_seeds(number, number_of_services):
     directory_path = 'random_seeds/size_' + str(number)
     random_seed_list = []
     random_np_seed_list = []
+    random_collect_list = []
     file = open(directory_path + '/seed_list.txt', 'r')
     file_np = open(directory_path + '/np_seed_list.txt', 'r')
-    counter = 0
+    file_cl = open(directory_path + '/seed_to_collect_random_services.txt', 'r')
     for line in file:
-        # if counter >= number_of_services:
-        #     counter = 0
-        #     break
         random_seed_list.append(int(line))
-        counter += 1
 
     for line in file_np:
-        # if counter >= number_of_services:
-        #     break
         random_np_seed_list.append(int(line))
-        counter += 1
-    return random_seed_list, random_np_seed_list
+
+    for line in file_cl:
+        random_collect_list.append(int(line))
+    return random_seed_list, random_np_seed_list, random_collect_list
 
 
 def generate_random_index_from_vnf_components(vnf_components, service):

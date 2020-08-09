@@ -1,18 +1,21 @@
 #!/bin/sh
 
 # Request scaling 
-#python message_factory.py -t request_scaling_of_service -h 52.141.61.172 -p 5003 -i 23db6f14-ce65-11ea-9f26-04ea56f99520 --seed 9060025
-python message_factory.py -t request_scaling_of_service -h 52.151.70.54 -p 5005 -i 23db6f10-ce65-11ea-9f26-04ea56f99520 --seed 3298482
+python message_factory.py -t request_scaling_of_service -h 20.185.45.222 -p 5004 -i 0121f6a5-da2e-11ea-b222-04ea56f99520 --seed 33746
 python3 message_factory.py -r external
-python message_factory.py -t request_scaling_of_service -h 52.229.37.237 -p 5002 -i 23db6f09-ce65-11ea-9f26-04ea56f99520 --seed 738537
+python message_factory.py -t request_scaling_of_service -h 40.127.108.223 -p 5001 -i 0121f6aa-da2e-11ea-b222-04ea56f99520 --seed 89027
 python3 message_factory.py -r external
-python message_factory.py -t request_scaling_of_service -h 20.185.45.222 -p 5004 -i 23db6f0a-ce65-11ea-9f26-04ea56f99520 --seed 5759419
+python message_factory.py -t request_scaling_of_service -h 52.229.37.237 -p 5002 -i 0121f6bb-da2e-11ea-b222-04ea56f99520 --seed 9585
+python3 message_factory.py -r external
+python message_factory.py -t request_scaling_of_service -h 52.151.70.54 -p 5005 -i 0121f6a1-da2e-11ea-b222-04ea56f99520 --seed 30407
+python3 message_factory.py -r external
+python message_factory.py -t request_scaling_of_service -h 52.141.61.172 -p 5003 -i 0121f6b1-da2e-11ea-b222-04ea56f99520 --seed 95998
 python3 message_factory.py -r external
 
 # Add results 
-#python3 message_factory.py -h 40.127.108.223 -p 5001 -r external
-#python3 message_factory.py -h 52.229.37.237 -p 5002 -r external
-#python3 message_factory.py -h 52.141.61.172 -p 5003 -r external
-#python3 message_factory.py -h 20.185.45.222 -p 5004 -r external
-#python3 message_factory.py -h 52.151.70.54 -p 5005 -r external
+python3 message_factory.py -h 40.127.108.223 -p 5001 -r external
+python3 message_factory.py -h 52.229.37.237 -p 5002 -r external
+python3 message_factory.py -h 52.141.61.172 -p 5003 -r external
+python3 message_factory.py -h 20.185.45.222 -p 5004 -r external
+python3 message_factory.py -h 52.151.70.54 -p 5005 -r external
 
