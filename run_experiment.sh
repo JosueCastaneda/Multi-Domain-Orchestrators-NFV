@@ -13,5 +13,8 @@ source my_env/bin/activate
 
 message=$'Testing experiment\n'
 echo -n "$message"
-chmod +x experiments/experiment_generator/experiments/experiment_$EXPERIMENT_NUMBER/client_commands.sh
-./experiments/experiment_generator/experiments/experiment_$EXPERIMENT_NUMBER/client_commands.sh
+#chmod +x experiments/experiment_generator/experiments/experiment_$EXPERIMENT_NUMBER/client_commands.sh
+#./experiments/experiment_generator/experiments/experiment_$EXPERIMENT_NUMBER/client_commands.sh
+
+chmod +x experiments/experiment_generator/experiments/experiment_$EXPERIMENT_NUMBER/client_second_file_commands.sh
+./experiments/experiment_generator/experiments/experiment_$EXPERIMENT_NUMBER/client_second_file_commands.sh
