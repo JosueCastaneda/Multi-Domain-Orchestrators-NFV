@@ -1,13 +1,13 @@
 #!/bin/sh
 
 # Request scaling 
-python message_factory.py -t request_scaling_of_service -h 40.127.108.223 -p 5001 -i 0121f7aa-da2e-11ea-b222-04ea56f99520 --seed 99669
+python message_factory.py -t request_scaling_of_service -h 40.127.108.223 -p 5001 -i 12d5b603-dafe-11ea-b222-04ea56f99520 --seed 99669
 python3 message_factory.py -r external
-python message_factory.py -t request_scaling_of_service -h 52.141.61.172 -p 5003 -i 0121f7a1-da2e-11ea-b222-04ea56f99520 --seed 25122
+python message_factory.py -t request_scaling_of_service -h 52.141.61.172 -p 5003 -i 12d5b5fa-dafe-11ea-b222-04ea56f99520 --seed 25122
 python3 message_factory.py -r external
-python message_factory.py -t request_scaling_of_service -h 52.229.37.237 -p 5002 -i 0121f7af-da2e-11ea-b222-04ea56f99520 --seed 6538
+python message_factory.py -t request_scaling_of_service -h 52.229.37.237 -p 5002 -i 12d5b608-dafe-11ea-b222-04ea56f99520 --seed 6538
 python3 message_factory.py -r external
-python message_factory.py -t request_scaling_of_service -h 20.185.45.222 -p 5004 -i 0121f79c-da2e-11ea-b222-04ea56f99520 --seed 42499
+python message_factory.py -t request_scaling_of_service -h 20.185.45.222 -p 5004 -i 12d5b5f5-dafe-11ea-b222-04ea56f99520 --seed 42499
 python3 message_factory.py -r external
 
 # Add results 

@@ -291,12 +291,12 @@ class DockerScriptGeneratorExternal:
 
     def get_orchestrator_by_service(self, service):
         list_orchestrators = list()
-        for experiment_index in range(0, self.configuration.number_of_experiments):
-            directory_path = 'experiments/experiment_' + str(experiment_index) + '/'
-            file_name = 'experiment_' + str(experiment_index) + '.json'
-            with open(directory_path + file_name) as json_file:
-                data_orchetrators = json.load(json_file)
-                list_orchestrators.append(data_orchetrators)
+        # for experiment_index in range(0, self.configuration.number_of_experiments):
+        directory_path = 'experiments/experiment_' + str(service['experiment_index']) + '/'
+        file_name = 'experiment_' + str(service['experiment_index']) + '.json'
+        with open(directory_path + file_name) as json_file:
+            data_orchestrators = json.load(json_file)
+            list_orchestrators.append(data_orchestrators)
 
         for orchestrator_list in list_orchestrators:
             for orchestrator in orchestrator_list['orchestrators']:

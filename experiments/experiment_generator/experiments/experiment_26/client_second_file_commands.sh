@@ -1,67 +1,22 @@
 #!/bin/sh
 
-# Dependencies 5
-python3 message_factory.py -t request_scaling_of_service -h 52.141.61.172 -p 5003 -i ca51d25a-da29-11ea-b222-04ea56f99520
-python3 message_factory.py -r external
-#!/bin/sh
-
 # Dependencies 3
-python3 message_factory.py -t request_scaling_of_service -h 52.229.37.237 -p 5002 -i 262b5a3e-da2a-11ea-b222-04ea56f99520
+python3 message_factory.py -t request_scaling_of_service -h 52.229.37.237 -p 5002 -i 12d5b643-dafe-11ea-b222-04ea56f99520
 python3 message_factory.py -r external
 #!/bin/sh
 
 # Dependencies 4
-python3 message_factory.py -t request_scaling_of_service -h 40.127.108.223 -p 5001 -i 262b5a3f-da2a-11ea-b222-04ea56f99520
+python3 message_factory.py -t request_scaling_of_service -h 40.127.108.223 -p 5001 -i 12d5b644-dafe-11ea-b222-04ea56f99520
 python3 message_factory.py -r external
 #!/bin/sh
 
 # Dependencies 4
-python3 message_factory.py -t request_scaling_of_service -h 40.127.108.223 -p 5001 -i 262b5a40-da2a-11ea-b222-04ea56f99520
+python3 message_factory.py -t request_scaling_of_service -h 40.127.108.223 -p 5001 -i 12d5b645-dafe-11ea-b222-04ea56f99520
 python3 message_factory.py -r external
 #!/bin/sh
 
 # Dependencies 5
-python3 message_factory.py -t request_scaling_of_service -h 52.141.61.172 -p 5003 -i 262b5a41-da2a-11ea-b222-04ea56f99520
-python3 message_factory.py -r external
-#!/bin/sh
-
-# Dependencies 3
-python3 message_factory.py -t request_scaling_of_service -h 52.229.37.237 -p 5002 -i ea7468b6-da2d-11ea-b222-04ea56f99520
-python3 message_factory.py -r external
-#!/bin/sh
-
-# Dependencies 4
-python3 message_factory.py -t request_scaling_of_service -h 40.127.108.223 -p 5001 -i ea7468b7-da2d-11ea-b222-04ea56f99520
-python3 message_factory.py -r external
-#!/bin/sh
-
-# Dependencies 4
-python3 message_factory.py -t request_scaling_of_service -h 40.127.108.223 -p 5001 -i ea7468b8-da2d-11ea-b222-04ea56f99520
-python3 message_factory.py -r external
-#!/bin/sh
-
-# Dependencies 5
-python3 message_factory.py -t request_scaling_of_service -h 52.141.61.172 -p 5003 -i ea7468b9-da2d-11ea-b222-04ea56f99520
-python3 message_factory.py -r external
-#!/bin/sh
-
-# Dependencies 3
-python3 message_factory.py -t request_scaling_of_service -h 52.229.37.237 -p 5002 -i 0121f7ea-da2e-11ea-b222-04ea56f99520
-python3 message_factory.py -r external
-#!/bin/sh
-
-# Dependencies 4
-python3 message_factory.py -t request_scaling_of_service -h 40.127.108.223 -p 5001 -i 0121f7eb-da2e-11ea-b222-04ea56f99520
-python3 message_factory.py -r external
-#!/bin/sh
-
-# Dependencies 4
-python3 message_factory.py -t request_scaling_of_service -h 40.127.108.223 -p 5001 -i 0121f7ec-da2e-11ea-b222-04ea56f99520
-python3 message_factory.py -r external
-#!/bin/sh
-
-# Dependencies 5
-python3 message_factory.py -t request_scaling_of_service -h 52.141.61.172 -p 5003 -i 0121f7ed-da2e-11ea-b222-04ea56f99520
+python3 message_factory.py -t request_scaling_of_service -h 52.141.61.172 -p 5003 -i 12d5b646-dafe-11ea-b222-04ea56f99520
 python3 message_factory.py -r external
 # Add results 
 python3 message_factory.py -h 40.127.108.223 -p 5001 -r external
