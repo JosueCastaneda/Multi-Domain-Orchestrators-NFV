@@ -28,7 +28,8 @@ def is_orchestrator_included_for_notification(id_orch, excluding_list):
 
 class Orchestrator:
 
-    def __init__(self, experiment_index, orchestrator_index, server_host, server_port, random_seed, causal_delivery=True):
+    def __init__(self, experiment_index, orchestrator_index, server_host, server_port, random_seed,
+                 causal_delivery=True):
         self.experiment_name = 'experiment_' + experiment_index
         self.experiment_index = experiment_index
         self.name = 'orch_' + orchestrator_index
@@ -57,7 +58,7 @@ class Orchestrator:
         random.seed(self.random_seed)
 
     def load_server_information(self):
-        all_route = ROOT_DIR + '/' + self.directory_path+ self.experiment_name +'.json'
+        all_route = ROOT_DIR + '/' + self.directory_path + self.experiment_name + '.json'
         with open(all_route) as json_file:
             raw_data = json.load(json_file)
 
@@ -202,11 +203,6 @@ class Orchestrator:
                     new_vector_clock = VectorClock()
                     new_vector_clock.create_from_list(pending_operation.sender_vector_clock)
                     pending_operation.sender_vector_clock = new_vector_clock
-                # log.info('Pending operation' + str(pending_operation) + ' Repetition: ' + str(
-                #     self.pending_operations_repetitions) + ' Total pending: ' + str(total_pending_operations))
-                # log.info('Orchestrator sender ID: ' + str(
-                #     pending_operation.orchestrator_sender_id) + ' VT: ' + pending_operation.sender_vector_clock.as_string())
-                # log.info('My vector clock: ' + self.vector_clock.as_string())
                 difference_in_clocks = self.vector_clock.compare_clocks(pending_operation.sender_vector_clock,
                                                                         pending_operation.orchestrator_sender_id,
                                                                         self.causal_delivery)
@@ -366,7 +362,7 @@ class Orchestrator:
         self.instantiate_services(my_orchestrator['services'], my_ip)
 
     async def get_pending_operations(self):
-        pending_operations =  self.life_cycle_manager.pending_operations
+        pending_operations = self.life_cycle_manager.pending_operations
         for operation in pending_operations:
             operation['start_time'] = ''
         return pending_operations

@@ -26,14 +26,13 @@ def compute_errors(experiment, valid):
     index_result = 0
     index_validation = 0
     errors = 0
-    aciertos = 0
-    # if is_experiment_valid(len(experiment), len(valid)):
-    while index_validation < len(valid) :
+    matches = 0
+    while index_validation < len(valid):
         validation_item = valid[index_validation]
         experiment_item = experiment[index_result]
         if is_present(validation_item, experiment):
             if are_equal(validation_item, experiment_item):
-                aciertos += 1
+                matches += 1
                 index_validation += 1
                 index_result += 1
             else:
@@ -47,34 +46,28 @@ def compute_errors(experiment, valid):
             index_validation += 1
         if index_validation >= len(experiment):
             break
-            # total_errors = errors + len(valid) - index_validation
-            # return total_errors, aciertos
-    error_score = len(experiment) - aciertos
+    error_score = len(experiment) - matches
     return error_score
 
 
 def missing_elements(experiment, valid):
     repeated_missing_elements = []
-    missing_elements = 0
+    missing_elements_counter = 0
     for elem in valid:
         if elem not in experiment:
             if elem not in repeated_missing_elements:
-                missing_elements +=1
+                missing_elements_counter += 1
                 repeated_missing_elements.append(elem)
-    return missing_elements
+    return missing_elements_counter
 
 
 def main():
     experiment = [387, 1, 285, 10, 327, 28, 246, 4, 432, 7, 10, 327, 28, 246, 4, 432, 7, 28, 246, 4, 432, 7]
     valid = [387, 1, 285, 10, 327, 28, 4, 285, 10, 327, 28, 4]
-
     error_score = missing_elements(experiment, valid)
-    # print('Aciertos: ', aciertos)
     print('Missing score: ', error_score)
     print('Length experiment: ', len(experiment))
 
 
 if __name__ == main():
     main()
-
-

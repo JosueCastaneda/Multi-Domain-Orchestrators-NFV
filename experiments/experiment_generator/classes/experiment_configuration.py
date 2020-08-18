@@ -21,8 +21,9 @@ class ExperimentConfiguration:
         self.constraints = self.create_constraint_configuration(experiment)
         self.number_of_vnfs = experiment['number_of_vnfs']
         self.number_of_vnfs_per_orchestrator = experiment['number_of_vnfs_per_orchestrator']
-        self.random_seed_list, self.random_np_seed_list, self.collect_random = generate_random_seeds(self.number_of_vnf_components,
-                                                                                self.number_of_services)
+        self.random_seed_list, self.random_np_seed_list, self.collect_random = generate_random_seeds(
+            self.number_of_vnf_components,
+            self.number_of_services)
 
     def load_configuration_file(self):
         with open(self.path) as json_file:

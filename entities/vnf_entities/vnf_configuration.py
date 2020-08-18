@@ -90,4 +90,3 @@ class VnfConfiguration:
         log.info("Queue P: ")
         for d in self.get_state().get_p():
             log.info(''.join([str(d), " "]))
-

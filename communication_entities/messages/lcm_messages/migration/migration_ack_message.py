@@ -10,5 +10,3 @@ class MigrationAckMessage(AbstractMessage):
 
     def process_by_command_line(self):
         log.info("Migration ACK")
-
-

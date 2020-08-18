@@ -8,7 +8,6 @@ from aiohttp.web_response import Response
 
 from communication_entities.vector_clock import VectorClock
 from entities.vnf_entities.vnf_information import VnfInformation
-from utilities.logger import log
 
 
 class OrchestratorHandler:

@@ -47,8 +47,8 @@ class MessageGenerator:
         return m
 
     @staticmethod
-    def generate_add_message(vnf_host, vnf_port, name):
-        return AddVNF(vnf_host, vnf_port, name)
+    def generate_add_message(vnf_host, vnf_port, vnf_name):
+        return AddVNF(vnf_host, vnf_port, vnf_name)
 
     @staticmethod
     def generate_migration_message(name, new_name):

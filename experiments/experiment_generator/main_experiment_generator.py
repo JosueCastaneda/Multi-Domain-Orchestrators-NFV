@@ -20,6 +20,7 @@ def main():
     list_name_experiments = exp_gen.generate_experiment()
     experiment_index = 0
     random_running_index = 0
+    dock_gen = None
     for experiment_file in list_name_experiments:
         if local_deployment:
             dock_gen = DockerScriptGeneratorLocal(experiment_file, experiment_configuration)

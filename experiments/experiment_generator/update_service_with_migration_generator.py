@@ -63,7 +63,7 @@ class UpdateServiceWithMigrationGenerator:
     def add_constraints_to_detailed_vnf_information(self):
         with open(self.experiment_path + 'vnf_info.json') as json_file:
             raw_data = json.load(json_file)
-            vnf_list =  raw_data['vnf']
+            vnf_list = raw_data['vnf']
         for index in range(len(vnf_list)):
             self.list_vnf_detailed_information[index]['delay'] = vnf_list[index]['delay']
             self.list_vnf_detailed_information[index]['loss'] = vnf_list[index]['loss']
@@ -105,7 +105,6 @@ class UpdateServiceWithMigrationGenerator:
                     service_constraints['jitter'] += float(vnf_detail[3])
             service['constraints'] = service_constraints
 
-
     def update_previous_vnf(self, previous_vnf):
         for vnf in self.list_of_updated_vnfs:
             if vnf['server'] == previous_vnf['server']:
@@ -121,7 +120,7 @@ class UpdateServiceWithMigrationGenerator:
             if index_vnf >= 1:
                 affected = get_previous_vnf_from_service(index_vnf - 1, service)
                 if affected is not None:
-                    affected_vnf= dict()
+                    affected_vnf = dict()
                     affected_vnf['ip'] = affected
                     affected_vnf['service'] = service['constraints']
                     affected_vnfs.append(affected_vnf)

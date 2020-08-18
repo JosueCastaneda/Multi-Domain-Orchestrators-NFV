@@ -80,7 +80,7 @@ class DockerScriptGeneratorLocal:
         for index in range(len(self.data['orchestrators'])):
             first_string = 'docker exec -it mn.orch_' + str(index) + ' python orchestrator_script.py -i ' + str(index)
             second_string = ' -e ' + str(self.experiment_index)
-            third_string = ' -h 127.0.0.1' + ' -p ' + str(port)  + ' &'
+            third_string = ' -h 127.0.0.1' + ' -p ' + str(port) + ' &'
             self.file_commands.write(first_string + second_string + third_string + '\n')
             port += 1
 
@@ -94,15 +94,16 @@ class DockerScriptGeneratorLocal:
             current_orchestrator = self.data['orchestrators'][index]
             for i in range(len(self.data['orchestrators'])):
                 if i != index:
-                    other_orch = self.data['orchestrators'][i]
+                    other_orchestrator = self.data['orchestrators'][i]
                     first_string = 'docker exec -it mn.source python message_factory.py -t add_orchestrator -h '
                     second_string = current_orchestrator['ip'] + ' -p ' + current_orchestrator['port']
-                    third_string = ' -n none -m none --vnf_host ' + other_orch['ip'] + ' --vnf_port ' + other_orch[
-                        'port'] + ' -x ' + other_orch['id']
+                    third_string = ' -n none -m none --vnf_host ' + other_orchestrator['ip'] + ' --vnf_port ' + \
+                                   other_orchestrator[
+                                       'port'] + ' -x ' + other_orchestrator['id']
                     self.file_commands.write(first_string + second_string + third_string + '\n')
 
     def set_up_chain_orchestrators(self):
-        self.file_commands.write('# Add orchestrator\'s informaton to my orchestrator' + '\n')
+        self.file_commands.write('# Add orchestrator\'s information to my orchestrator' + '\n')
         self.set_up_chain_orchestrators_local()
         self.write_new_line_to_file()
 
@@ -132,32 +133,32 @@ class DockerScriptGeneratorLocal:
                 first_index = 0
                 first_dependency = None
                 while first_index < len(service['dependencies']) - 1:
-                    if first_dependency == None:
+                    if first_dependency is None:
                         first_dependency = self.get_dependency_connection_point_by_id(
                             service['dependencies'][first_index])
-                    second_dependecy = self.get_dependency_connection_point_by_id(
+                    second_dependency = self.get_dependency_connection_point_by_id(
                         service['dependencies'][first_index + 1],
                         False)
                     first_str = 'docker exec -it mn.source python message_factory.py -t add_chain -h ' + \
                                 first_dependency['server']
-                    second_str = ' -p ' + str(first_dependency['port']) + ' -n none -m none -v ' + second_dependecy[
-                        'server'] + ' --vnf_port ' + str(second_dependecy['port'])
+                    second_str = ' -p ' + str(first_dependency['port']) + ' -n none -m none -v ' + second_dependency[
+                        'server'] + ' --vnf_port ' + str(second_dependency['port'])
                     self.file_commands.write(first_str + second_str + '\n')
                     first_index += 1
-                    first_dependency = second_dependecy
+                    first_dependency = second_dependency
 
-    def get_dependency_connection_point_by_id(self, dependency, isFirst=True):
+    def get_dependency_connection_point_by_id(self, dependency, is_first=True):
         if dependency['type'] == 'Service':
-            return self.find_connection_point_of_service_by_id(dependency['id'], isFirst)
+            return self.find_connection_point_of_service_by_id(dependency['id'], is_first)
         for vnf in self.all_dependencies:
             if vnf['id'] == dependency['id']:
                 return vnf
 
-    def find_connection_point_of_service_by_id(self, dependency_id, isFirst):
+    def find_connection_point_of_service_by_id(self, dependency_id, is_first):
         for orchestrator in self.data['orchestrators']:
             for service in orchestrator['services']:
                 if service['id'] == dependency_id:
-                    if isFirst:
+                    if is_first:
                         new_connection_point = service['dependencies'][0]
                     else:
                         new_connection_point = service['dependencies'][len(service['dependencies']) - 1]

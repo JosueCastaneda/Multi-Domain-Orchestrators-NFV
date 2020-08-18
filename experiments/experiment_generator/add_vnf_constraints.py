@@ -65,8 +65,8 @@ def main():
     exp_gen = AddVNFConstraints(experiment_path, delay, bandwidth, loss, jitter)
     exp_gen.add_constraints()
 
-    with open(experiment_path + 'vnf_info.json') as jsonfile:
-        parsed = json.load(jsonfile)
+    with open(experiment_path + 'vnf_info.json') as json_file:
+        parsed = json.load(json_file)
     print(json.dumps(parsed, indent=2, sort_keys=True))
 
     print('Finish setting up experiment!')

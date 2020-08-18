@@ -17,7 +17,5 @@ class AllQueueInformation(AbstractMessage):
         self.current_server.orchestrator.configuration.get_state().extend_queue("Q", self.queue_q)
         self.current_server.orchestrator.configuration.get_state().extend_queue("R", self.queue_r)
         # Send an ack to synchronize servers
-        ack_message = 'Queue recieved'
+        ack_message = 'Queue received'
         self.client_socket.send(ack_message.encode("UTF-8"))
-
-

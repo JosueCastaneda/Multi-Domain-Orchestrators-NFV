@@ -94,7 +94,8 @@ class VectorClock(dict):
     def update_clock(self, other_vector_clock, id_sender, is_causal_delivery=False):
         if is_causal_delivery:
             for i in range(len(self.clock_list)):
-                if id_sender == self.clock_list[i]['id'] and self.clock_list[i]['value'] < other_vector_clock.clock_list[i]['value']:
+                is_smaller_clock = self.clock_list[i]['value'] < other_vector_clock.clock_list[i]['value']
+                if id_sender == self.clock_list[i]['id'] and is_smaller_clock:
                     self.clock_list[i]['value'] += 1
         else:
             for clock in self.clock_list:
@@ -117,7 +118,7 @@ class VectorClock(dict):
             my_value = self.clock_list[i]['value']
             other_value = other_clock.clock_list[i]['value']
             if other_value > my_value and other_value == (my_value + 1):
-                differences+=1
+                differences += 1
                 orchestrator_sender_id = self.clock_list[i]['id']
         if differences == 1:
             return differences, orchestrator_sender_id

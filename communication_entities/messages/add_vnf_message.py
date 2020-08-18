@@ -5,7 +5,7 @@ from entities.vnf_entities.vnf_information import VnfInformation
 class AddVNF(AbstractMessage):
 
     def __init__(self,
-                 id,
+                 id_value,
                  vnf_host,
                  vnf_port,
                  vnf_name,
@@ -15,7 +15,7 @@ class AddVNF(AbstractMessage):
                  connection_points=None,
                  dependency_list=None):
         super().__init__(None)
-        self.id = id
+        self.id = id_value
         self.current_server = None
         self.vnf_host = vnf_host
         self.vnf_port = vnf_port

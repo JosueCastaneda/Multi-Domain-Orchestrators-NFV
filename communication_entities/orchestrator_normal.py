@@ -6,7 +6,6 @@ import sys
 from communication_entities.generic_service import GenericService
 from communication_entities.life_cycle_management import LifeCycleManagement
 from communication_entities.messages.lcm_messages.notification_lcm_operation import NotificationLCMOperation
-from communication_entities.orchestrator_classes.pending_lcm_scaling_operation import PendingLCMScalingOperation
 from communication_entities.vector_clock import VectorClock
 from definitions import ROOT_DIR
 from utilities.life_cycle_management_update import return_success, return_failure, return_in_process, send_message
@@ -28,7 +27,8 @@ def is_orchestrator_included_for_notification(id_orch, excluding_list):
 
 class OrchestratorNormal:
 
-    def __init__(self, experiment_index, orchestrator_index, server_host, server_port, random_seed, causal_delivery=True):
+    def __init__(self, experiment_index, orchestrator_index, server_host, server_port, random_seed,
+                 causal_delivery=True):
         self.experiment_name = 'experiment_' + experiment_index
         self.experiment_index = experiment_index
         self.name = 'orch_' + orchestrator_index
@@ -57,7 +57,7 @@ class OrchestratorNormal:
         random.seed(self.random_seed)
 
     def load_server_information(self):
-        all_route = ROOT_DIR + '/' + self.directory_path+ self.experiment_name +'.json'
+        all_route = ROOT_DIR + '/' + self.directory_path + self.experiment_name + '.json'
         with open(all_route) as json_file:
             raw_data = json.load(json_file)
 
@@ -209,7 +209,6 @@ class OrchestratorNormal:
 
                 log.info('Difference in clocks: ' + str(difference_in_clocks))
 
-                # INCONSISTENCY
                 if difference_in_clocks > 1:
                     self.add_inconsistency(pending_operation.sender_vector_clock)
 
@@ -249,7 +248,7 @@ class OrchestratorNormal:
             original_service['original_service_id'][0:8]))
         log.info('Received ' + sender_vector_clock.as_string() + ' My clock ' + self.vector_clock.as_string())
         await self.grant_lcm_operation_normal(vnf_component_to_scale_id, operation, original_service,
-                                                  sender_vector_clock)
+                                              sender_vector_clock)
 
     def compute_difference_in_vectors(self, original_service, sender_vector_clock) -> int:
         if original_service['orchestrator_id'] != self.id:
@@ -332,7 +331,7 @@ class OrchestratorNormal:
         self.instantiate_services(my_orchestrator['services'], my_ip)
 
     async def get_pending_operations(self):
-        pending_operations =  self.life_cycle_manager.pending_operations
+        pending_operations = self.life_cycle_manager.pending_operations
         for operation in pending_operations:
             operation['start_time'] = ''
         return pending_operations

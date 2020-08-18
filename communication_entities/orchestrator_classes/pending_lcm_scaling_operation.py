@@ -18,4 +18,3 @@ class PendingLCMScalingOperation:
         self.service_sender_id = service_sender_id
         self.original_service = original_service
         self.is_not_done = True
-

@@ -25,16 +25,16 @@ async def init_app(experiment_index, orchestrator_index, vnf_index, server_host,
 
 
 def get_server_and_port(experiment_index, orchestrator_index, vnf_index):
-    orch_index = int(orchestrator_index)
+    orchestrator_index_as_integer = int(orchestrator_index)
     vnf_index = int(vnf_index)
     experiment_name = 'experiment_' + experiment_index
     directory_path = 'experiments/experiment_generator/experiments/experiment_' + experiment_index + '/'
     with open(directory_path + experiment_name + '.json') as json_file:
         raw_data = json.load(json_file)
-    my_vnf =  raw_data['orchestrators'][orch_index]['vnfs'][vnf_index]
+    my_vnf = raw_data['orchestrators'][orchestrator_index_as_integer]['vnfs'][vnf_index]
     server = my_vnf['server']
     port = my_vnf['port']
-    return server,port
+    return server, port
 
 
 def main(argv) -> None:
@@ -53,7 +53,9 @@ def main(argv) -> None:
         server_port = 3008
 
     try:
-        opts, args = getopt.getopt(argv, "v:o:e:h:p:i:", ["vnf_id=","orchestrator_id=", "experiment_id=", "host=", "port=", "index="])
+        string_arguments = 'v:o:e:h:p:i:'
+        list_of_valid_arguments = ["vnf_id=", "orchestrator_id=", "experiment_id=", "host=", "port=", "index="]
+        opts, args = getopt.getopt(argv, string_arguments, list_of_valid_arguments)
     except getopt.GetoptError:
         log.info('Error')
         sys.exit(2)

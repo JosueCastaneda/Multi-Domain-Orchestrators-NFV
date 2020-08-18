@@ -36,7 +36,7 @@ class ServiceDefinition:
 
             if vnfc.type == 'Service':
                 is_loop = vnfc.is_new_vnf_component_in_a_loop(new_vnfc)
-                if is_loop == True:
+                if is_loop:
                     return True
         return False
 
@@ -47,11 +47,11 @@ class ServiceDefinition:
         new_service['are_all_dependencies_vnfs'] = self.are_all_dependencies_vnfs
         new_service['type'] = self.type
         new_service['dependencies'] = list()
-        for dependecy in self.list_of_vnf_components:
+        for dependency in self.list_of_vnf_components:
             new_dependency = dict()
-            new_dependency['id'] = dependecy.id
-            new_dependency['orchestrator_id'] = dependecy.orchestrator_id
-            new_dependency['type'] = dependecy.type
+            new_dependency['id'] = dependency.id
+            new_dependency['orchestrator_id'] = dependency.orchestrator_id
+            new_dependency['type'] = dependency.type
             new_service['dependencies'].append(new_dependency)
         return new_service
 

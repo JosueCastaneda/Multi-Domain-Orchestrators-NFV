@@ -39,8 +39,3 @@ class MigrationMessage(AbstractMessage):
         print('Data bandwidth: ', new_vnf_message.data.file_pack.bandwidth)
         print('Data loss: ', new_vnf_message.data.file_pack.loss)
         print('Data jitter: ', new_vnf_message.data.file_pack.jitter)
-
-        # self.current_server.orchestrator.send_message_to_vnf(local_vnf, new_vnf_message)
-        # This next line can be commented when debugging since it will remove the vnf and further testing cannot be done
-        # self.current_server.orchestrator.search_and_remove_vnf(local_vnf)
-

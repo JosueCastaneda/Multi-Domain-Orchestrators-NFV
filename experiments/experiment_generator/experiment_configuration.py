@@ -24,7 +24,7 @@ class ExperimentConfiguration:
         self.number_of_scalings = experiment['number_of_scalings']
         self.number_of_vnfs_per_orchestrator = experiment['number_of_vnfs_per_orchestrator']
         self.random_seed_list, self.random_np_seed_list, self.collect_random = generate_random_seeds(self.number_of_vnf_components,
-                                                                                self.number_of_services)
+                                                                                                     self.number_of_services)
 
     def load_configuration_file(self):
         with open(self.path) as json_file:

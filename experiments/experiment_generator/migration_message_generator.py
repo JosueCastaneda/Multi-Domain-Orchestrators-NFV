@@ -50,8 +50,6 @@ class MigrationMessageGenerator:
     def set_up_migration_vnfs_docker(self):
         new_line = '\n'
         for vnf in self.list_of_detailed_vnfs:
-        # for mig_vnf in self.migration_vnfs:
-        #     vnf = self.get_vnf_by_migration(mig_vnf)
             name = vnf['name'] + '_new'
             ip = vnf['migration_vnf_ip']
             new_vnf = self.get_new_vnf_details(ip)
@@ -66,6 +64,7 @@ class MigrationMessageGenerator:
             fourth_str = ' --initial ' + initial + ' &'
             self.file_commands.write(first_str + second_str + third_str + fourth_str + new_line)
 
+    # TODO: Make utility function
     def create_topology_from_vnf(self, vnf):
         str_test = str(vnf['delay']) \
                    + ',' \
@@ -87,9 +86,10 @@ class MigrationMessageGenerator:
         for vnf_migration in self.migration_vnfs:
             for vnf in self.list_of_detailed_vnfs:
                 if vnf['ip'] == vnf_migration:
-                    first_str = 'docker exec -it mn.source python message_factory.py -t migration -h ' + vnf['orch_ip'] + ' -p '+ vnf['orch_port']
+                    zero_str = 'docker exec -it mn.source python message_factory.py -t migration -h '
+                    first_str = vnf['orch_ip'] + ' -p ' + vnf['orch_port']
                     second_str = ' -n ' + vnf['name'] + ' -m new -v none --vnf_port none'
-                    self.file_commands.write(first_str + second_str + new_line)
+                    self.file_commands.write(zero_str + first_str + second_str + new_line)
                     break
             # self.write_new_line_to_file()
         print('Writing done!')

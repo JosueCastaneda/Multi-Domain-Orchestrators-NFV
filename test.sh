@@ -4,7 +4,7 @@
 # well defined test suite for single, double, triple cases.
 # In the case of local test, this can be executed
 
-echo -n "Please type if local or external test: "
+echo -n "Please type if 'local' or 'external' test: "
 read TEST_TYPE
 
 case $TEST_TYPE in

@@ -8,11 +8,10 @@ from experiments.experiment_generator.classes.constraints.service_definition imp
 from experiments.experiment_generator.classes.constraints.vnf_definition import VNFDefinition
 from experiments.experiment_generator.classes.constraints.vnf_definition_configuration import VNFDefinitionConfiguration
 from utilities.experiment_file_loader import load_orchestrators, create_empty_experiment_entry, load_vnf_raw_data
-from utilities.random_integer_generation import generate_random_integer, generate_unique_identifier, \
-    generate_random_index_from_vnf_components
+from utilities.random_integer_generation import generate_random_integer, generate_random_index_from_vnf_components
 
 
-class ExperimentGenerator():
+class ExperimentGenerator:
 
     def __init__(self, configuration, local_deployment=False):
         self.number_of_experiments = configuration.number_of_experiments
@@ -28,6 +27,7 @@ class ExperimentGenerator():
         self.list_vnf_components = list()
         self.vnf_data = load_vnf_raw_data()
         self.list_name_of_experiments = list()
+        self.remaining_vnfc_components = 0
         # TODO: This is only for local deployments
         self.vnf_port = 5500
         self.local_deployment = local_deployment

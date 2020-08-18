@@ -101,14 +101,14 @@ class LifeCycleManagement:
             if dependency['type'] == 'VNF':
                 are_there_still_vnfs_to_scale = True
                 break
-        if are_there_still_vnfs_to_scale and operation['is_first_operation'] == True:
+        if are_there_still_vnfs_to_scale and operation['is_first_operation']:
             return False
         return are_there_still_vnfs_to_scale
 
-    def no_more_dependencies_to_scale(self, operation, type):
+    def no_more_dependencies_to_scale(self, operation, operation_type):
         log.info('Checking if no more dependencies to scale')
         no_services = self.no_more_service_dependencies_to_scale(operation)
-        if self.is_simple_scaling(type, no_services, operation['is_first_operation'], operation['pending_operations']):
+        if self.is_simple_scaling(operation_type, no_services, operation['is_first_operation'], operation['pending_operations']):
             log.info('Is simple scaling')
             return True
         at_least_one_vnf = self.are_there_still_vnfs_to_scale(operation)

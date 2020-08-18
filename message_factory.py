@@ -12,6 +12,7 @@ sys.path.append('../')
 from entities.message_generator import MessageGenerator
 from utilities.command_package import CommandPackage
 
+
 def generate_messages(command):
     m = MessageGenerator(command, command.experiment)
     return m.generate_message()
@@ -109,7 +110,6 @@ async def send_message(command, message):
                 print(await resp.text())
     except asyncio.TimeoutError as e:
         log.error('Scaling timeout, requesting results: ')
-        # await get_results_external(command.host, command.port)
         await get_results_external('40.127.108.223', 5001)
         await get_results_external('52.229.37.237', 5002)
         await get_results_external('52.141.61.172', 5003)
@@ -120,7 +120,6 @@ async def send_message(command, message):
 
 async def send_message_local(port):
     url = 'http://0.0.0.0:' + str(port) + '/'
-    url2 = 'http://52.141.61.172:' + str(port) + '/'
     print(url)
     async with aiohttp.ClientSession() as session:
         async with session.get(url) as resp:
@@ -140,7 +139,7 @@ async def get_results_local(orchestrator_ip='127.0.0.1', orchestrator_port=5001)
                 total_inconsistencies += int(inconsistency_decoded['result'])
         initial_port += 1
 
-    url = 'http://'+ str(orchestrator_ip) + ':'+ str(orchestrator_port) + '/get_time_elapsed'
+    url = 'http://' + str(orchestrator_ip) + ':' + str(orchestrator_port) + '/get_time_elapsed'
     async with aiohttp.ClientSession() as session:
         async with session.get(url, data='') as resp:
             elapsed_time_encoded = await resp.text()
@@ -155,7 +154,7 @@ async def get_results_local(orchestrator_ip='127.0.0.1', orchestrator_port=5001)
     messages_sent = messages_sent_decoded['result']
     str_result_1 = 'Inconsistencies: ' + str(total_inconsistencies)
     str_result_2 = ' messages sent: ' + str(messages_sent)
-    str_result_3 = ' elapsed time: '+ str(elapsed_time) + ' seconds'
+    str_result_3 = ' elapsed time: ' + str(elapsed_time) + ' seconds'
     print(str_result_1 + str_result_2 + str_result_3)
 
 
@@ -169,7 +168,7 @@ async def get_results_external(orchestrator_ip='0.0.0.0', orchestrator_port=5001
     url_list.append('20.185.45.222')
     url_list.append('52.151.70.54')
     for i in range(5):
-        url = 'http://' + str(url_list[i])+ ':' + str(initial_port) + '/get_inconsistencies'
+        url = 'http://' + str(url_list[i]) + ':' + str(initial_port) + '/get_inconsistencies'
         async with aiohttp.ClientSession() as session:
             async with session.get(url, data='') as resp:
                 inconsistency_as_text = await resp.text()
@@ -177,7 +176,7 @@ async def get_results_external(orchestrator_ip='0.0.0.0', orchestrator_port=5001
                 total_inconsistencies += int(inconsistency_decoded['result'])
         initial_port += 1
 
-    url = 'http://'+ str(orchestrator_ip) + ':'+ str(orchestrator_port) + '/get_time_elapsed'
+    url = 'http://' + str(orchestrator_ip) + ':' + str(orchestrator_port) + '/get_time_elapsed'
     async with aiohttp.ClientSession() as session:
         async with session.get(url, data='') as resp:
             elapsed_time_encoded = await resp.text()
@@ -196,6 +195,7 @@ async def get_results_external(orchestrator_ip='0.0.0.0', orchestrator_port=5001
     print(str_result_1 + str_result_2 + str_result_3)
     return [total_inconsistencies, messages_sent, elapsed_time]
 
+
 async def main(argv):
     command = read_parameters(argv)
     if command.results:
@@ -204,7 +204,6 @@ async def main(argv):
             return
         elif command.results == 'external':
             await get_all_results()
-            # await get_results_external(command.host, command.port)
             return
         elif command.results == 'test':
             await send_message_local(command.port)

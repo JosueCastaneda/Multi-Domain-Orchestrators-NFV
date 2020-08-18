@@ -23,14 +23,14 @@ async def init_app(experiment_index, orchestrator_index, server_host, server_por
 
 
 def get_server_and_port(experiment_index, orchestrator_index):
-    orch_index = int(orchestrator_index)
+    orchestrator_index_as_integer = int(orchestrator_index)
     experiment_name = 'experiment_' + experiment_index
     directory_path = 'experiments/experiment_generator/experiments/experiment_' + experiment_index + '/'
     with open(directory_path + experiment_name + '.json') as json_file:
         raw_data = json.load(json_file)
-    server = raw_data['orchestrators'][orch_index]['ip']
-    port = raw_data['orchestrators'][orch_index]['port']
-    return server,port
+    server = raw_data['orchestrators'][orchestrator_index_as_integer]['ip']
+    port = raw_data['orchestrators'][orchestrator_index_as_integer]['port']
+    return server, port
 
 
 def main(argv) -> None:
@@ -47,7 +47,9 @@ def main(argv) -> None:
         server_host = '127.0.0.1'
         server_port = 5002
     try:
-        opts, args = getopt.getopt(argv, "i:e:h:p:r:", ["service_id=", "experiment_id=", "host=", "port=", "random_seed="])
+        valid_arguments_as_string = "i:e:h:p:r:"
+        list_valid_arguments = ["service_id=", "experiment_id=", "host=", "port=", "random_seed="]
+        opts, args = getopt.getopt(argv, valid_arguments_as_string, list_valid_arguments)
     except getopt.GetoptError:
         sys.exit(2)
     for opt, arg in opts:

@@ -5,7 +5,6 @@ from aiohttp import web
 from aiohttp.web_response import Response
 
 from communication_entities.generic_vnf import GenericVNF
-from utilities.logger import log
 
 
 class VirtualNetworkFunctionHandler:
@@ -43,5 +42,4 @@ class VirtualNetworkFunctionHandler:
             return web.json_response(response)
 
     async def index(self, request: web.Request) -> Response:
-        data = self.virtual_network_function.name
         return web.json_response(self.virtual_network_function.entry_as_dictionary())

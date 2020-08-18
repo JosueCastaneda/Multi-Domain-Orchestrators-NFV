@@ -14,4 +14,3 @@ class AddVNFToChainMessage(AbstractMessage):
     def process_by_command_line(self):
         log.info("Adding VNF to the chain...")
         self.current_server.orchestrator.add_affected_vnf(self.data)
-

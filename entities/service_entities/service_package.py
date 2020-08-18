@@ -44,10 +44,6 @@ class ServicePackage:
 
     # TODO: Use the utilities function, this is repeated
     def check_constraint(self, constraint, previous, new):
-        # print('Constraint: ', type(constraint), constraint)
-        # print('Previous: ', type(previous), previous)
-        # print('New: ', type(new), new)
-        # return True
         return (constraint + new - previous) <= constraint + (constraint * 0.3)
 
     # TODO: CHANGE TO ACTUALLY USE THE RECURSIVE MIGRATION
@@ -74,8 +70,3 @@ class ServicePackage:
         if not is_valid_loss:
             log.info("Loss is not valid")
         return is_valid_bandwidth and is_valid_loss and is_valid_jitter and is_valid_delay
-
-        # return self.is_valid_bandwidth(new_vnf.consumed_bandwidth, previous_vnf.consumed_bandwidht) and \
-        #        self.is_new_delay_less_or_equal_than_previous_delay(new_vnf.delay, previous_vnf.delay) and \
-        #        self.is_new_jitter_less_or_equal_to_previous_jitter(new_vnf.jitter, previous_vnf.jitter) and \
-        #        self.is_new_loss_less_or_equal_than_previous_loss(new_vnf.loss, previous_vnf.loss)

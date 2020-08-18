@@ -9,3 +9,4 @@ class LossConstraint:
 
     def get_high(self):
         return self.high_value
+

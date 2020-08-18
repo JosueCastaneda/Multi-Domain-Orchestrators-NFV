@@ -10,6 +10,7 @@ def generate_unique_identifier():
     return str(uuid.uuid1())
 
 
+# TODO: Remove number_of_services as parameter
 def generate_random_seeds(number, number_of_services):
     directory_path = 'random_seeds/size_' + str(number)
     random_seed_list = []

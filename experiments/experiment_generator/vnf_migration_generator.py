@@ -37,7 +37,7 @@ class VNFMigrationGenerator:
             new_vnf['queue_p'] = [running_queue]
             new_vnf['queue_q'] = [running_queue + 1]
             new_vnf['queue_r'] = [running_queue + 2]
-            new_vnf['delay'] =  generate_random_integer(self.delay_low, self.delay_high)
+            new_vnf['delay'] = generate_random_integer(self.delay_low, self.delay_high)
             new_vnf['bandwidth'] = generate_random_integer(self.bandwidth_low, self.bandwidth_high)
             new_vnf['loss'] = generate_random_integer(self.loss_low, self.loss_high)
             new_vnf['jitter'] = generate_random_integer(self.jitter_low, self.jitter_high)
@@ -60,8 +60,8 @@ def main():
     experiment_path = '../first/' + str(video_definition) + '/exp_1_' + str(length_of_vnfs) + '/experiments/'
     exp_gen = VNFMigrationGenerator(delay, bandwidth, loss, jitter, orchestrator, experiment_path)
     exp_gen.create_vnfs()
-    with open(experiment_path + 'migration_vnfs.json') as jsonfile:
-        parsed = json.load(jsonfile)
+    with open(experiment_path + 'migration_vnfs.json') as json_file:
+        parsed = json.load(json_file)
     print(json.dumps(parsed, indent=2, sort_keys=True))
     print('Finish creating up experiment!')
 

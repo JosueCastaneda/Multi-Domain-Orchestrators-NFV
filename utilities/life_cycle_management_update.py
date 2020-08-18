@@ -37,9 +37,6 @@ async def send_message(message):
         async with session.post(url, data=message.data) as resp:
             str_log_encoded = await (resp.text())
             log.info(str_log_encoded)
-            # str_log_decoded = json.loads(str_log_encoded)
-            # log.info('Result of message:')
-            # log.info(str_log_decoded['result'])
 
 
 def return_failure(message):

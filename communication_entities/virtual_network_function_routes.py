@@ -1,6 +1,5 @@
 from aiohttp import web
 
-from communication_entities.orchestrator_handler import OrchestratorHandler
 from communication_entities.virtual_network_function_handler import VirtualNetworkFunctionHandler
 
 

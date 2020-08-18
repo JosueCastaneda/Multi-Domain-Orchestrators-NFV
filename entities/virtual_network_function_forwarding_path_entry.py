@@ -22,4 +22,3 @@ class VirtualNetworkFunctionForwardingPathEntry:
 
     def set_second_connection_point(self, value):
         self.first_connection_point = value
-

@@ -1,5 +1,6 @@
-import random
 import json
+import random
+
 from utilities.random_integer_generation import generate_random_integer
 
 
@@ -62,7 +63,7 @@ class DockerCommandsGenerator:
                 self.list_orchestrator.append([name_orchestrator, orch_ip])
                 first_string = 'docker exec -it mn.' + name_orchestrator + 'python orchestrator_script.py -h ' + orch_ip
                 second_string = ' -p 5461 -n ' + name_orchestrator + ' --path ' + self.path[2:]
-                third_string = ' --experiment_name ' + self.name_experiment+'.json ' + ' &'
+                third_string = ' --experiment_name ' + self.name_experiment + '.json ' + ' &'
                 self.file_commands.write(first_string + second_string + third_string + new_line)
         print('Finish set up run orchestrator')
 
@@ -93,15 +94,18 @@ class DockerCommandsGenerator:
             operation = vnf['name'][4:]
             detailed_vnf = self.get_vnf_detailed_information(operation)
             vnf_topology = self.generate_topology()
+            migration_ip = '0.0.0.0'
             # migration_ip = self.generate_migration_ip(detailed_vnf['server'])
             # migration_ip_topology = self.generate_migration_ip_topology(migration_ip)
             services = self.generate_services()
             vnf_initial = str(detailed_vnf['queue_p'][0])
-            first_str = 'docker exec -it mn.' + vnf['name'] + ' python vnf_script.py -h ' + vnf['ip'] + ' -v 4437 -o ' + orch_ip
-            second_str = ' -q 5461 -n ' + vnf['name'] + ' --topology ' + vnf_topology + ' --migration_ip ' + migration_ip
+            first_str = 'docker exec -it mn.' + vnf['name'] + ' python vnf_script.py -h ' + vnf[
+                'ip'] + ' -v 4437 -o ' + orch_ip
+            second_str = ' -q 5461 -n ' + vnf[
+                'name'] + ' --topology ' + vnf_topology + ' --migration_ip ' + migration_ip
             # third_str = ' --migration_topology ' + migration_ip_topology + ' --services ' + services
             third_str = ' --services ' + services
-            fourth_str = ' --initial ' + vnf_initial +' &'
+            fourth_str = ' --initial ' + vnf_initial + ' &'
             self.file_commands.write(first_str + second_str + third_str + fourth_str + new_line)
 
     def set_up_running_vnf_unique(self):
@@ -117,10 +121,12 @@ class DockerCommandsGenerator:
             migration_ip_topology = self.generate_migration_ip_topology(migration_ip)
             services = self.generate_services()
             vnf_initial = str(detailed_vnf['queue_p'][0])
-            first_str = 'docker exec -it mn.' + vnf['name'] + ' python vnf_script.py -h ' + vnf['ip'] + ' -v 4437 -o ' + orch_ip
-            second_str = ' -q 5461 -n ' + vnf['name'] + ' --topology ' + vnf_topology + ' --migration_ip ' + migration_ip
+            first_str = 'docker exec -it mn.' + vnf['name'] + ' python vnf_script.py -h ' + vnf[
+                'ip'] + ' -v 4437 -o ' + orch_ip
+            second_str = ' -q 5461 -n ' + vnf[
+                'name'] + ' --topology ' + vnf_topology + ' --migration_ip ' + migration_ip
             third_str = ' --migration_topology ' + migration_ip_topology + ' --services ' + services
-            fourth_str = ' --initial ' + vnf_initial +' &'
+            fourth_str = ' --initial ' + vnf_initial + ' &'
             self.file_commands.write(first_str + second_str + third_str + fourth_str + new_line)
 
     def generate_random_indexes(self):
@@ -150,13 +156,9 @@ class DockerCommandsGenerator:
                 vnf_topology['loss'] = vnf['loss']
                 vnf_topology['jitter'] = vnf['jitter']
                 vnf_topology['bandwidth'] = vnf['bandwidth']
-                str_topology = str(vnf_topology['delay']) \
-                               + ',' \
-                               + str(vnf_topology['bandwidth']) \
-                               + ',' \
-                               + str(vnf_topology['loss']) \
-                               + ',' \
-                               + str(vnf_topology['jitter'])
+                vnf_to_string_1 = str(vnf_topology['delay']) + ',' + str(vnf_topology['bandwidth']) + ','
+                vnf_to_string_2 = str(vnf_topology['loss']) + ',' + str(vnf_topology['jitter'])
+                str_topology = vnf_to_string_1 + vnf_to_string_2
                 return str_topology
         return ''
 
@@ -200,18 +202,14 @@ class DockerCommandsGenerator:
         topology['bandwidth'] = generate_random_integer(self.bandwidth_low, self.bandwidth_high)
         topology['loss'] = generate_random_integer(self.loss_low, self.loss_high)
         topology['jitter'] = generate_random_integer(self.jitter_low, self.jitter_high)
-        str_topology = str(topology['delay']) \
-                       + ',' \
-                       + str(topology['bandwidth']) \
-                       + ',' \
-                       + str(topology['loss']) \
-                       + ',' \
-                       + str(topology['jitter'])
+        topology_as_string_1 = str(topology['delay']) + ',' + str(topology['bandwidth']) + ','
+        topology_as_string_2 = str(topology['loss']) + ',' + str(topology['jitter'])
+        str_topology = topology_as_string_1 + topology_as_string_2
         return str_topology
 
     def get_vnf_detailed_information(self, operation):
         for vnf in self.vnf_list_detailed:
-            if vnf['operation'] +' ' == operation:
+            if vnf['operation'] + ' ' == operation:
                 return vnf
         return None
 
@@ -273,7 +271,7 @@ class DockerCommandsGenerator:
         with open('random_seeds.txt', 'r') as f:
             self.seeds = [line.strip() for line in f]
 
-    # TODO: Use join to add two strings togehter
+    # TODO: Use join to add two strings together
     def load_list_vnf_migration(self):
         with open(self.path + 'vnf_info_migration.json') as json_file:
             raw_data = json.load(json_file)
@@ -288,4 +286,3 @@ class DockerCommandsGenerator:
             raw_data = json.load(json_file)
         for orchestrator in raw_data['orchestrators']:
             self.detailed_services.extend(orchestrator['services'])
-            # self.detailed_services = raw_data['services']

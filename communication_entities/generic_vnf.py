@@ -29,14 +29,14 @@ from definitions import ROOT_DIR
 from entities.communication_entity_package import CommunicationEntityPackage
 from entities.topology import Topology
 from entities.vnf_entities.vnf_package import VnfPackage
+from utilities.life_cycle_management_update import return_success, send_message
 from utilities.logger import log
 from utilities.socket_size import SocketSize
-from utilities.life_cycle_management_update import return_success, send_message
 
 
 class GenericVNF:
 
-    def __init__(self, experiment_index,  orchestrator_index, vnf_index, server_host, server_port):
+    def __init__(self, experiment_index, orchestrator_index, vnf_index, server_host, server_port):
         self.experiment_name = 'experiment_' + str(experiment_index)
         self.experiment_index = experiment_index
         self.orchestrator_index = int(orchestrator_index)
@@ -232,7 +232,6 @@ class GenericVNF:
         self.server.disconnect_send_channel()
         log.info('Finished disconnecting all the channels')
         self.update_information_after_migration_to_orchestrator()
-        # self.print_state_vnf()
 
     def update_information_after_migration_to_orchestrator(self):
         log.info('Sending update to orchestrator')
@@ -287,7 +286,7 @@ class GenericVNF:
             # TODO: This connects to the new vnf server
             new_previous_vnf = CommunicationEntityPackage(answer_message.data.ip, answer_message.data.port)
             str_ip = str(answer_message.data.ip)
-            log.info('Connecting to new Previous VNF: IP '+ str_ip)
+            log.info('Connecting to new Previous VNF: IP ' + str_ip)
             self.server.connect_to_another_server(new_previous_vnf)
             m_rec_mig = MigrationDeactivateRecursiveMessage("Do it")
             log.info('Send MigrationDeactivateRecursiveMessage to new VNF')
@@ -313,7 +312,8 @@ class GenericVNF:
         self.server.send_message(m2)
         self.collect_data_to_queue(self.configuration.get_state().get_p())
 
-    async def scale(self, vnfc_id, original_service_id, orchestrator_sender_id, original_orchestrator_id, sender_vector_clock, service_sender_id):
+    async def scale(self, vnfc_id, original_service_id, orchestrator_sender_id, original_orchestrator_id,
+                    sender_vector_clock, service_sender_id):
         log.info('VNF ' + str(self.id[0:8]) + ' has scaled: ' + str(self.id))
         data = dict()
         data['vnf_component_id'] = self.id

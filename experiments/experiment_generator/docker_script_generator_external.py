@@ -132,7 +132,9 @@ class DockerScriptGeneratorExternal:
         third_string = str(self.get_port_based_on_index()) + ' -r ' + str(random_seed) + ' &'
         self.file_commands_causal.write(first_string + second_string + third_string + '\n')
         self.file_commands_normal.write(first_string_normal + second_string + third_string + '\n')
-        print('Seed list: ' + str(len(self.configuration.random_seed_list)) + ' Running experiment: ' + str(self.running_experiment))
+        log_string_1 = 'Seed list: ' + str(len(self.configuration.random_seed_list))
+        log_string_2 = ' Running experiment: ' + str(self.running_experiment)
+        print(log_string_1 + log_string_2)
 
     def set_up_run_orchestrators(self):
         self.file_commands_causal.write('# Launch orchestrator' + '\n')
@@ -144,17 +146,18 @@ class DockerScriptGeneratorExternal:
         current_orchestrator = self.data['orchestrators'][self.orchestrator_index]
         for i in range(len(self.data['orchestrators'])):
             if i != self.orchestrator_index:
-                other_orch = self.data['orchestrators'][i]
+                other_orchestrator = self.data['orchestrators'][i]
                 first_string = 'python message_factory.py -t add_orchestrator -h 0.0.0.0'
                 second_string = ' -p ' + current_orchestrator['port']
-                third_string = ' -n none -m none --vnf_host ' + other_orch['ip'] + ' --vnf_port ' + other_orch[
-                    'port'] + ' -x ' + other_orch['id']
+                third_string = ' -n none -m none --vnf_host ' + other_orchestrator['ip'] + ' --vnf_port ' + \
+                               other_orchestrator[
+                                   'port'] + ' -x ' + other_orchestrator['id']
                 self.file_commands_causal.write(first_string + second_string + third_string + '\n')
                 self.file_commands_normal.write(first_string + second_string + third_string + '\n')
 
     def set_up_chain_orchestrators(self):
-        self.file_commands_causal.write('# Add orchestrator\'s informaton to my orchestrator' + '\n')
-        self.file_commands_normal.write('# Add orchestrator\'s informaton to my orchestrator' + '\n')
+        self.file_commands_causal.write('# Add orchestrator\'s information to my orchestrator' + '\n')
+        self.file_commands_normal.write('# Add orchestrator\'s information to my orchestrator' + '\n')
         self.set_up_chain_orchestrators_external()
         self.write_new_line_to_file()
 
@@ -162,7 +165,6 @@ class DockerScriptGeneratorExternal:
         current_orchestrator = self.data['orchestrators'][self.orchestrator_index]
         vnf_port = 3001
         for vnf_index in range(len(current_orchestrator['vnfs'])):
-            vnf = current_orchestrator['vnfs'][vnf_index]
             first_string = 'python vnf_script.py -i ' + str(vnf_index) + ' -o ' + str(self.orchestrator_index) + ' -e '
             third_string = str(self.experiment_index) + ' -h \'0.0.0.0\' -p ' + str(vnf_port) + ' &'
             self.file_commands_causal.write(first_string + third_string + '\n')
@@ -201,18 +203,18 @@ class DockerScriptGeneratorExternal:
                     first_index += 1
                     first_dependency = second_dependency
 
-    def get_dependency_connection_point_by_id(self, dependency, isFirst=True):
+    def get_dependency_connection_point_by_id(self, dependency, is_first=True):
         if dependency['type'] == 'Service':
-            return self.find_connection_point_of_service_by_id(dependency['id'], isFirst)
+            return self.find_connection_point_of_service_by_id(dependency['id'], is_first)
         for vnf in self.all_dependencies:
             if vnf['id'] == dependency['id']:
                 return vnf
 
-    def find_connection_point_of_service_by_id(self, dependency_id, isFirst):
+    def find_connection_point_of_service_by_id(self, dependency_id, is_first):
         for orchestrator in self.data['orchestrators']:
             for service in orchestrator['services']:
                 if service['id'] == dependency_id:
-                    if isFirst:
+                    if is_first:
                         new_connection_point = service['dependencies'][0]
                     else:
                         new_connection_point = service['dependencies'][len(service['dependencies']) - 1]
@@ -243,6 +245,7 @@ class DockerScriptGeneratorExternal:
     def add_request_of_scaling_second(self):
         self.add_request_of_scaling_external_second_experiment()
 
+    # TODO: Make utility function
     def is_valid_random_service(self, service, service_list, orchestrator_list):
         if service in service_list:
             return False
@@ -250,6 +253,7 @@ class DockerScriptGeneratorExternal:
             return False
         return True
 
+    # TODO: Make utility function
     def load_service_data_from_experiment(self, experiment_index):
         list_of_services = list()
         directory_path = 'experiments/experiment_' + str(experiment_index) + '/'
@@ -261,6 +265,7 @@ class DockerScriptGeneratorExternal:
                 list_of_services.append(service)
         return list_of_services
 
+    # TODO: Make utility function
     def get_service_by_dependency(self, dependency, service_data):
         for service in service_data:
             if dependency['id'] == service['id']:
@@ -289,9 +294,9 @@ class DockerScriptGeneratorExternal:
                     list_valid_services.append(service)
         return list_valid_services
 
+    # TODO: Make utility function
     def get_orchestrator_by_service(self, service):
         list_orchestrators = list()
-        # for experiment_index in range(0, self.configuration.number_of_experiments):
         directory_path = 'experiments/experiment_' + str(service['experiment_index']) + '/'
         file_name = 'experiment_' + str(service['experiment_index']) + '.json'
         with open(directory_path + file_name) as json_file:
@@ -326,6 +331,7 @@ class DockerScriptGeneratorExternal:
         list_valid_services = list()
         list_valid_test_experiments = list()
         random_list_per_experiment = list()
+        random_list = []
         for i in range(0, self.configuration.max_dependencies):
             list_valid_services.append(self.get_list_of_valid_services_by_total_dependencies(i))
             random_list = self.generate_random_list_from_np_seeds(i, len(list_valid_services[i]))
@@ -333,7 +339,7 @@ class DockerScriptGeneratorExternal:
 
         for experiment_list in list_valid_services:
             print('Length Experiment list: ' + str(len(experiment_list)))
-            sublist =[experiment_list[i] for i in random_list]
+            sublist = [experiment_list[i] for i in random_list]
             list_valid_test_experiments.append(sublist)
 
         for i in range(0, self.configuration.max_dependencies):

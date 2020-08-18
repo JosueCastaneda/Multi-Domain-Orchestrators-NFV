@@ -42,6 +42,7 @@ class VnfState:
         self.queue_Q = new_queue_q
         self.queue_R = new_queue_r
 
+    # TODO: Implement code no more stub
     def process_queue(self, my_queue):
         log.info("Processing queue.....")
         return my_queue
@@ -70,18 +71,6 @@ class VnfState:
             while self.queue_R:
                 data.append(self.get_and_remove_first_element_in_r())
         return data
-
-    # TODO: Continue working with this class
-    # def collect_data_to_queue(self, queue: list):
-    #     log.info('Waiting for answer from previous nfv')
-    #     x = self.server.send_channel.recv(SocketSize.RECEIVE_BUFFER.value)
-    #     answer_message = pickle.loads(x)
-    #     str_log = 'Message received of type: ' + str(type(answer_message))
-    #     log.info(str_log)
-    #     for d in answer_message.data:
-    #         queue.append(d)
-
-    # def collect_data_to_p_queue(self):
 
     def get_p(self):
         return self.queue_P

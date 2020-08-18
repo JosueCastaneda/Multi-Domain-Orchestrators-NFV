@@ -20,16 +20,6 @@ def check_entries_are_different(entries):
     else:
         print('M1: ', m1_second, ' M2: ', m2_second, ' M3: ', m3_second, ' M4: ', m4_second)
         return True
-
-
-    # for i in range(1, len(entries)):
-    #     m_entry_first = entries[i]['first_connection_point']
-    #     m_entry_second = entries[i]['first_connection_point']
-    #     if m1_first != m_entry_first or m1_second != m_entry_second:
-    #         return True
-    #     m1_first = m_entry_first
-    #     m1_second = m_entry_second
-
     return False
 
 

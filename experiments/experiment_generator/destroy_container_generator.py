@@ -5,7 +5,6 @@ class DestroyContainerGenerator:
         self.file_container_orchestrator = open(self.container_path + "containers_orchestrator.sh", "r+")
         self.file_container_vnfs = open(self.container_path + "containers_vnfs.sh", "r+")
         self.file_destruction = open(self.container_path + "destroy_containers.sh", "w+")
-        print('Constructor')
 
     def generate_file(self):
         print('Begin destroy containers')
