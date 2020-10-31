@@ -9,6 +9,11 @@ def generate_random_integer(low, high):
 def generate_unique_identifier():
     return str(uuid.uuid1())
 
+def generate_random_ip():
+    return str('127.0.0.1')
+
+def generate_random_port():
+    return str('5000')
 
 # TODO: Remove number_of_services as parameter
 def generate_random_seeds(number, number_of_services):

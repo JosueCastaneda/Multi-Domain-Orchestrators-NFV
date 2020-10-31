@@ -6,7 +6,9 @@ import traceback
 from aiohttp import web
 from aiohttp.web_response import Response
 
+from communication_entities.matching_attribute import MatchingAttribute
 from communication_entities.vector_clock import VectorClock
+from communication_entities.vnf_connection_point_reference import VNFConnectionPointReference
 from entities.vnf_entities.vnf_information import VnfInformation
 
 
@@ -22,6 +24,15 @@ class OrchestratorHandler:
     async def get_services(self, request: web.Request) -> Response:
         try:
             result = await self.orchestrator.get_services()
+            answer = {'status': 'Good', 'result': result}
+            return web.json_response(answer)
+        except Exception as e:
+            response = {'status': 'failed', 'message': str(e)}
+            return web.json_response(response)
+
+    async def get_vnf_forwarding_graphs(self, request: web.Request) -> Response:
+        try:
+            result = await self.orchestrator.get_vnf_forwarding_graphs()
             answer = {'status': 'Good', 'result': result}
             return web.json_response(answer)
         except Exception as e:
@@ -82,6 +93,37 @@ class OrchestratorHandler:
         try:
             data = await request.post()
             result = await self.orchestrator.request_service_scale(data['service_id'])
+            answer = {'status': 'Good', 'result': result}
+            return web.json_response(answer)
+        except Exception as e:
+            response = {'status': 'failed', 'message': str(e)}
+            return web.json_response(response)
+
+    async def update_vnffg_rsp(self, request: web.Request) -> Response:
+        try:
+            data = await request.post()
+            new_vnf_connection_point_reference = VNFConnectionPointReference(data['vnf_identifier'],
+                                                                             data['order'],
+                                                                             data['ingress_connection_point'],
+                                                                             data['egress_connection_point'])
+            result = await self.orchestrator.update_unique_vnf_forwarding_graph_rendered_service_path(new_vnf_connection_point_reference)
+            answer = {'status': 'Good', 'result': result}
+            return web.json_response(answer)
+        except Exception as e:
+            response = {'status': 'failed', 'message': str(e)}
+            return web.json_response(response)
+
+    async def update_vnffg_classifier(self, request: web.Request) -> Response:
+        try:
+            data = await request.post()
+            new_matching_attribute = MatchingAttribute(data['identifier'],
+                                                       data['ip_proto'],
+                                                       data['source_ip'],
+                                                       data['destination_ip'],
+                                                       data['source_port'],
+                                                       data['destination_port'])
+
+            result = await self.orchestrator.update_unique_vnf_forwarding_graph_classifier_rule(new_matching_attribute)
             answer = {'status': 'Good', 'result': result}
             return web.json_response(answer)
         except Exception as e:

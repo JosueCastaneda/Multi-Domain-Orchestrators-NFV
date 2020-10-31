@@ -12,6 +12,17 @@ class CommandPackage:
         self.seed = None
         self.results = None
         self.orchestrator_id = None
+        self.vnf_identifier = ''
+        self.order = 0
+        self.ingress_connection_point = ''
+        self.egress_connection_point = ''
+        self.match_identifier = ''
+        self.ip_proto = ''
+        self.source_ip = ''
+        self.destination_ip = ''
+        self.source_port = ''
+        self.destination_port = ''
+
         self.help_message = "message_factory.py -t <message_type> -h <host> -p <port>" \
                             " -n <name> -m <new_name> -v <vnf_host> -w <vnf_port>"
 

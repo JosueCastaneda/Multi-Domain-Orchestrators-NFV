@@ -2,6 +2,8 @@ import json
 import os
 import random
 
+from utilities.random_integer_generation import generate_random_integer, generate_unique_identifier
+
 
 class DockerScriptGeneratorExternal:
     def __init__(self, experiment_index, configuration, random_running_index):
@@ -13,8 +15,10 @@ class DockerScriptGeneratorExternal:
         self.orchestrator_index = 0
         self.file_commands_causal = None
         self.file_commands_normal = None
+        self.file_vnf_forwarding_graph_update = None
         self.running_experiment = 0
         self.random_running_index = random_running_index
+        self.number_of_vnffg_updates = 5
 
     def set_index(self, index):
         self.orchestrator_index = index
@@ -77,8 +81,113 @@ class DockerScriptGeneratorExternal:
 
             self.close_file()
 
-        # self.add_results()
-        # self.close_file()
+    def generate_vnf_forwarding_graph_update(self):
+        vnf_forwarding_graph_updates = list()
+        remaining_updates = self.number_of_vnffg_updates
+        while remaining_updates:
+            random_orchestrator = self.get_random_orchestrator()
+            random_vnf_forwarding_graph = self.get_random_vnffg(random_orchestrator)
+            type_of_update = self.get_random_vnffg_update()
+            new_vnf_forwarding_graph = self.generate_vnffg_update(random_vnf_forwarding_graph,
+                                                                  type_of_update,
+                                                                  random_orchestrator)
+            vnf_forwarding_graph_updates.append(new_vnf_forwarding_graph)
+            remaining_updates -= 1
+        self.write_vnffg_updates_in_docker_file(vnf_forwarding_graph_updates)
+        print('Hello')
+
+    def write_vnffg_updates_in_docker_file(self, vnf_forwarding_graph_updates:list):
+        self.create_vnf_forwarding_graph_update()
+        for vnf_forwarding_graph_update in vnf_forwarding_graph_updates:
+            if vnf_forwarding_graph_update['type'] == 'rsp':
+                self.write_new_rsp_entry(vnf_forwarding_graph_update)
+            else:
+                self.write_new_classifier_entry(vnf_forwarding_graph_update)
+            self.file_vnf_forwarding_graph_update.write('\n')
+        self.file_vnf_forwarding_graph_update.flush()
+        self.file_vnf_forwarding_graph_update.close()
+        print('Writing docker')
+
+    def create_vnf_forwarding_graph_update(self):
+        file_directory = 'experiments/experiment_' + self.experiment_index + '/'
+        file_name = 'updates_vnf_forwarding_graphs.sh'
+        if not os.path.exists(file_directory):
+            os.makedirs(file_directory)
+        self.file_vnf_forwarding_graph_update = open(file_directory + file_name, 'w+')
+
+    def write_new_rsp_entry(self, vnf_forwarding_graph_update:dict):
+        first = 'python message_factory.py --type --update_vnffg_rsp --host ' + vnf_forwarding_graph_update['host']
+        second = ' --port ' + vnf_forwarding_graph_update['port'] + ' --vnf_identifier '
+        third = vnf_forwarding_graph_update['vnf_identifier'] + ' --order ' + str(vnf_forwarding_graph_update['order'])
+        fourth = ' --ingress_connection_point ' + vnf_forwarding_graph_update['ingress_connection_point']
+        fifth = ' --egress_connection_point ' + vnf_forwarding_graph_update['egress_connection_point']
+        self.file_vnf_forwarding_graph_update.write(first + second + third + fourth + fifth + '\n')
+
+    def write_new_classifier_entry(self, vnf_forwarding_graph_update:dict):
+        first = 'python message_factory.py --type --update_vnffg_classifier --host ' + vnf_forwarding_graph_update['host']
+        second = ' --port ' + vnf_forwarding_graph_update['port'] + ' --match_identifier '
+        third = vnf_forwarding_graph_update['vnf_identifier'] + ' --ip_proto ' + vnf_forwarding_graph_update['ip_proto']
+        fourth = ' --source_ip ' + str(vnf_forwarding_graph_update['source_ip'])
+        fifth = ' --destination_ip ' + str(vnf_forwarding_graph_update['destination_ip'])
+        six = ' --source_port ' + str(vnf_forwarding_graph_update['source_port'])
+        seven = ' --destination_port ' + str(vnf_forwarding_graph_update['destination_port'])
+        self.file_vnf_forwarding_graph_update.write(first + second + third + fourth + fifth + six + seven + '\n')
+
+    def generate_vnffg_update(self, vnf_forwarding_graph: dict, type_of_update:str, random_orchestrator:dict):
+        if type_of_update == 'rsp':
+            return self.generate_new_rsp(vnf_forwarding_graph, random_orchestrator)
+        return self.generate_new_classifier(vnf_forwarding_graph, random_orchestrator)
+
+    def generate_new_rsp(self, vnf_forwarding_graph:dict, random_orchestrator:dict):
+        unique_rsp = vnf_forwarding_graph['rendered_service_paths'][0]
+        number_of_vnf_descriptor_points = len(unique_rsp['vnf_descriptor_connection_points'])
+        random_connection_point_index = generate_random_integer(0, number_of_vnf_descriptor_points - 1)
+        vnf_fg_to_change = unique_rsp['vnf_descriptor_connection_points'][random_connection_point_index]
+        new_update = dict()
+        new_update['vnf_identifier'] = vnf_fg_to_change['vnf_identifier']
+        new_update['order'] = generate_random_integer(0, self.configuration.number_of_vnf_components - 1)
+        new_update['ingress_connection_point'] = generate_unique_identifier()
+        new_update['egress_connection_point'] = generate_unique_identifier()
+        new_update['host'] = random_orchestrator['ip']
+        new_update['port'] = random_orchestrator['port']
+        new_update['type'] = 'rsp'
+        return new_update
+
+    # TODO: This function changes all the entry, it is necessary to change only items instead of the whole thing
+    def generate_new_classifier(self, vnf_forwarding_graph:dict, random_orchestrator:dict):
+        unique_rule = vnf_forwarding_graph['classification_rules'][0]
+        number_of_matching_attributes = len(unique_rule['matching_attributes'])
+        random_matching_attribute_index = generate_random_integer(0, number_of_matching_attributes - 1)
+        vnf_fg_to_change = unique_rule['matching_attributes'][random_matching_attribute_index]
+        new_update = dict()
+        new_update['identifier'] = vnf_fg_to_change['identifier']
+        new_update['vnf_identifier'] = vnf_fg_to_change['vnf_identifier']
+        # TODO: This line has to create only a couple of valus like tcp, udp, for now a new string
+        new_update['ip_proto'] = generate_unique_identifier()
+        new_update['source_ip'] = generate_unique_identifier()
+        new_update['destination_ip'] = generate_unique_identifier()
+        new_update['source_port'] = generate_unique_identifier()
+        new_update['destination_port'] = generate_unique_identifier()
+        new_update['host'] = random_orchestrator['ip']
+        new_update['port'] = random_orchestrator['port']
+        new_update['type'] = 'classifier'
+        return new_update
+
+    def get_random_orchestrator(self):
+        number_of_orchestrators = len(self.data['orchestrators'])
+        random_index = generate_random_integer(0, number_of_orchestrators - 1)
+        return self.data['orchestrators'][random_index]
+
+    def get_random_vnffg(self, orchestrator_as_dictionary:dict):
+        number_of_vnf_forwarding_graphs = len(orchestrator_as_dictionary['vnf-forwarding_graphs'])
+        random_index = generate_random_integer(0, number_of_vnf_forwarding_graphs - 1)
+        return orchestrator_as_dictionary['vnf-forwarding_graphs'][random_index]
+
+    def get_random_vnffg_update(self):
+        update_number = generate_random_integer(0, 1)
+        if update_number == 0:
+            return 'rsp'
+        return 'classifier'
 
     def add_results(self):
         self.file_commands_causal.write('# Add results \n')
@@ -132,9 +241,9 @@ class DockerScriptGeneratorExternal:
         third_string = str(self.get_port_based_on_index()) + ' -r ' + str(random_seed) + ' &'
         self.file_commands_causal.write(first_string + second_string + third_string + '\n')
         self.file_commands_normal.write(first_string_normal + second_string + third_string + '\n')
-        log_string_1 = 'Seed list: ' + str(len(self.configuration.random_seed_list))
-        log_string_2 = ' Running experiment: ' + str(self.running_experiment)
-        print(log_string_1 + log_string_2)
+        # log_string_1 = 'Seed list: ' + str(len(self.configuration.random_seed_list))
+        # log_string_2 = ' Running experiment: ' + str(self.running_experiment)
+        # print(log_string_1 + log_string_2)
 
     def set_up_run_orchestrators(self):
         self.file_commands_causal.write('# Launch orchestrator' + '\n')
@@ -325,7 +434,8 @@ class DockerScriptGeneratorExternal:
 
     def generate_random_list_from_np_seeds(self, index, max_numbers):
         random.seed(self.configuration.collect_random[index])
-        return random.sample(range(0, max_numbers), 30)
+        print('Max numbers: ' + str(max_numbers))
+        return random.sample(range(0, max_numbers), 5)
 
     def add_request_of_scaling_external_second_experiment(self):
         list_valid_services = list()
@@ -337,10 +447,14 @@ class DockerScriptGeneratorExternal:
             random_list = self.generate_random_list_from_np_seeds(i, len(list_valid_services[i]))
             random_list_per_experiment.append(random_list)
 
+        print('List_valid_services: ' + str(len(list_valid_services)))
+
         for experiment_list in list_valid_services:
-            print('Length Experiment list: ' + str(len(experiment_list)))
-            sublist = [experiment_list[i] for i in random_list]
-            list_valid_test_experiments.append(sublist)
+            sublist_copia = list()
+            for i in random_list:
+                if i < len(experiment_list):
+                    sublist_copia.append(experiment_list[i])
+            list_valid_test_experiments.append(sublist_copia)
 
         for i in range(0, self.configuration.max_dependencies):
             for service in list_valid_test_experiments[i]:
@@ -401,5 +515,6 @@ class DockerScriptGeneratorExternal:
         self.file_commands_normal.write('\n')
 
     def close_file(self):
-        self.file_commands_causal.close()
+        print('Hello')
+        # self.file_commands_causal.close()
         # self.file_commands_normal.close()

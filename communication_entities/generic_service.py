@@ -21,6 +21,7 @@ class GenericService:
         self.loss_ratio = 0
         self.dependencies = dependencies
         self.type = 'Service'
+        self.vnf_forwarding_graphs = list()
 
     def as_string(self):
         dictionary_string = dict()
@@ -56,6 +57,14 @@ class GenericService:
             await self.scale_withouth_dependencies(list())
         else:
             await self.scale_with_dependencies(services_to_scale, vnfs_to_scale, services_ids, list())
+
+    def append_vnf_forwarding_graph(self, new_vnf_forwarding_graph):
+        self.vnf_forwarding_graphs.append(new_vnf_forwarding_graph)
+
+    def get_vnf_forwarding_graph_by_indentifier(self, identifier):
+        for vnf_forwarding_graph in self.vnf_forwarding_graphs:
+            if vnf_forwarding_graph.get_identifier() == identifier:
+                return vnf_forwarding_graph
 
     def gather_dependencies(self, vnfs_to_scale):
         services_to_scale = list()

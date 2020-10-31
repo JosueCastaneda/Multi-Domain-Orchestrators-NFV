@@ -1,7 +1,7 @@
 {
   "experiment":
   {
-    "number_of_experiments": 40,
+    "number_of_experiments": 10,
     "number_of_services": 30,
     "number_of_vnf_components": 6,
     "video_definition": 480,

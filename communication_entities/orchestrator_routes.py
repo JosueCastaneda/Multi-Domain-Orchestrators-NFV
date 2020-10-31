@@ -11,6 +11,7 @@ def init_routes(app: web.Application, handler: OrchestratorHandler) -> None:
     add_route('POST', '/clear_inconsistencies', handler.clear_inconsistencies, name='clear_inconsistencies')
     add_route('POST', '/get_log_file', handler.get_log_file, name='get_log_file')
     add_route('POST', '/get_services', handler.get_services, name='get_services')
+    add_route('GET', '/get_vnf_forwarding_graphs', handler.get_vnf_forwarding_graphs, name='get_vnf_forwarding_graphs')
     add_route('POST', '/get_vnfs', handler.get_vnfs, name='get_vnfs')
     add_route('POST', '/get_orchestrators', handler.get_orchestrators, name='get_orchestrators')
     add_route('POST', '/get_vector_clock', handler.get_vector_clock, name='get_vector_clock')
@@ -20,6 +21,8 @@ def init_routes(app: web.Application, handler: OrchestratorHandler) -> None:
     add_route('POST', '/notify_scaling_has_ended', handler.notify_scaling_has_ended, name='notify_scaling_has_ended')
     add_route('POST', '/request_scaling_of_service', handler.request_scaling_of_service,
               name='request_scaling_of_service')
+    add_route('POST', '/update_vnffg_rsp', handler.update_vnffg_rsp, name='update_vnffg_rsp')
+    add_route('POST', '/update_vnffg_classifier', handler.update_vnffg_classifier, name='update_vnffg_classifier')
     str_end = 'scale_of_service_has_ended'
     add_route('POST', '/scale_of_service_has_ended', handler.scale_of_service_has_ended, name=str_end)
     add_route('GET', '/get_inconsistencies', handler.get_inconsistencies, name='get_inconsistencies')

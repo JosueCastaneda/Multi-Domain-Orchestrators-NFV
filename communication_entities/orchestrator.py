@@ -5,9 +5,13 @@ import sys
 
 from communication_entities.generic_service import GenericService
 from communication_entities.life_cycle_management import LifeCycleManagement
+from communication_entities.matching_attribute import MatchingAttribute
 from communication_entities.messages.lcm_messages.notification_lcm_operation import NotificationLCMOperation
 from communication_entities.orchestrator_classes.pending_lcm_scaling_operation import PendingLCMScalingOperation
+from communication_entities.rendered_service_path import RenderedServicePath
 from communication_entities.vector_clock import VectorClock
+from communication_entities.vnf_connection_point_reference import VNFConnectionPointReference
+from communication_entities.vnf_forwarding_graph import VNFForwardingGraph
 from definitions import ROOT_DIR
 from utilities.life_cycle_management_update import return_success, return_failure, return_in_process, send_message
 
@@ -44,6 +48,7 @@ class Orchestrator:
         self.topology = None
         self.services = list()
         self.vnfs = list()
+        self.vnf_forwarding_graphs = list()
         self.inconsistencies = 0
         self.messages_sent = 0
         self.load_server_information()
@@ -56,6 +61,19 @@ class Orchestrator:
         self.pending_operations_repetitions = 0
         self.time_elapsed_in_reconfiguration = 0.0
         random.seed(self.random_seed)
+
+    def add_vnf_forwarding_graph(self, vnf_forwarding_graphs):
+        for vnf_fg_entry in vnf_forwarding_graphs:
+            new_vnf_fg = VNFForwardingGraph(identifier=vnf_fg_entry['identifier'],
+                                            name=vnf_fg_entry['name'],
+                                            short_name=vnf_fg_entry['short_name'],
+                                            is_shared=vnf_fg_entry['is_shared'],
+                                            service_identifier=vnf_fg_entry['service_identifier'])
+
+            new_vnf_fg.instantiate_rendered_service_path(vnf_fg_entry)
+            new_vnf_fg.instantiate_classification_rules(vnf_fg_entry)
+            new_vnf_fg.add_unique_orchestrators(vnf_fg_entry['unique_orchestrators'])
+            self.vnf_forwarding_graphs.append(new_vnf_fg)
 
     def load_server_information(self):
         all_route = ROOT_DIR + '/' + self.directory_path + self.experiment_name + '.json'
@@ -110,6 +128,12 @@ class Orchestrator:
         for service in self.services:
             list_of_services.append(service.as_string())
         return list_of_services
+
+    async def get_vnf_forwarding_graphs(self):
+        vnf_forwarding_graphs = list()
+        for vnf_forwarding_graph in self.vnf_forwarding_graphs:
+            vnf_forwarding_graphs.append(vnf_forwarding_graph.as_dictionary())
+        return vnf_forwarding_graphs
 
     def get_orchestrator_information_by_id(self, orchestrator_id):
         for orchestrator in self.list_orchestrator:
@@ -360,6 +384,7 @@ class Orchestrator:
         else:
             my_ip = str(my_orchestrator['ip'])
         self.instantiate_services(my_orchestrator['services'], my_ip)
+        self.add_vnf_forwarding_graph(my_orchestrator['vnf-forwarding_graphs'])
 
     async def get_pending_operations(self):
         pending_operations = self.life_cycle_manager.pending_operations
@@ -375,6 +400,9 @@ class Orchestrator:
                                          ip,
                                          self.port)
             self.services.append(new_service)
+
+    def instatiate_vnf_forwarding_graphs(self, vnf_forwarding_graphs):
+        print('Hlloe')
 
     def print_state_vnf(self):
         log.info(''.join(["VNF name: ", self.name]))
@@ -410,3 +438,19 @@ class Orchestrator:
         with open(file_name, 'r') as file:
             data = file.read()
         return data
+
+    # TODO: This only works for a single VNFFG per service
+    def update_vnf_forwarding_graph_rendered_service_path(self,
+                                                          new_rendered_service_path: RenderedServicePath,
+                                                          new_vnf_connection_point_reference:VNFConnectionPointReference):
+        self.vnf_forwarding_graphs[0].update_rendered_service_path(new_rendered_service_path,
+                                                                   new_vnf_connection_point_reference)
+
+    async def update_unique_vnf_forwarding_graph_rendered_service_path(self,
+                                                                 new_vnf_connection_point_reference:VNFConnectionPointReference):
+        await self.vnf_forwarding_graphs[0].update_unique_rendered_service_path(new_vnf_connection_point_reference)
+        return return_success()
+
+    async def update_unique_vnf_forwarding_graph_classifier_rule(self, new_matching_attribute: MatchingAttribute):
+        await self.vnf_forwarding_graphs[0].update_unique_classifier_rule(new_matching_attribute)
+        return return_success()

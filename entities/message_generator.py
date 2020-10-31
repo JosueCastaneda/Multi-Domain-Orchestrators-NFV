@@ -7,18 +7,21 @@ from communication_entities.messages.lcm_messages.migration.migration_message im
 from communication_entities.messages.lcm_messages.request_service_scale_message import RequestServiceScaleMessage
 from communication_entities.messages.process_data_message import ProcessDataMessage
 from communication_entities.messages.request_update_message import RequestUpdateMessage
-from communication_entities.messages.vnf_forwarding_graph.initiate_vnffg_updates_message import \
-    InitiateVNFFGUpdatesMessage
+from communication_entities.messages.vnf_forwarding_graph.update_vnf_fg_classifier_message import \
+    UpdateVnfFgClassifierMessage
+from communication_entities.messages.vnf_forwarding_graph.update_vnf_fg_rended_service_path_message import \
+    UpdateVnfFgRenderedServicePathMessage
 from entities.communication_entity_package import CommunicationEntityPackage
 from entities.parameters.parameter_generator import ParameterGenerator
 from entities.parameters.parameter_package import ParameterPackage
+from utilities.command_package import CommandPackage
 from utilities.logger import log
 from utilities.message_type import MessageType
 
 
 class MessageGenerator:
 
-    def __init__(self, command, json_file):
+    def __init__(self, command:CommandPackage, json_file):
         self.command = command
         self.json_file = json_file
 
@@ -38,8 +41,21 @@ class MessageGenerator:
                                        orchestrator_id=self.command.orchestrator_id)
         elif self.command.message_type == "process":
             m = self.generate_process_message()
-        elif self.command.message_type == "update_vnf_fg":
-            m = InitiateVNFFGUpdatesMessage()
+        elif self.command.message_type == "update_vnffg_rsp":
+            print('Ingress CP: ' + str(self.command.ingress_connection_point))
+            m = UpdateVnfFgRenderedServicePathMessage(self.command.vnf_identifier,
+                                                      self.command.order,
+                                                      self.command.ingress_connection_point,
+                                                      self.command.egress_connection_point)
+        elif self.command.message_type == "update_vnffg_classifier":
+            print('XXXIngress CP: ' + str(self.command.ingress_connection_point))
+            m = UpdateVnfFgClassifierMessage(self.command.match_identifier,
+                                             self.command.ip_proto,
+                                             self.command.source_ip,
+                                             self.command.destination_ip,
+                                             self.command.source_port,
+                                             self.command.destination_port)
+
         elif self.command.message_type == "request_update":
             m = RequestUpdateMessage(self.command.seed)
         elif self.command.message_type == "request_scaling_of_service":

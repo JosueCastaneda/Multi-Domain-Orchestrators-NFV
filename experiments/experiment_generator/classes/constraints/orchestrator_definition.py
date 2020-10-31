@@ -13,6 +13,10 @@ class OrchestratorDefinition:
         self.location = location
         self.current_ip = 1
         self.constraints = constraints
+        self.vnf_forwarding_graphs = list()
+
+    def add_vnf_forwarding_graph(self, vnf_forwarding_graph):
+        self.vnf_forwarding_graphs.append(vnf_forwarding_graph)
 
     def add_vnf(self, vnf):
         self.vnfs.append(vnf)
@@ -33,12 +37,17 @@ class OrchestratorDefinition:
         new_orchestrator['type'] = self.type
         new_orchestrator['vnfs'] = list()
         new_orchestrator['services'] = list()
+        new_orchestrator['vnf-forwarding_graphs'] = list()
         for vnf in self.vnfs:
             new_vnf = vnf.create_dictionary_specification()
             new_orchestrator['vnfs'].append(new_vnf)
         for service in self.services:
             new_service = service.create_dictionary_specification()
             new_orchestrator['services'].append(new_service)
+
+        for vnf_forwarding_graph in self.vnf_forwarding_graphs:
+            new_orchestrator['vnf-forwarding_graphs'].append(vnf_forwarding_graph)
+
         return new_orchestrator
 
     def get_vnfs(self):

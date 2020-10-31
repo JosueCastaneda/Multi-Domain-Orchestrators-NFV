@@ -32,9 +32,14 @@ def read_parameters(argv):
         command.orchestrator_id = 'e5ea698b-8a3d-11ea-aa9d-04ea56f99520'
         command.message_type = 'request_sc'
         command.results = 'local'
+        command.vnf_identifier = 'vnf1'
+        command.order = '0'
+        command.ingress_connection_point = 'x1'
+        command.egress_connection_point = 'x2'
 
     try:
-        opts, args = getopt.getopt(argv, "t:h:p:n:m:v:w:e:s:i:x:r:",
+        str_var = "t:h:p:n:m:v:w:e:s:i:x:r:vi:or:icp:ecp:mi:ipp:sip:dip:sp:dp:"
+        opts, args = getopt.getopt(argv, str_var,
                                    ["type=",
                                     "host=",
                                     "port=",
@@ -46,7 +51,17 @@ def read_parameters(argv):
                                     "seed=",
                                     "service_id=",
                                     "orchestrator_id=",
-                                    "results="])
+                                    "results=",
+                                    "vnf_identifier=",
+                                    "order=",
+                                    "ingress_connection_point=",
+                                    "egress_connection_point=",
+                                    "match_identifier=",
+                                    "ip_proto=",
+                                    "source_ip=",
+                                    "destination_ip=",
+                                    "source_port=",
+                                    "destination_port="])
     except getopt.GetoptError:
         print(command.help_message)
         sys.exit(2)
@@ -79,6 +94,26 @@ def read_parameters(argv):
             command.orchestrator_id = arg
         elif opt in ("-r", "--results"):
             command.results = arg
+        elif opt in ("-vi", "--vnf_identifier"):
+            command.vnf_identifier = arg
+        elif opt in ("-or", "--order"):
+            command.order = arg
+        elif opt in ("-icp", "--ingress_connection_point"):
+            command.ingress_connection_point = arg
+        elif opt in ("-ecp", "--egress_connection_point"):
+            command.egress_connection_point = arg
+        elif opt in ("-mi", "--match_identifier"):
+            command.match_identifier = arg
+        elif opt in ("-ipp", "--ip_proto"):
+            command.ip_proto = arg
+        elif opt in ("-sip", "--source_ip"):
+            command.source_ip = arg
+        elif opt in ("-dip", "--destination_ip"):
+            command.destination_ip = arg
+        elif opt in ("-sp", "--source_port"):
+            command.source_port = arg
+        elif opt in ("-dp", "--destination_port"):
+            command.destination_port = arg
     return command
 
 

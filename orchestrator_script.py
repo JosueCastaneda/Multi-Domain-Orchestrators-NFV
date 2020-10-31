@@ -39,7 +39,7 @@ def main(argv) -> None:
     server_host = ''
     server_port = 0
     random_seed = 1000
-    debug = False
+    debug = True
 
     if debug:
         orchestrator_index = '0'
