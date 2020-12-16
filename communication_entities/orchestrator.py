@@ -1,5 +1,7 @@
 import asyncio
 import json
+import logging
+import os
 import random
 import sys
 
@@ -7,18 +9,16 @@ from communication_entities.generic_service import GenericService
 from communication_entities.life_cycle_management import LifeCycleManagement
 from communication_entities.matching_attribute import MatchingAttribute
 from communication_entities.messages.lcm_messages.notification_lcm_operation import NotificationLCMOperation
+from communication_entities.messages.vnf_forwarding_graph.update_vnf_forwarding_graph import UpdateVNFForwardingGraph
 from communication_entities.orchestrator_classes.pending_lcm_scaling_operation import PendingLCMScalingOperation
-from communication_entities.rendered_service_path import RenderedServicePath
 from communication_entities.vector_clock import VectorClock
 from communication_entities.vnf_connection_point_reference import VNFConnectionPointReference
 from communication_entities.vnf_forwarding_graph import VNFForwardingGraph
 from definitions import ROOT_DIR
 from utilities.life_cycle_management_update import return_success, return_failure, return_in_process, send_message
+from utilities.random_integer_generation import generate_random_integer
 
 sys.path.append('../')
-
-from utilities.logger import *
-
 
 def is_orchestrator_included_for_notification(id_orch, excluding_list):
     for orchestrator in excluding_list:
@@ -33,10 +33,12 @@ def is_orchestrator_included_for_notification(id_orch, excluding_list):
 class Orchestrator:
 
     def __init__(self, experiment_index, orchestrator_index, server_host, server_port, random_seed,
-                 causal_delivery=True):
+                 causal_delivery=False, algorithm_type='causal'):
         self.experiment_name = 'experiment_' + experiment_index
         self.experiment_index = experiment_index
         self.name = 'orch_' + orchestrator_index
+        self.orchestrator_index = orchestrator_index
+        self.orchestrator_counter = 0
         self.directory_path = 'experiments/experiment_generator/experiments/experiment_' + self.experiment_index + '/'
         self.id = ''
         self.location = ''
@@ -60,6 +62,8 @@ class Orchestrator:
         self.random_seed = random_seed
         self.pending_operations_repetitions = 0
         self.time_elapsed_in_reconfiguration = 0.0
+        self.algorithm_type = algorithm_type
+        self.set_up_my_logger()
         random.seed(self.random_seed)
 
     def add_vnf_forwarding_graph(self, vnf_forwarding_graphs):
@@ -68,7 +72,8 @@ class Orchestrator:
                                             name=vnf_fg_entry['name'],
                                             short_name=vnf_fg_entry['short_name'],
                                             is_shared=vnf_fg_entry['is_shared'],
-                                            service_identifier=vnf_fg_entry['service_identifier'])
+                                            service_identifier=vnf_fg_entry['service_identifier'],
+                                            my_orchestrator=self.id)
 
             new_vnf_fg.instantiate_rendered_service_path(vnf_fg_entry)
             new_vnf_fg.instantiate_classification_rules(vnf_fg_entry)
@@ -109,7 +114,7 @@ class Orchestrator:
         return self.time_elapsed_in_reconfiguration
 
     async def request_service_scale(self, service_id) -> json:
-        log.info('Please scale service: ' + str(service_id))
+        self.log.info('Please scale service: ' + str(service_id))
         self.time_elapsed_in_reconfiguration = 0.0
         self.inconsistencies = 0
         self.life_cycle_manager.are_VNFs_scaled = False
@@ -147,10 +152,13 @@ class Orchestrator:
         orchestrator_format['port'] = self.port
         orchestrator_format['id'] = self.id
         orchestrator_format['name'] = self.name
+        orchestrator_format['is_causal'] = self.causal_delivery
+        orchestrator_format['algorithm_type'] = self.algorithm_type
         orchestrator_format['vector_clock'] = self.vector_clock.as_string()
         orchestrator_format['inconsistencies'] = self.inconsistencies
         orchestrator_format['random_seed'] = self.random_seed
         orchestrator_format['messages_sent'] = self.messages_sent
+        orchestrator_format['pending_operations'] = len(self.pending_lcm_operations)
         orchestrator_format['time_elapsed_in_last_reconfiguration'] = self.time_elapsed_in_reconfiguration
         return orchestrator_format
 
@@ -164,23 +172,76 @@ class Orchestrator:
         await asyncio.sleep(wait_period)
         await self.notification_of_lcm(vector_clock, orchestrator_sender_id)
 
+    def set_up_my_logger(self):
+        file_name = 'logs/file_' + self.name + '_' + self.experiment_index + '.log'
+        other_folder = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', file_name))
+        logging.basicConfig(filename=other_folder)
+        self.log = logging.getLogger('logger')
+        self.log.setLevel(logging.DEBUG)
+        log_str = '%(asctime)s - %(filename)s - %(lineno)s - %(message)s'
+        formatter = logging.Formatter(log_str)
+        fh = logging.FileHandler(other_folder, mode='w', encoding='utf-8')
+        fh.setLevel(logging.DEBUG)
+        fh.setFormatter(formatter)
+        self.log.addHandler(fh)
+        ch = logging.StreamHandler()
+        ch.setLevel(logging.INFO)
+        ch.setFormatter(formatter)
+        self.log.addHandler(ch)
+
+    def add_inconsistency(self, vector_clock):
+        str_log = 'A new inconsistency because Sender ' + vector_clock.as_string() + ' > '
+        str_log_2 = str_log + self.vector_clock.as_string()
+        self.log.info(str_log_2)
+        self.inconsistencies += 1
+
     async def notification_of_lcm(self, vector_clock_string, orchestrator_sender_id):
+        self.log.info('notification_of_lcm -- Update')
         vector_clock = VectorClock()
         vector_clock.create_from_list(vector_clock_string)
-        log.info('Received ' + vector_clock.as_string() + ' from: ' + str(
+        self.log.info('Received ' + vector_clock.as_string() + ' from: ' + str(
             orchestrator_sender_id[0:8]) + ' My clock ' + self.vector_clock.as_string())
+        causal_delivery = False
+        if self.algorithm_type == 'causal':
+            causal_delivery = True
         if orchestrator_sender_id == self.id:
             difference_in_vectors = 0
         else:
-            difference_in_vectors = self.vector_clock.compare_clocks(vector_clock, orchestrator_sender_id,
-                                                                     self.causal_delivery)
+            difference_in_vectors = self.vector_clock.compare_clocks(vector_clock,
+                                                                     orchestrator_sender_id,
+                                                                     causal_delivery,
+                                                                     self.log)
+        await self.apply_notification_of_lifecycle_management_operation(difference_in_vectors,
+                                                                        vector_clock,
+                                                                        orchestrator_sender_id)
+        self.log.info('Orch operations in ' + str(
+            len(self.pending_lcm_operations)) + ' LCM operations: ' + str(
+            len(self.life_cycle_manager.pending_operations)) + ' My ' + self.vector_clock.as_string())
+        self.pending_operations_repetitions = 0
+        return_success()
+
+    async def apply_notification_of_lifecycle_management_operation(self, difference_in_vectors, vector_clock, sender):
+        if self.algorithm_type == 'causal':
+            await self.notification_of_lcm_causal(difference_in_vectors, vector_clock, sender)
+        elif self.algorithm_type == 'standard':
+            await self.notification_of_lcm_normal(difference_in_vectors, vector_clock, sender)
+        elif self.algorithm_type == 'last_writer_wins':
+            await self.notification_of_lcm_last_writer_wins(difference_in_vectors, vector_clock, sender)
+        elif self.algorithm_type == 'multi_value':
+            await self.notification_of_lcm_multi_value(difference_in_vectors, vector_clock, sender)
+
+    async def notification_of_lcm_last_writer_wins(self, difference_in_vectors, vector_clock, sender):
+        pass
+
+    async def notification_of_lcm_multi_value(self, difference_in_vectors, vector_clock, sender):
+        pass
+
+    async def notification_of_lcm_causal(self, difference_in_vectors, vector_clock, orchestrator_sender_id):
         if difference_in_vectors <= 1:
-            if not self.vector_clock.is_equal(vector_clock):
-                self.vector_clock.update_clock(vector_clock, orchestrator_sender_id, self.causal_delivery)
-            await self.do_pending_lcm_notifications_notifications()
+            await self.apply_notification_of_lcm_operation(vector_clock, orchestrator_sender_id)
         else:
             if self.vector_clock.are_different(vector_clock.clock_list):
-                log.info('Saving notification as a pending operation')
+                self.log.info('Saving notification as a pending operation')
                 new_pending_operation = PendingLCMScalingOperation(vnf_component_to_scale_id='',
                                                                    operation='notification',
                                                                    original_service_id='',
@@ -189,17 +250,32 @@ class Orchestrator:
                                                                    sender_vector_clock=vector_clock,
                                                                    service_sender_id='')
                 self.add_pending_operation(new_pending_operation)
-        log.info('Orch operations in ' + str(
-            len(self.pending_lcm_operations)) + ' LCM operations: ' + str(
-            len(self.life_cycle_manager.pending_operations)) + ' My ' + self.vector_clock.as_string())
-        self.pending_operations_repetitions = 0
-        return_success()
 
-    async def notify_all_orchestrators_of_change(self, exclude_list_of_orchestrators, current_vector_clock):
+    async def notification_of_lcm_normal(self, difference_in_vectors, vector_clock, orchestrator_sender_id):
+        if difference_in_vectors > 1:
+            self.add_inconsistency(vector_clock)
+        await self.apply_notification_of_lcm_operation(vector_clock, orchestrator_sender_id)
+
+    async def apply_notification_of_lcm_operation(self, vector_clock, orchestrator_sender_id):
+        if not self.vector_clock.is_equal(vector_clock):
+            self.log.info('Before update: ' + str(self.vector_clock.as_string()))
+            self.vector_clock.update_clock(vector_clock,
+                                           orchestrator_sender_id,
+                                           self.log)
+            self.log.info('After update: ' + str(self.vector_clock.as_string()) + ' Pending operations: ' + str(
+                len(self.pending_lcm_operations)))
+        total_pending_operations = len(self.pending_lcm_operations)
+        if total_pending_operations > 0:
+            await self.do_pending_lcm_notifications_notifications()
+
+    async def notify_all_orchestrators_of_change(self, exclude_list_of_orchestrators, current_vector_clock, operation='scaling'):
         exclude_list_of_orchestrators.append(self.id)
         data = dict()
-        data['vector_clock'] = current_vector_clock.to_json()
+        data['vector_clock'] = current_vector_clock
         data['orchestrator_sender_id'] = self.id
+        data['type'] = self.algorithm_type
+        data['orchestrator_counter'] = self.orchestrator_counter
+        data['orchestrator_index'] = self.orchestrator_index
         for orchestrator in self.list_orchestrator:
             if is_orchestrator_included_for_notification(orchestrator['id'], exclude_list_of_orchestrators):
                 new_message = NotificationLCMOperation(host=orchestrator['ip'],
@@ -212,55 +288,102 @@ class Orchestrator:
         self.messages_sent += 1
 
     async def do_pending_lcm_notifications_notifications(self):
-        log.info('Do pending LCM NOTIFICATION')
+        self.log.info('Do pending LCM NOTIFICATION')
         at_least_one_clock_changed = True
         while at_least_one_clock_changed:
-            change_took_place = False
-            repetitions_message = 0
-            total_pending_operations = len(self.pending_lcm_operations)
-            # log.info('Total pending operations: ' + str(total_pending_operations) + ' Pending LCM operations' + str(
-            #     len(self.pending_lcm_operations)))
-            while self.pending_lcm_operations and repetitions_message < total_pending_operations and self.pending_operations_repetitions < total_pending_operations:
-                repetitions_message += 1
-                pending_operation = self.pending_lcm_operations.pop(0)
-                if type(pending_operation.sender_vector_clock) == str:
-                    new_vector_clock = VectorClock()
-                    new_vector_clock.create_from_list(pending_operation.sender_vector_clock)
-                    pending_operation.sender_vector_clock = new_vector_clock
-                difference_in_clocks = self.vector_clock.compare_clocks(pending_operation.sender_vector_clock,
-                                                                        pending_operation.orchestrator_sender_id,
-                                                                        self.causal_delivery)
-                if difference_in_clocks == 2:
-                    difference_in_clocks, real_orchestrator_sender_id = self.vector_clock.check_single_difference(
-                        pending_operation.sender_vector_clock)
-                    if difference_in_clocks == 1:
-                        pending_operation.orchestrator_sender_id = real_orchestrator_sender_id
-
-                log.info('Difference in clocks: ' + str(difference_in_clocks))
-                if difference_in_clocks <= 1:
-                    if pending_operation.operation == 'notification' and pending_operation.is_not_done:
-                        log.info('Notification and pending operation is not done')
-                        self.vector_clock.update_clock(pending_operation.sender_vector_clock,
-                                                       pending_operation.orchestrator_sender_id)
-                        pending_operation.is_not_done = False
-                        change_took_place = True
-
-                    elif pending_operation.operation == 'scale' or pending_operation.operation == 'scaling' and pending_operation.is_not_done:
-                        log.info('Scaling operation and pending operation is not done')
-                        pending_operation.is_not_done = False
-                        change_took_place = True
-                        await self.life_cycle_manager.scale_confirmation(pending_operation.vnf_component_to_scale_id,
-                                                                         pending_operation.original_service_id,
-                                                                         pending_operation.orchestrator_sender_id,
-                                                                         pending_operation.original_orchestrator_id,
-                                                                         pending_operation.sender_vector_clock,
-                                                                         pending_operation.service_sender_id)
-                    else:
-                        log.info('Something went horribly wrong')
-
-                else:
-                    self.add_pending_operation(pending_operation)
+            change_took_place = await self.repeat_lcm_operations()
             at_least_one_clock_changed = change_took_place
+        self.log.info('Finish doing LCM notifications!')
+
+    async def repeat_lcm_operations(self):
+        change_took_place = False
+        repetitions_message = 0
+        total_pending_operations = len(self.pending_lcm_operations)
+        self.log.info('Total operatins: ' + str(total_pending_operations))
+        while self.pending_lcm_operations and repetitions_message < total_pending_operations and self.pending_operations_repetitions < total_pending_operations:
+            self.log.info('Current repetitions: ' + str(repetitions_message))
+            repetitions_message += 1
+            pending_operation = self.pending_lcm_operations.pop(0)
+
+            if type(pending_operation.sender_vector_clock) == str:
+                new_vector_clock = VectorClock()
+                new_vector_clock.create_from_list(pending_operation.sender_vector_clock)
+                self.log.info(new_vector_clock.to_json())
+                pending_operation.set_vector_clock(new_vector_clock)
+
+            difference_in_clocks = self.compute_clock_difference(pending_operation)
+            change_result = False
+            if self.algorithm_type == 'causal':
+                change_result = await self.repeat_lcm_operations_causal(difference_in_clocks, pending_operation)
+            elif self.algorithm_type == 'normal':
+                change_result = await self.repeat_lcm_operations_normal(difference_in_clocks, pending_operation)
+            change_took_place = change_result
+            if change_took_place:
+                repetitions_message = 0
+        return change_took_place
+
+    async def repeat_lcm_operations_causal(self, difference_in_clocks, pending_operation):
+        change_took_place = False
+        if difference_in_clocks <= 1 and pending_operation.is_not_done:
+            self.log.info('Applying operation')
+            change_took_place = await self.apply_lcm_operation(pending_operation)
+        else:
+            self.add_pending_operation(pending_operation)
+        return change_took_place
+
+    async def repeat_lcm_operations_normal(self, difference_in_clocks, pending_operation):
+        if difference_in_clocks > 1:
+            self.add_inconsistency(pending_operation.sender_vector_clock)
+        return await self.apply_lcm_operation(pending_operation)
+
+    def compute_clock_difference(self, pending_operation):
+        causal_delivery = False
+        if self.algorithm_type == 'causal':
+            causal_delivery = True
+
+        difference_in_clocks = self.vector_clock.compare_clocks(pending_operation.sender_vector_clock,
+                                                                pending_operation.orchestrator_sender_id,
+                                                                causal_delivery,
+                                                                self.log)
+        self.log.info('Difference in clocks: ' + str(difference_in_clocks))
+        return difference_in_clocks
+
+    async def apply_lcm_operation(self, pending_operation):
+        self.log.info('Appliging LCM operation')
+        change_result = True
+        if pending_operation.operation == 'notification':
+            pending_operation.is_not_done = False
+            await self.apply_notification_operation(pending_operation)
+        elif pending_operation.operation == 'scale' or pending_operation.operation == 'scaling':
+            pending_operation.is_not_done = False
+            await self.apply_scaling_operation(pending_operation)
+        elif pending_operation.operation == 'vnf_fg_update':
+            self.log.info('Appliying VNF FG UPDATE')
+            pending_operation.is_not_done = False
+            self.vector_clock.update_clock_with_a_string(pending_operation.sender_vector_clock,
+                                                         self.log)
+            await self.apply_vnf_fg_update_notification(pending_operation.data)
+        else:
+            self.log.info('Something went horribly wrong')
+            change_result = False
+        return change_result
+
+    async def apply_notification_operation(self, pending_operation):
+        self.log.info('Notification and pending operation is not done')
+        self.vector_clock.update_clock(pending_operation.sender_vector_clock,
+                                       pending_operation.orchestrator_sender_id,
+                                       self.log)
+        pending_operation.is_not_done = False
+
+    async def apply_scaling_operation(self, pending_operation):
+        self.log.info('Scaling operation and pending operation is not done')
+        pending_operation.is_not_done = False
+        await self.life_cycle_manager.scale_confirmation(pending_operation.vnf_component_to_scale_id,
+                                                         pending_operation.original_service_id,
+                                                         pending_operation.orchestrator_sender_id,
+                                                         pending_operation.original_orchestrator_id,
+                                                         pending_operation.sender_vector_clock,
+                                                         pending_operation.service_sender_id)
 
     async def wait_before_delivery_grant(self, vnf_component_to_scale_id, operation, original_service,
                                          sender_vector_clock=None):
@@ -272,9 +395,9 @@ class Orchestrator:
 
     async def grant_lcm_operation_of_service(self, vnf_component_to_scale_id, operation, original_service,
                                              sender_vector_clock=None):
-        log.info('Can you please scale: ' + str(vnf_component_to_scale_id)[0:8] + ' originally from ' + str(
+        self.log.info('Can you please scale: ' + str(vnf_component_to_scale_id)[0:8] + ' originally from ' + str(
             original_service['original_service_id'][0:8]))
-        log.info('Received ' + sender_vector_clock.as_string() + ' My clock ' + self.vector_clock.as_string())
+        self.log.info('Received ' + sender_vector_clock.as_string() + ' My clock ' + self.vector_clock.as_string())
         if self.causal_delivery:
             await self.grant_lcm_operation_causal(vnf_component_to_scale_id, operation, original_service,
                                                   sender_vector_clock)
@@ -283,16 +406,23 @@ class Orchestrator:
                                                   sender_vector_clock)
 
     def compute_difference_in_vectors(self, original_service, sender_vector_clock) -> int:
+        causal_delivery = False
+        if self.algorithm_type == 'causal':
+            causal_delivery = True
+
         if original_service['orchestrator_id'] != self.id:
-            return self.vector_clock.compare_clocks(sender_vector_clock, original_service['orchestrator_id'],
-                                                    self.causal_delivery)
+            return self.vector_clock.compare_clocks(sender_vector_clock,
+                                                    original_service['orchestrator_id'],
+                                                    causal_delivery,
+                                                    self.log)
         return 100
 
     async def do_lcm_operation(self, original_service, sender_vector_clock, operation, vnf_component_to_scale_id):
-        log.info('Doing LCM operations')
+        self.log.info('Doing LCM operations')
         if original_service['orchestrator_id'] != self.id:
-            self.vector_clock.update_clock(sender_vector_clock, original_service['orchestrator_id'],
-                                           self.causal_delivery)
+            self.vector_clock.update_clock(sender_vector_clock,
+                                           original_service['orchestrator_id'],
+                                           self.log)
         await asyncio.gather(self.scale_vnfc_operation(vnf_component_to_scale_id, original_service),
                              self.do_pending_operations())
 
@@ -316,14 +446,11 @@ class Orchestrator:
                                          sender_vector_clock=None):
         difference_in_vectors = self.compute_difference_in_vectors(original_service, sender_vector_clock)
         if difference_in_vectors > 1:
-            str_log = 'A new inconsistency because Sender VT' + sender_vector_clock.as_string() + ' > '
-            str_log_2 = str_log + self.vector_clock.as_string()
-            log.info(str_log_2)
-            self.inconsistencies += 1
+            self.add_inconsistency(sender_vector_clock)
         await self.do_lcm_operation(original_service, sender_vector_clock, operation, vnf_component_to_scale_id)
 
     def add_pending_operation(self, new_operation) -> None:
-        log.info('Adding operation to pending LCM')
+        self.log.info('Adding operation to pending LCM')
         self.pending_lcm_operations.append(new_operation)
 
     async def scale_vnfc_operation(self, vnf_component_to_scale_id, original_service):
@@ -336,37 +463,35 @@ class Orchestrator:
                                                             original_service['orchestrator_id'])
 
     async def do_pending_operations(self):
-        log.info('Grant Pending Operations ' + str(
+        self.log.info('Grant Pending Operations ' + str(
             self.pending_operations_repetitions) + ' are VNFs SCALED? ' + str(self.life_cycle_manager.are_VNFs_scaled))
         self.pending_operations_repetitions += 1
         clock_was_updated = True
         while clock_was_updated:
-            at_least_one_clock_changed = False
-            repetitions_message = 0
-            total_pending_operations = len(self.pending_lcm_operations)
-            while self.pending_lcm_operations and repetitions_message < total_pending_operations and self.pending_operations_repetitions < total_pending_operations:
-                repetitions_message += 1
-                operation = self.pending_lcm_operations.pop(0)
-                clock_difference = self.vector_clock.compare_stored_clock(operation.sender_vector_clock,
-                                                                          self.causal_delivery)
-                log.info('My Clock: ' + str(self.vector_clock.as_string()) + ' Sender Vector clock: ' + str(
-                    operation.sender_vector_clock.as_string()))
-                # log.info('Clock difference: ' + str(clock_difference))
-                if operation.is_not_done and self.vector_clock.compare_stored_clock(operation.sender_vector_clock,
-                                                                                    self.causal_delivery):
-                    if operation.operation != 'notification':
-                        operation.is_not_done = False
-                        at_least_one_clock_changed = True
-                        log.info('Doing pending operation ' + str(
-                            operation.vnf_component_to_scale_id) + ' originally from: ' + str(
-                            operation.original_service_id))
-                        await self.grant_lcm_operation_causal(operation.vnf_component_to_scale_id, 'scale',
-                                                              operation.original_service, operation.sender_vector_clock)
-                else:
-                    log.info('Adding operation to LCM Operations')
-                    self.add_pending_operation(operation)
+            at_least_one_clock_changed = await self.repeat_operation_store_clock()
             clock_was_updated = at_least_one_clock_changed
         self.pending_operations_repetitions = 0
+
+    async def repeat_operation_store_clock(self):
+        at_least_one_clock_changed = False
+        repetitions_message = 0
+        total_pending_operations = len(self.pending_lcm_operations)
+        while self.pending_lcm_operations and repetitions_message < total_pending_operations and self.pending_operations_repetitions < total_pending_operations:
+            repetitions_message += 1
+            operation = self.pending_lcm_operations.pop(0)
+            if operation.is_not_done and self.vector_clock.compare_stored_clock(operation.sender_vector_clock,
+                                                                                self.causal_delivery):
+                if operation.operation == 'scale' or operation.operation == 'scaling':
+                    operation.is_not_done = False
+                    at_least_one_clock_changed = True
+                    self.log.info('Doing pending operation ' + str(
+                        operation.vnf_component_to_scale_id) + ' originally from: ' + str(
+                        operation.original_service_id))
+                    await self.grant_lcm_operation_causal(operation.vnf_component_to_scale_id, 'scale',
+                                                          operation.original_service, operation.sender_vector_clock)
+            else:
+                self.add_pending_operation(operation)
+        return at_least_one_clock_changed
 
     def load_vnf_components(self):
         all_route = ROOT_DIR + '/' + self.directory_path + self.experiment_name + '.json'
@@ -401,11 +526,8 @@ class Orchestrator:
                                          self.port)
             self.services.append(new_service)
 
-    def instatiate_vnf_forwarding_graphs(self, vnf_forwarding_graphs):
-        print('Hlloe')
-
     def print_state_vnf(self):
-        log.info(''.join(["VNF name: ", self.name]))
+        self.log.info(''.join(["VNF name: ", self.name]))
 
     def get_local_vnf(self, vnf_name):
         return self.list_vnf.get(vnf_name)
@@ -439,18 +561,224 @@ class Orchestrator:
             data = file.read()
         return data
 
-    # TODO: This only works for a single VNFFG per service
-    def update_vnf_forwarding_graph_rendered_service_path(self,
-                                                          new_rendered_service_path: RenderedServicePath,
-                                                          new_vnf_connection_point_reference:VNFConnectionPointReference):
-        self.vnf_forwarding_graphs[0].update_rendered_service_path(new_rendered_service_path,
-                                                                   new_vnf_connection_point_reference)
+    async def update_unique_vnf_forwarding_graph_rendered_service_path(self, connection_point:VNFConnectionPointReference):
+        for vnffg in self.vnf_forwarding_graphs:
+            update_result = await vnffg.update_unique_rendered_service_path(connection_point,
+                                                                            self.log,
+                                                                            self.orchestrator_index,
+                                                                            was_called_by_caller=True)
+            if update_result['is_positive_result']:
+                oi = str(self.orchestrator_index)
+                nc = str(update_result['new_counter'])
+                mc = str(update_result['new_max_counter'])
+                id = str(update_result['vnffg_identifier'])
+                ci = str(update_result['change_identifier'])
 
-    async def update_unique_vnf_forwarding_graph_rendered_service_path(self,
-                                                                 new_vnf_connection_point_reference:VNFConnectionPointReference):
-        await self.vnf_forwarding_graphs[0].update_unique_rendered_service_path(new_vnf_connection_point_reference)
+                if self.algorithm_type == 'causal' or self.algorithm_type == 'standard':
+                    self.log.info(
+                        'Call from Handler... My clock after update: ' + self.vector_clock.as_string() + ' Pending operations: ' + str(
+                            len(self.pending_lcm_operations)))
+                elif self.algorithm_type == 'last_writer_wins':
+                    self.log.info('Call from Handler... After update: {' + oi + ',' + nc + ','+mc+'} for VNFFG ' + id + ' val: ' + ci)
+                return await self.notify_all_replicas_and_orchestrators_of_positive_change(update_result)
+        return return_failure('No VNF ID FOUND! ' + str(connection_point.get_vnf_identifier()))
+
+    async def update_unique_vnf_forwarding_graph_classifier_rule(self, matching_attribute:MatchingAttribute):
+        for vnffg in self.vnf_forwarding_graphs:
+            update_result = await vnffg.update_unique_classifier_rule(matching_attribute,
+                                                                      self.log,
+                                                                      was_called_by_caller=True)
+            if update_result['is_positive_result']:
+                oi = str(self.orchestrator_index)
+                nc = str(update_result['new_counter'])
+                mc = str(update_result['new_max_counter'])
+                id = str(update_result['vnffg_identifier'])
+                ci = str(update_result['change_identifier'])
+                if self.algorithm_type == 'causal' or self.algorithm_type == 'standard':
+                    self.log.info(
+                        'Call from Handler... My clock after update: ' + self.vector_clock.as_string() + ' Pending operations: ' + str(
+                            len(self.pending_lcm_operations)))
+                elif self.algorithm_type == 'last_writer_wins':
+                    self.log.info('Call from Handler... After update: {' + oi + ',' + nc + ','+mc+'} for VNFFG ' + id + ' val: ' + ci)
+                return await self.notify_all_replicas_and_orchestrators_of_positive_change(update_result)
+        return return_failure('No Matching attribute with ID found! ' + str(matching_attribute.get_identifier()))
+
+    async def notify_all_replicas_and_orchestrators_of_positive_change(self, update_result):
+        list_of_replicas_to_notify = update_result['replicas']
+        vnf_fg_as_dictionary = update_result['vnffg']
+        self.vector_clock.increment_clock(self.id)
+        my_clock_as_json = self.vector_clock.to_json()
+        await self.notify_replicas_of_vnf_forwarding_graph_update(list_of_replicas_to_notify, vnf_fg_as_dictionary, my_clock_as_json)
+        if self.algorithm_type == 'causal' or self.algorithm_type == 'standard':
+            await self.notify_all_orchestrators_of_change(list_of_replicas_to_notify, my_clock_as_json)
         return return_success()
 
-    async def update_unique_vnf_forwarding_graph_classifier_rule(self, new_matching_attribute: MatchingAttribute):
-        await self.vnf_forwarding_graphs[0].update_unique_classifier_rule(new_matching_attribute)
-        return return_success()
+    def increase_my_counter(self):
+        self.orchestrator_counter +=1
+
+    async def notify_replicas_of_vnf_forwarding_graph_update(self, replicas, vnf_forwarding_graph, vector_clock_as_json):
+        # self.log.info('Notifying replicas of VNFFG Update....')
+        for replica in replicas:
+            for orchestrator in self.list_orchestrator:
+                if orchestrator['id'] == replica:
+                    vnf_forwarding_graph['vector_clock'] = vector_clock_as_json
+                    vnf_forwarding_graph['orchestrator_id'] = self.id
+                    vnf_forwarding_graph['type'] = self.algorithm_type
+                    vnf_forwarding_graph['orchestrator_index'] = self.orchestrator_index
+                    new_message = UpdateVNFForwardingGraph(host=orchestrator['ip'],
+                                                           port=orchestrator['port'],
+                                                           data=vnf_forwarding_graph)
+                    await send_message(new_message)
+
+    async def notify_update_of_vnf_forwarding_graph(self, vnf_forwarding_graph):
+        self.log.info('Received Notification for: ' + str(vnf_forwarding_graph['identifier'][0:8]) + ' ' + str(vnf_forwarding_graph['change_identifier'][0:8]) )
+        vector_clock = VectorClock()
+        vector_clock.create_from_list(vnf_forwarding_graph['vector_clock'])
+        sender_id = vnf_forwarding_graph['orchestrator_id']
+        difference_in_vectors = self.vector_clock.compare_with_list_of_values(vector_clock, sender_id, self.log)
+        if self.algorithm_type == 'causal' or self.algorithm_type == 'standard':
+            self.log.info('Difference in Vectors: ' + str(difference_in_vectors))
+        await self.apply_notification_using_type(difference_in_vectors, vector_clock, vnf_forwarding_graph)
+        if self.algorithm_type == 'causal' or self.algorithm_type == 'standard':
+            self.log.info('My clock after notification: ' + self.vector_clock.as_string() + ' Pending operations: ' + str(len(self.pending_lcm_operations)))
+
+    async def apply_notification_using_type(self, difference_in_vectors, vector_clock, vnf_forwarding_graph):
+        if vnf_forwarding_graph['type'] == 'causal':
+            await self.apply_notification_using_causal_algorithm(difference_in_vectors, vector_clock, vnf_forwarding_graph)
+        elif vnf_forwarding_graph['type'] == 'standard':
+            await self.apply_notification_using_standard_algorithm(vector_clock, vnf_forwarding_graph)
+        elif vnf_forwarding_graph['type'] == 'last_writer_wins':
+            await self.apply_notification_using_last_writer_win_algorithm(vnf_forwarding_graph)
+        elif vnf_forwarding_graph['type'] == 'multi_value':
+            self.log.info('Applying multi-value')
+            await self.apply_notification_using_multi_value_algorithm()
+        else:
+            self.log.info('ERROR!')
+
+    async def apply_notification_using_causal_algorithm(self, difference_in_vectors, vector_clock, vnf_forwarding_graph):
+        if difference_in_vectors <= 1:
+            self.log.info('Updating....')
+            self.vector_clock.update_clock_with_a_string(vector_clock, self.log)
+            await self.apply_vnf_fg_update_notification(vnf_forwarding_graph)
+            total_pending_operations = len(self.pending_lcm_operations)
+            self.log.info('Total pelding operations: ' + str(total_pending_operations))
+            if total_pending_operations > 0:
+                await self.do_pending_lcm_notifications_notifications()
+        else:
+            self.save_vnf_fg_update_notification(vnf_forwarding_graph)
+
+    async def apply_notification_using_standard_algorithm(self, vector_clock, vnf_forwarding_graph):
+        # self.log.info('Updating using standard algorithm....')
+        self.vector_clock.update_clock_with_a_string(vector_clock, self.log)
+        await self.apply_vnf_fg_update_notification(vnf_forwarding_graph)
+
+    async def apply_notification_using_last_writer_win_algorithm(self, vnf_forwarding_graph):
+        other_counter = int(vnf_forwarding_graph['vnffg_counter'])
+        other_index = int(vnf_forwarding_graph['orchestrator_index'])
+        # other_max_index = int(vnf_forwarding_graph['orchestrator_index'])
+        # self.log.info('OP Value: {' + str(other_index) + ',' + str(other_counter) + '}')
+        debug_change = False
+        for vnf_fg_entry in self.vnf_forwarding_graphs:
+            if vnf_fg_entry.get_identifier() == vnf_forwarding_graph['identifier']:
+                my_counter = vnf_fg_entry.get_counter_of_entry(vnf_forwarding_graph, self.log)
+                my_current_max_index = vnf_fg_entry.get_current_max_index_of_entry(vnf_forwarding_graph, self.log)
+                if my_current_max_index == -1:
+                    my_current_max_index = self.orchestrator_index
+                debug_string = 'Received Notification for: ' + str(vnf_forwarding_graph['identifier'][0:8]) + ' ' + str(
+                    vnf_forwarding_graph['change_identifier'][0:8])
+                op_string = ' OP Value: {' + str(other_index) + ',' + str(other_counter) + '}'
+                my_string = ' My Value: {' + str(self.orchestrator_index) + ',' + str(my_counter) + ', ' + str(my_current_max_index) + '}'
+                self.log.info(debug_string + op_string + my_string)
+                debug_first_condition = other_counter > my_counter
+                debug_second_first_condition = other_counter == my_counter
+                debug_second_second_condition = other_index > int(my_current_max_index)
+                debug_second_condition = debug_second_first_condition and debug_second_second_condition
+                # self.log.info('First condition is: ' + str(debug_first_condition))
+                # self.log.info('Second condition is: ' + str(debug_second_condition))
+                if debug_first_condition or debug_second_condition:
+                    self.log.info('Applying update because First condition is ' + str(debug_first_condition) + ' Second condition is: ' + str(debug_second_condition))
+                    debug_change = True
+                    await self.apply_vnf_fg_update_notification(vnf_forwarding_graph)
+
+        self.log.info('Applying notification or not?: ' + str(debug_change))
+
+    async def apply_notification_using_multi_value_algorithm(self):
+        print('apply_notification_using_multi_value_algorithm')
+
+    def save_vnf_fg_update_notification(self, new_vnf_forwarding_graph):
+        new_vector_clock = VectorClock()
+        if type(new_vnf_forwarding_graph['vector_clock']) == str:
+            new_vector_clock.create_from_list(new_vnf_forwarding_graph['vector_clock'])
+        else:
+            new_vector_clock.create_from_list(new_vnf_forwarding_graph['vector_clock'].as_string())
+
+        new_pending_operation = PendingLCMScalingOperation(vnf_component_to_scale_id='',
+                                                           operation='vnf_fg_update',
+                                                           orchestrator_sender_id=new_vnf_forwarding_graph['orchestrator_id'],
+                                                           sender_vector_clock=new_vector_clock,
+                                                           data=new_vnf_forwarding_graph)
+        self.add_pending_operation(new_pending_operation)
+
+    async def apply_vnf_fg_update_notification(self, new_vnf_forwarding_graph):
+        for vnf_fg_entry in self.vnf_forwarding_graphs:
+            if vnf_fg_entry.get_identifier() == new_vnf_forwarding_graph['identifier']:
+                if new_vnf_forwarding_graph['type_of_change'] == 'rsp':
+                    new_change = self.create_vnf_fg_update_entry_rsp(new_vnf_forwarding_graph)
+                    result = await self.update_vnf_forwarding_graph_unique_rsp(vnf_fg_entry, new_change)
+                if new_vnf_forwarding_graph['type_of_change'] == 'classifier_rule':
+                    new_change = self.create_vnf_fg_update_entry_classifier(new_vnf_forwarding_graph)
+                    result = await self.update_vnf_forwarding_graph_unique_classifier(vnf_fg_entry, new_change)
+                if self.algorithm_type == 'last_writer_wins':
+                    self.log.info('After update {' + str(self.orchestrator_index) + ',' + str(result['vnffg'][['vnffg_counter']]) +'}')
+        total_pending_operations = len(self.pending_lcm_operations)
+        self.log.info('Total pending operations: ' + str(total_pending_operations))
+
+    def create_vnf_fg_update_entry_classifier(self, new_vnf_forwarding_graph):
+        new_matching_attributed = MatchingAttribute(
+            identifier=new_vnf_forwarding_graph['change_identifier'],
+            ip_proto=new_vnf_forwarding_graph['change_ip_proto'],
+            source_ip=new_vnf_forwarding_graph['change_source_ip'],
+            destination_ip=new_vnf_forwarding_graph['change_destination_ip'],
+            source_port=new_vnf_forwarding_graph['change_source_port'],
+            destination_port=new_vnf_forwarding_graph['change_destination_port'],
+            counter=new_vnf_forwarding_graph['vnffg_counter'],
+            current_max_orchestrator_index=new_vnf_forwarding_graph['orchestrator_index']
+            )
+        return new_matching_attributed
+
+    def create_vnf_fg_update_entry_rsp(self, new_vnf_forwarding_graph):
+        new_vnf_connection_point_reference = VNFConnectionPointReference(
+            identifier=new_vnf_forwarding_graph['change_identifier'],
+            order=new_vnf_forwarding_graph['change_order'],
+            ingress_connection_point=new_vnf_forwarding_graph['change_ingress_connection_point'],
+            egress_connection_point=new_vnf_forwarding_graph['change_egress_connection_point'],
+            counter=new_vnf_forwarding_graph['vnffg_counter'],
+            current_max_orchestrator_index=new_vnf_forwarding_graph['orchestrator_index'])
+        return new_vnf_connection_point_reference
+
+    # DEBUG: Only to test if the inconsistency code is valid
+    async def update_random_vnf_forwarding_graph(self):
+        random_index_vnf_fg_entry = generate_random_integer(0, len(self.vnf_forwarding_graphs) - 1)
+        random_index_connection_point = generate_random_integer(0, len(self.vnf_forwarding_graphs) - 1)
+        service_path = self.vnf_forwarding_graphs[random_index_vnf_fg_entry].rendered_service_paths[0]
+        connection_point = service_path.vnf_descriptor_connection_points[random_index_connection_point]
+        print(connection_point)
+        connection_point.order = -999
+
+    async def update_vnf_forwarding_graph_unique_rsp(self,
+                                                     old_vnf_fg: VNFForwardingGraph,
+                                                     new_cp:VNFConnectionPointReference):
+        self.log.info('Updating VNF-FG: ' + str(old_vnf_fg.identifier[0:8]) + ' RSP: ' + str(new_cp.vnf_identifier[0:8]))
+        result = await old_vnf_fg.update_unique_rendered_service_path(new_cp, self.log, self.orchestrator_index)
+        if self.algorithm_type == 'last_writer_wins':
+            self.log.info('After update: {' + str(self.orchestrator_index) + ',' + str(result['new_counter']) + ',' + str(result['new_max_counter']) + '}')
+        return result
+
+    async def update_vnf_forwarding_graph_unique_classifier(self,
+                                                            old_vnf_fg: VNFForwardingGraph,
+                                                            new_matching_attribute: MatchingAttribute):
+        self.log.info('Updating VNF-FG: ' + str(old_vnf_fg.identifier[0:8]) + ' CLA: ' + str(new_matching_attribute.identifier[0:8]))
+        result = await old_vnf_fg.update_unique_classifier_rule(new_matching_attribute, self.log)
+        if self.algorithm_type == 'last_writer_wins':
+            self.log.info('After update: {' + str(self.orchestrator_index) + ',' + str(result['new_counter']) + ',' + str(result['new_max_couter']) + '}')
+        return result

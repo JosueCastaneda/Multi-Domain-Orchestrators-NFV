@@ -4,7 +4,7 @@ import random
 
 import numpy as np
 
-from communication_entities.classifier import Classifier
+from communication_entities.classifier_rule import ClassifierRule
 from communication_entities.rendered_service_path import RenderedServicePath
 from communication_entities.vnf_connection_point_reference import VNFConnectionPointReference
 from communication_entities.vnf_forwarding_graph import VNFForwardingGraph
@@ -166,12 +166,12 @@ class ExperimentGenerator:
         classifier_identifier = generate_unique_identifier()
         classifier_name = generate_unique_identifier()
         rsp_id = vnf_forwarding_graph.get_first_rendered_service_path_id()
-        classifier = Classifier(classifier_identifier, classifier_name, rsp_id)
+        classifier = ClassifierRule(classifier_identifier, classifier_name, rsp_id)
         vnf_forwarding_graph.append_classification(classifier)
         vnf_connection_points = vnf_forwarding_graph.rendered_service_paths[0].vnf_descriptor_connection_points
         self.add_matching_attributes_to_classifier(classifier, vnf_connection_points)
 
-    def add_matching_attributes_to_classifier(self, classifier:Classifier, vnf_descriptor_connection_points):
+    def add_matching_attributes_to_classifier(self, classifier:ClassifierRule, vnf_descriptor_connection_points):
         for vnf_connection_point in vnf_descriptor_connection_points:
             new_matching_attribute_as_dictionary = dict()
             new_matching_attribute_as_dictionary['identifier'] = generate_unique_identifier()

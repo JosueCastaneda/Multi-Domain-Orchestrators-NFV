@@ -118,11 +118,17 @@ def read_parameters(argv):
 
 
 async def get_all_results():
-    first = await get_results_external('40.127.108.223', 5001)
-    second = await get_results_external('52.229.37.237', 5002)
-    third = await get_results_external('52.141.61.172', 5003)
-    fourth = await get_results_external('20.185.45.222', 5004)
-    fifth = await get_results_external('52.151.70.54', 5005)
+    first = await get_results_external('127.0.0.1', 4437)
+    second = await get_results_external('127.0.0.1', 4439)
+    third = await get_results_external('127.0.0.1', 4441)
+    fourth = await get_results_external('127.0.0.1', 4443)
+    fifth = await get_results_external('127.0.0.1', 4445)
+
+    # first = await get_results_external('40.127.108.223', 5001)
+    # second = await get_results_external('52.229.37.237', 5002)
+    # third = await get_results_external('52.141.61.172', 5003)
+    # fourth = await get_results_external('20.185.45.222', 5004)
+    # fifth = await get_results_external('52.151.70.54', 5005)
     total_inconsistencies = first[0] + second[0] + third[0] + fourth[0] + fifth[0]
     messages_sent = first[1] + second[1] + third[1] + fourth[1] + fifth[1]
     elapsed_time = first[2] + second[2] + third[2] + fourth[2] + fifth[2]
@@ -138,18 +144,24 @@ async def send_message(command, message):
     url = 'http://' + command.host + ':' + str(command.port) + '/' + command.message_type
     print(url)
     try:
-        timeout = aiohttp.ClientTimeout(total=60)
+        timeout = aiohttp.ClientTimeout(total=180)
         async with aiohttp.ClientSession(timeout=timeout) as session:
             async with session.post(url, data=message.data) as resp:
                 print(resp.status)
                 print(await resp.text())
     except asyncio.TimeoutError as e:
         log.error('Scaling timeout, requesting results: ')
-        await get_results_external('40.127.108.223', 5001)
-        await get_results_external('52.229.37.237', 5002)
-        await get_results_external('52.141.61.172', 5003)
-        await get_results_external('20.185.45.222', 5004)
-        await get_results_external('52.151.70.54', 5005)
+        await get_results_external('127.0.0.1', 4437)
+        await get_results_external('127.0.0.1', 4439)
+        await get_results_external('127.0.0.1', 4441)
+        await get_results_external('127.0.0.1', 4443)
+        await get_results_external('127.0.0.1', 4445)
+
+        # await get_results_external('40.127.108.223', 5001)
+        # await get_results_external('52.229.37.237', 5002)
+        # await get_results_external('52.141.61.172', 5003)
+        # await get_results_external('20.185.45.222', 5004)
+        # await get_results_external('52.151.70.54', 5005)
         log.error(e)
 
 
@@ -192,6 +204,43 @@ async def get_results_local(orchestrator_ip='127.0.0.1', orchestrator_port=5001)
     str_result_3 = ' elapsed time: ' + str(elapsed_time) + ' seconds'
     print(str_result_1 + str_result_2 + str_result_3)
 
+
+async def get_results_external(orchestrator_ip='0.0.0.0', orchestrator_port=5001):
+    total_inconsistencies = 0
+    initial_port = 5001
+    url_list = list()
+    url_list.append('40.127.108.223')
+    url_list.append('52.229.37.237')
+    url_list.append('52.141.61.172')
+    url_list.append('20.185.45.222')
+    url_list.append('52.151.70.54')
+    for i in range(5):
+        url = 'http://' + str(url_list[i]) + ':' + str(initial_port) + '/get_inconsistencies'
+        async with aiohttp.ClientSession() as session:
+            async with session.get(url, data='') as resp:
+                inconsistency_as_text = await resp.text()
+                inconsistency_decoded = json.loads(inconsistency_as_text)
+                total_inconsistencies += int(inconsistency_decoded['result'])
+        initial_port += 1
+
+    url = 'http://' + str(orchestrator_ip) + ':' + str(orchestrator_port) + '/get_time_elapsed'
+    async with aiohttp.ClientSession() as session:
+        async with session.get(url, data='') as resp:
+            elapsed_time_encoded = await resp.text()
+    elapsed_time_decoded = json.loads(elapsed_time_encoded)
+    elapsed_time = elapsed_time_decoded['result']
+
+    url = 'http://' + str(orchestrator_ip) + ':' + str(orchestrator_port) + '/get_messages_sent'
+    async with aiohttp.ClientSession() as session:
+        async with session.get(url, data='') as resp:
+            messages_sent_encoded = await resp.text()
+    messages_sent_decoded = json.loads(messages_sent_encoded)
+    messages_sent = messages_sent_decoded['result']
+    str_result_1 = 'Inconsistencies: ' + str(total_inconsistencies)
+    str_result_2 = ' messages sent: ' + str(messages_sent)
+    str_result_3 = ' elapsed time: ' + str(elapsed_time) + ' seconds'
+    print(str_result_1 + str_result_2 + str_result_3)
+    return [total_inconsistencies, messages_sent, elapsed_time]
 
 async def get_results_external(orchestrator_ip='0.0.0.0', orchestrator_port=5001):
     total_inconsistencies = 0

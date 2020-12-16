@@ -5,6 +5,7 @@ import traceback
 
 from aiohttp import web
 from aiohttp.web_response import Response
+from numpy import random
 
 from communication_entities.matching_attribute import MatchingAttribute
 from communication_entities.vector_clock import VectorClock
@@ -99,6 +100,15 @@ class OrchestratorHandler:
             response = {'status': 'failed', 'message': str(e)}
             return web.json_response(response)
 
+    async def modify_connection_point(self, request: web.Request) -> Response:
+        try:
+            result = await self.orchestrator.update_random_vnf_forwarding_graph()
+            answer = {'status': 'Good', 'result': result}
+            return web.json_response(answer)
+        except Exception as e:
+            response = {'status': 'failed', 'message': str(e)}
+            return web.json_response(response)
+
     async def update_vnffg_rsp(self, request: web.Request) -> Response:
         try:
             data = await request.post()
@@ -107,6 +117,18 @@ class OrchestratorHandler:
                                                                              data['ingress_connection_point'],
                                                                              data['egress_connection_point'])
             result = await self.orchestrator.update_unique_vnf_forwarding_graph_rendered_service_path(new_vnf_connection_point_reference)
+            answer = {'status': 'Good', 'result': result}
+            return web.json_response(answer)
+        except Exception as e:
+            response = {'status': 'failed', 'message': str(e)}
+            return web.json_response(response)
+
+    async def notify_update_vnf_forwarding_graph(self, request: web.Request) -> Response:
+        try:
+            data = await request.post()
+            wait_period = random.randint(0, 10)
+            await asyncio.sleep(wait_period)
+            result = await self.orchestrator.notify_update_of_vnf_forwarding_graph(data)
             answer = {'status': 'Good', 'result': result}
             return web.json_response(answer)
         except Exception as e:
@@ -251,6 +273,15 @@ class OrchestratorHandler:
     async def get_time_elapsed(self, request: web.Request) -> Response:
         try:
             result = await self.orchestrator.get_time_elapsed_reconfiguration()
+            answer = {'status': 'Good', 'result': result}
+            return web.json_response(answer)
+        except Exception as e:
+            response = {'status': 'failed', 'message': str(e)}
+            return web.json_response(response)
+
+    async def get_inconsistencies_of_vnf_fg_update(self, request: web.Request) -> Response:
+        try:
+            result = await self.orchestrator.get_inconsistencies_of_vnf_fg_update()
             answer = {'status': 'Good', 'result': result}
             return web.json_response(answer)
         except Exception as e:

@@ -106,7 +106,6 @@ class DockerScriptGeneratorExternal:
             self.file_vnf_forwarding_graph_update.write('\n')
         self.file_vnf_forwarding_graph_update.flush()
         self.file_vnf_forwarding_graph_update.close()
-        print('Writing docker')
 
     def create_vnf_forwarding_graph_update(self):
         file_directory = 'experiments/experiment_' + self.experiment_index + '/'
@@ -515,6 +514,7 @@ class DockerScriptGeneratorExternal:
         self.file_commands_normal.write('\n')
 
     def close_file(self):
-        print('Hello')
+
+        x = 1
         # self.file_commands_causal.close()
         # self.file_commands_normal.close()

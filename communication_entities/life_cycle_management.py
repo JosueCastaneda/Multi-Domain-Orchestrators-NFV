@@ -247,9 +247,14 @@ class LifeCycleManagement:
         if original_service_id == self.orchestrator.id:
             difference_in_vectors = 0
         else:
+            causal_delivery = False
+            if self.orchestrator.algorithm_type == 'causal':
+                causal_delivery = True
+
             difference_in_vectors = self.orchestrator.vector_clock.compare_clocks(sender_vector_clock,
                                                                                   orchestrator_sender_id,
-                                                                                  self.orchestrator.causal_delivery)
+                                                                                  causal_delivery,
+                                                                                  self.orchestrator.log)
             my_clock_is_bigger = self.orchestrator.vector_clock.is_greater_than_other(sender_vector_clock)
             if difference_in_vectors == 2:
                 difference_in_clocks, real_orchestrator_sender_id = self.orchestrator.vector_clock.check_single_difference(
@@ -309,8 +314,9 @@ class LifeCycleManagement:
                                                          my_clock_is_bigger,
                                                          sender_vector_clock):
         if not my_clock_is_bigger:
-            self.orchestrator.vector_clock.update_clock(sender_vector_clock, orchestrator_sender_id,
-                                                        self.orchestrator.causal_delivery)
+            self.orchestrator.vector_clock.update_clock(sender_vector_clock,
+                                                        orchestrator_sender_id,
+                                                        self.orchestrator.log)
         if vnf_component_id == '':
             log.info('Scaling operation of VNF has finished')
         else:

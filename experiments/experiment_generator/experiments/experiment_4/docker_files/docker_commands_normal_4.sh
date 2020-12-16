@@ -4,10 +4,10 @@
 python orchestrator_script_normal.py -i 4 -e 4 -h '0.0.0.0' -p 5005 -r 94203 &
 
 # Add orchestrator's information to my orchestrator
-python message_factory.py -t add_orchestrator -h 0.0.0.0 -p 5005 -n none -m none --vnf_host 40.127.108.223 --vnf_port 5001 -x 10fa5aa8-1b7b-11eb-9945-525400e0bd2a
-python message_factory.py -t add_orchestrator -h 0.0.0.0 -p 5005 -n none -m none --vnf_host 52.229.37.237 --vnf_port 5002 -x 10fa5aa9-1b7b-11eb-9945-525400e0bd2a
-python message_factory.py -t add_orchestrator -h 0.0.0.0 -p 5005 -n none -m none --vnf_host 52.141.61.172 --vnf_port 5003 -x 10fa5aaa-1b7b-11eb-9945-525400e0bd2a
-python message_factory.py -t add_orchestrator -h 0.0.0.0 -p 5005 -n none -m none --vnf_host 20.185.45.222 --vnf_port 5004 -x 10fa5aab-1b7b-11eb-9945-525400e0bd2a
+python message_factory.py -t add_orchestrator -h 0.0.0.0 -p 5005 -n none -m none --vnf_host 40.127.108.223 --vnf_port 5001 -x 5f8c3912-1dcd-11eb-9945-525400e0bd2a
+python message_factory.py -t add_orchestrator -h 0.0.0.0 -p 5005 -n none -m none --vnf_host 52.229.37.237 --vnf_port 5002 -x 5f8c3913-1dcd-11eb-9945-525400e0bd2a
+python message_factory.py -t add_orchestrator -h 0.0.0.0 -p 5005 -n none -m none --vnf_host 52.141.61.172 --vnf_port 5003 -x 5f8c3914-1dcd-11eb-9945-525400e0bd2a
+python message_factory.py -t add_orchestrator -h 0.0.0.0 -p 5005 -n none -m none --vnf_host 20.185.45.222 --vnf_port 5004 -x 5f8c3915-1dcd-11eb-9945-525400e0bd2a
 
 # Instantiate the orchestrator's VNFs 
 python vnf_script.py -i 0 -o 4 -e 4 -h '0.0.0.0' -p 3001 &
@@ -24,13 +24,13 @@ python vnf_script.py -i 9 -o 4 -e 4 -h '0.0.0.0' -p 3010 &
 #!/bin/sh
 
 # Request scaling 
-python message_factory.py -t request_scaling_of_service -h 52.141.61.172 -p 5003 -i 110f05c8-1b7b-11eb-9945-525400e0bd2a --seed 13888
+python message_factory.py -t request_scaling_of_service -h 52.141.61.172 -p 5003 -i 5fa151d8-1dcd-11eb-9945-525400e0bd2a --seed 13888
 python3 message_factory.py -r external
-python message_factory.py -t request_scaling_of_service -h 52.229.37.237 -p 5002 -i 110f0466-1b7b-11eb-9945-525400e0bd2a --seed 66337
+python message_factory.py -t request_scaling_of_service -h 52.229.37.237 -p 5002 -i 5fa15076-1dcd-11eb-9945-525400e0bd2a --seed 66337
 python3 message_factory.py -r external
-python message_factory.py -t request_scaling_of_service -h 20.185.45.222 -p 5004 -i 110f0424-1b7b-11eb-9945-525400e0bd2a --seed 32264
+python message_factory.py -t request_scaling_of_service -h 20.185.45.222 -p 5004 -i 5fa15034-1dcd-11eb-9945-525400e0bd2a --seed 32264
 python3 message_factory.py -r external
-python message_factory.py -t request_scaling_of_service -h 52.151.70.54 -p 5005 -i 110f0526-1b7b-11eb-9945-525400e0bd2a --seed 34231
+python message_factory.py -t request_scaling_of_service -h 52.151.70.54 -p 5005 -i 5fa15136-1dcd-11eb-9945-525400e0bd2a --seed 34231
 python3 message_factory.py -r external
 
 # Add results 

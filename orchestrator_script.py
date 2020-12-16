@@ -9,14 +9,25 @@ from communication_entities.orchestrator_handler import OrchestratorHandler
 from communication_entities.orchestrator_routes import init_routes
 
 
-async def init_app(experiment_index, orchestrator_index, server_host, server_port, random_seed) -> web.Application:
+async def init_app(experiment_index, orchestrator_index, server_host, server_port, random_seed, index_algorithm) -> web.Application:
+    algorithm_type = 'causal'
+    if index_algorithm == 0:
+        algorithm_type = 'causal'
+    elif index_algorithm == 1:
+        algorithm_type = 'standard'
+    elif index_algorithm == 2:
+        algorithm_type = 'last_writer_wins'
+    elif index_algorithm == 3:
+        algorithm_type = 'multi_value'
+
     app = web.Application()
     orchestrator = Orchestrator(orchestrator_index=orchestrator_index,
                                 experiment_index=experiment_index,
                                 server_host=server_host,
                                 server_port=server_port,
                                 random_seed=random_seed,
-                                causal_delivery=True)
+                                causal_delivery=False,
+                                algorithm_type=algorithm_type)
     handler = OrchestratorHandler(orchestrator)
     init_routes(app, handler)
     return app
@@ -40,12 +51,12 @@ def main(argv) -> None:
     server_port = 0
     random_seed = 1000
     debug = True
-
+    index_algorithm = 2
     if debug:
-        orchestrator_index = '0'
+        orchestrator_index = '4'
         experiment_index = '0'
         server_host = '127.0.0.1'
-        server_port = 5002
+        server_port = 4445
     try:
         valid_arguments_as_string = "i:e:h:p:r:"
         list_valid_arguments = ["service_id=", "experiment_id=", "host=", "port=", "random_seed="]
@@ -75,7 +86,8 @@ def main(argv) -> None:
                                            orchestrator_index,
                                            server_host,
                                            server_port,
-                                           random_seed))
+                                           random_seed,
+                                           index_algorithm))
     web.run_app(app, host=server_host, port=server_port)
 
 
