@@ -7,10 +7,10 @@
 # In the case of external use (cloud) this is the main file to run orchestrators
 
 # REMOVE COMMENTS ONLY FOR DEBUG PURPOSES
-#echo -n "Please type number of experiment: "
-# shellcheck disable=SC2162
-#read EXPERIMENT_NUMBER
-EXPERIMENT_NUMBER=0
+echo -n "Please type number of experiment: "
+ shellcheck disable=SC2162
+read EXPERIMENT_NUMBER
+#EXPERIMENT_NUMBER=0
 
 echo -n "Please type number of orchestrator: "
 # shellcheck disable=SC2162

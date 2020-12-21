@@ -4,6 +4,7 @@ import logging
 import os
 import random
 import sys
+import time
 
 from communication_entities.generic_service import GenericService
 from communication_entities.life_cycle_management import LifeCycleManagement
@@ -65,6 +66,8 @@ class Orchestrator:
         self.algorithm_type = algorithm_type
         self.set_up_my_logger()
         random.seed(self.random_seed)
+        self.total_time_for_experimentation = 0.0
+        self.log.info('Ready')
 
     def add_vnf_forwarding_graph(self, vnf_forwarding_graphs):
         for vnf_fg_entry in vnf_forwarding_graphs:
@@ -160,6 +163,7 @@ class Orchestrator:
         orchestrator_format['messages_sent'] = self.messages_sent
         orchestrator_format['pending_operations'] = len(self.pending_lcm_operations)
         orchestrator_format['time_elapsed_in_last_reconfiguration'] = self.time_elapsed_in_reconfiguration
+        orchestrator_format['total_time_for_experimentation'] = self.total_time_for_experimentation
         return orchestrator_format
 
     def get_service_by_id(self, service_id):
@@ -562,6 +566,7 @@ class Orchestrator:
         return data
 
     async def update_unique_vnf_forwarding_graph_rendered_service_path(self, connection_point:VNFConnectionPointReference):
+        start = time.time()
         for vnffg in self.vnf_forwarding_graphs:
             update_result = await vnffg.update_unique_rendered_service_path(connection_point,
                                                                             self.log,
@@ -580,10 +585,16 @@ class Orchestrator:
                             len(self.pending_lcm_operations)))
                 elif self.algorithm_type == 'last_writer_wins':
                     self.log.info('Call from Handler... After update: {' + oi + ',' + nc + ','+mc+'} for VNFFG ' + id + ' val: ' + ci)
-                return await self.notify_all_replicas_and_orchestrators_of_positive_change(update_result)
+                result = await self.notify_all_replicas_and_orchestrators_of_positive_change(update_result)
+                end = time.time()
+                time_difference = end - start
+                self.total_time_for_experimentation += time_difference
+                self.log.info('Time taken: ' + str(time_difference))
+                return result
         return return_failure('No VNF ID FOUND! ' + str(connection_point.get_vnf_identifier()))
 
     async def update_unique_vnf_forwarding_graph_classifier_rule(self, matching_attribute:MatchingAttribute):
+        start = time.time()
         for vnffg in self.vnf_forwarding_graphs:
             update_result = await vnffg.update_unique_classifier_rule(matching_attribute,
                                                                       self.log,
@@ -600,7 +611,12 @@ class Orchestrator:
                             len(self.pending_lcm_operations)))
                 elif self.algorithm_type == 'last_writer_wins':
                     self.log.info('Call from Handler... After update: {' + oi + ',' + nc + ','+mc+'} for VNFFG ' + id + ' val: ' + ci)
-                return await self.notify_all_replicas_and_orchestrators_of_positive_change(update_result)
+                result = await self.notify_all_replicas_and_orchestrators_of_positive_change(update_result)
+                end = time.time()
+                time_difference = end - start
+                self.total_time_for_experimentation += time_difference
+                self.log.info('Time taken: ' + str(time_difference))
+                return result
         return return_failure('No Matching attribute with ID found! ' + str(matching_attribute.get_identifier()))
 
     async def notify_all_replicas_and_orchestrators_of_positive_change(self, update_result):
@@ -608,7 +624,8 @@ class Orchestrator:
         vnf_fg_as_dictionary = update_result['vnffg']
         self.vector_clock.increment_clock(self.id)
         my_clock_as_json = self.vector_clock.to_json()
-        await self.notify_replicas_of_vnf_forwarding_graph_update(list_of_replicas_to_notify, vnf_fg_as_dictionary, my_clock_as_json)
+        answer_1 = await self.notify_replicas_of_vnf_forwarding_graph_update(list_of_replicas_to_notify, vnf_fg_as_dictionary, my_clock_as_json)
+        self.log.info('Return message after notifiying' + str(answer_1))
         if self.algorithm_type == 'causal' or self.algorithm_type == 'standard':
             await self.notify_all_orchestrators_of_change(list_of_replicas_to_notify, my_clock_as_json)
         return return_success()
@@ -617,7 +634,12 @@ class Orchestrator:
         self.orchestrator_counter +=1
 
     async def notify_replicas_of_vnf_forwarding_graph_update(self, replicas, vnf_forwarding_graph, vector_clock_as_json):
-        # self.log.info('Notifying replicas of VNFFG Update....')
+        self.log.info('Notifying replicas of VNFFG Update....')
+        for replica in replicas:
+            for orchestrator in self.list_orchestrator:
+                if orchestrator['id'] == replica:
+                    self.log.info(str(orchestrator['ip'])+':'+str(orchestrator['port']))
+
         for replica in replicas:
             for orchestrator in self.list_orchestrator:
                 if orchestrator['id'] == replica:
@@ -628,7 +650,8 @@ class Orchestrator:
                     new_message = UpdateVNFForwardingGraph(host=orchestrator['ip'],
                                                            port=orchestrator['port'],
                                                            data=vnf_forwarding_graph)
-                    await send_message(new_message)
+                    result = await send_message(new_message)
+        return result
 
     async def notify_update_of_vnf_forwarding_graph(self, vnf_forwarding_graph):
         self.log.info('Received Notification for: ' + str(vnf_forwarding_graph['identifier'][0:8]) + ' ' + str(vnf_forwarding_graph['change_identifier'][0:8]) )
@@ -720,16 +743,23 @@ class Orchestrator:
         self.add_pending_operation(new_pending_operation)
 
     async def apply_vnf_fg_update_notification(self, new_vnf_forwarding_graph):
+        result = None
         for vnf_fg_entry in self.vnf_forwarding_graphs:
             if vnf_fg_entry.get_identifier() == new_vnf_forwarding_graph['identifier']:
                 if new_vnf_forwarding_graph['type_of_change'] == 'rsp':
                     new_change = self.create_vnf_fg_update_entry_rsp(new_vnf_forwarding_graph)
                     result = await self.update_vnf_forwarding_graph_unique_rsp(vnf_fg_entry, new_change)
+                    # self.log.info('HELLO1')
                 if new_vnf_forwarding_graph['type_of_change'] == 'classifier_rule':
                     new_change = self.create_vnf_fg_update_entry_classifier(new_vnf_forwarding_graph)
                     result = await self.update_vnf_forwarding_graph_unique_classifier(vnf_fg_entry, new_change)
-                if self.algorithm_type == 'last_writer_wins':
-                    self.log.info('After update {' + str(self.orchestrator_index) + ',' + str(result['vnffg'][['vnffg_counter']]) +'}')
+                    # self.log.info('HELLO2')
+                break
+
+        # self.log.info('HELLO4.55')
+        if self.algorithm_type == 'last_writer_wins' and result is not None:
+            self.log.info('After update {' + str(self.orchestrator_index) + ',' + str(result['vnffg']['vnffg_counter']) + '}')
+        # self.log.info('HELLO3')
         total_pending_operations = len(self.pending_lcm_operations)
         self.log.info('Total pending operations: ' + str(total_pending_operations))
 

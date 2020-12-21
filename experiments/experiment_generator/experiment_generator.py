@@ -23,6 +23,7 @@ class ExperimentGenerator:
         self.number_of_services = configuration.number_of_services
         self.length_of_vnfs = configuration.number_of_vnf_components
         self.number_of_vnf = configuration.number_of_vnfs
+        self.algorithm_index = configuration.algorithm_index
         self.path = configuration.path
         self.random_seed_list = configuration.random_seed_list
         self.random_np_seed_list = configuration.random_np_seed_list
@@ -252,7 +253,7 @@ class ExperimentGenerator:
 
     def generate_experiment(self):
         for experiment_counter in range(self.number_of_experiments):
-            print('Experiment number: ' + str(experiment_counter))
+            # print('Experiment number: ' + str(experiment_counter))
             self.change_random_seeds(experiment_counter)
             self.add_vnfs_to_orchestrators()
             new_experiment = create_empty_experiment_entry()

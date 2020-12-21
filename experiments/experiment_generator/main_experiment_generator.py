@@ -12,7 +12,7 @@ from experiments.experiment_generator.experiment_generator import ExperimentGene
 
 
 def main():
-    local_deployment = True
+    local_deployment = False
     if len(sys.argv) >= 2 and sys.argv[1] == 'local':
         local_deployment = True
     experiment_configuration = ExperimentConfiguration('experiment_constraint.json')
@@ -26,7 +26,7 @@ def main():
         if local_deployment:
             dock_gen = DockerScriptGeneratorLocal(experiment_file, experiment_configuration, vnf_port_local)
         else:
-            dock_gen = DockerScriptGeneratorExternal(experiment_file, experiment_configuration, random_running_index)
+            dock_gen = DockerScriptGeneratorExternal(experiment_file, experiment_configuration)
         for index in range(len(exp_gen.list_orchestrators)):
             dock_gen.set_index(index)
             random_running_index += dock_gen.generate_orchestrator_commands(experiment_index)

@@ -1,23 +1,23 @@
 #!/bin/sh
 
 # Launch orchestrator
-python orchestrator_script.py -i 3 -e 7 -h '127.0.0.1' -p 4443 -r 44257 &
+python orchestrator_script.py -i 3 -e 7 -h '0.0.0.0' -p 5004 -r 276529 -a 0 &
 
 # Add orchestrator's information to my orchestrator
-python message_factory.py -t add_orchestrator -h 127.0.0.1 -p 4443 -n none -m none --vnf_host 127.0.0.1 --vnf_port 4437 -x c86c735a-3efe-11eb-bde0-04ea56f99520
-python message_factory.py -t add_orchestrator -h 127.0.0.1 -p 4443 -n none -m none --vnf_host 127.0.0.1 --vnf_port 4439 -x c86c735b-3efe-11eb-bde0-04ea56f99520
-python message_factory.py -t add_orchestrator -h 127.0.0.1 -p 4443 -n none -m none --vnf_host 127.0.0.1 --vnf_port 4441 -x c86c735c-3efe-11eb-bde0-04ea56f99520
-python message_factory.py -t add_orchestrator -h 127.0.0.1 -p 4443 -n none -m none --vnf_host 127.0.0.1 --vnf_port 4445 -x c86c735e-3efe-11eb-bde0-04ea56f99520
+python message_factory.py -t add_orchestrator -h 0.0.0.0 -p 5004 -n none -m none --vnf_host 40.127.108.223 --vnf_port 5001 -x 820ecaa8-4394-11eb-954b-04ea56f99520
+python message_factory.py -t add_orchestrator -h 0.0.0.0 -p 5004 -n none -m none --vnf_host 52.229.37.237 --vnf_port 5002 -x 820ecaa9-4394-11eb-954b-04ea56f99520
+python message_factory.py -t add_orchestrator -h 0.0.0.0 -p 5004 -n none -m none --vnf_host 52.141.61.172 --vnf_port 5003 -x 820ecaaa-4394-11eb-954b-04ea56f99520
+python message_factory.py -t add_orchestrator -h 0.0.0.0 -p 5004 -n none -m none --vnf_host 52.151.70.54 --vnf_port 5005 -x 820ecaac-4394-11eb-954b-04ea56f99520
 
 # Instantiate the orchestrator's VNFs 
-python vnf_script.py -i 0 -o 3 -e 7 -h '127.0.0.1' -p 3031 &
-python vnf_script.py -i 1 -o 3 -e 7 -h '127.0.0.1' -p 3032 &
-python vnf_script.py -i 2 -o 3 -e 7 -h '127.0.0.1' -p 3033 &
-python vnf_script.py -i 3 -o 3 -e 7 -h '127.0.0.1' -p 3034 &
-python vnf_script.py -i 4 -o 3 -e 7 -h '127.0.0.1' -p 3035 &
-python vnf_script.py -i 5 -o 3 -e 7 -h '127.0.0.1' -p 3036 &
-python vnf_script.py -i 6 -o 3 -e 7 -h '127.0.0.1' -p 3037 &
-python vnf_script.py -i 7 -o 3 -e 7 -h '127.0.0.1' -p 3038 &
-python vnf_script.py -i 8 -o 3 -e 7 -h '127.0.0.1' -p 3039 &
-python vnf_script.py -i 9 -o 3 -e 7 -h '127.0.0.1' -p 3040 &
+python vnf_script.py -i 0 -o 3 -e 7 -h '0.0.0.0' -p 3001 &
+python vnf_script.py -i 1 -o 3 -e 7 -h '0.0.0.0' -p 3002 &
+python vnf_script.py -i 2 -o 3 -e 7 -h '0.0.0.0' -p 3003 &
+python vnf_script.py -i 3 -o 3 -e 7 -h '0.0.0.0' -p 3004 &
+python vnf_script.py -i 4 -o 3 -e 7 -h '0.0.0.0' -p 3005 &
+python vnf_script.py -i 5 -o 3 -e 7 -h '0.0.0.0' -p 3006 &
+python vnf_script.py -i 6 -o 3 -e 7 -h '0.0.0.0' -p 3007 &
+python vnf_script.py -i 7 -o 3 -e 7 -h '0.0.0.0' -p 3008 &
+python vnf_script.py -i 8 -o 3 -e 7 -h '0.0.0.0' -p 3009 &
+python vnf_script.py -i 9 -o 3 -e 7 -h '0.0.0.0' -p 3010 &
 

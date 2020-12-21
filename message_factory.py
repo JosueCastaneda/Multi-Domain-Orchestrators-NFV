@@ -147,6 +147,7 @@ async def send_message(command, message):
         timeout = aiohttp.ClientTimeout(total=180)
         async with aiohttp.ClientSession(timeout=timeout) as session:
             async with session.post(url, data=message.data) as resp:
+                print('Godzilla')
                 print(resp.status)
                 print(await resp.text())
     except asyncio.TimeoutError as e:

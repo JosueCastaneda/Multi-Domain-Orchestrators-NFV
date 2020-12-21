@@ -16,9 +16,10 @@ class DockerScriptGeneratorLocal:
         self.orchestrator_index = 0
         self.file_commands = None
         self.random_running_index = 0
-        self.number_of_vnffg_updates = 800
+        self.number_of_vnffg_updates = 10
         self.running_experiment = 0
         self.vnf_port = initial_vnf_port
+        self.algorithm_index = configuration.algorithm_index
 
     def set_index(self, index):
         self.orchestrator_index = index
@@ -86,14 +87,9 @@ class DockerScriptGeneratorLocal:
         current_orchestrator = self.data['orchestrators'][self.orchestrator_index]
         first_string = 'python orchestrator_script.py -i ' + str(self.orchestrator_index)
         second_string = ' -e ' + str(self.experiment_index) + ' -h \'127.0.0.1\' -p '
-        third_string =  current_orchestrator['port'] + ' -r ' + str(random_seed) + ' &'
+        five_string = ' -a ' + str(self.algorithm_index)
+        third_string = current_orchestrator['port'] + ' -r ' + str(random_seed) + five_string + ' &'
         self.file_commands.write(first_string + second_string + third_string + '\n')
-        # for index in range(len(self.data['orchestrators'])):
-        # first_string = 'python orchestrator_script.py -i ' + str(index)
-        #     second_string = ' -e ' + str(self.experiment_index)
-        #     third_string = ' -h 127.0.0.1' + ' -p ' + str(port) + ' &'
-        #     self.file_commands.write(first_string + second_string + third_string + '\n')
-        #     port += 1
 
     def set_up_run_orchestrators(self):
         self.file_commands.write('# Launch orchestrator' + '\n')
@@ -273,7 +269,6 @@ class DockerScriptGeneratorLocal:
             vnf_forwarding_graph_updates.append(new_vnf_forwarding_graph)
             remaining_updates -= 1
         self.write_vnffg_updates_in_docker_file(vnf_forwarding_graph_updates)
-        print('Hello')
 
     def write_vnffg_updates_in_docker_file(self, vnf_forwarding_graph_updates:list):
         self.create_vnf_forwarding_graph_update()
@@ -396,8 +391,6 @@ class DockerScriptGeneratorLocal:
             random_list = self.generate_random_list_from_np_seeds(i, len(list_valid_services[i]))
             random_list_per_experiment.append(random_list)
 
-        print('List_valid_services: ' + str(len(list_valid_services)))
-
         for experiment_list in list_valid_services:
             sublist_copia = list()
             for i in random_list:
@@ -466,7 +459,6 @@ class DockerScriptGeneratorLocal:
 
     def generate_random_list_from_np_seeds(self, index, max_numbers):
         random.seed(self.configuration.collect_random[index])
-        print('Max numbers: ' + str(max_numbers))
         return random.sample(range(0, max_numbers), 5)
 
     def create_second_client_file(self, experiment_index):
