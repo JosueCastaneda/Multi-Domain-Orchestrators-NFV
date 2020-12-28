@@ -67,7 +67,7 @@ class Orchestrator:
         self.set_up_my_logger()
         random.seed(self.random_seed)
         self.total_time_for_experimentation = 0.0
-        self.log.info('Ready')
+        # self.log.info('Ready')
 
     def add_vnf_forwarding_graph(self, vnf_forwarding_graphs):
         for vnf_fg_entry in vnf_forwarding_graphs:
@@ -155,6 +155,8 @@ class Orchestrator:
         orchestrator_format['port'] = self.port
         orchestrator_format['id'] = self.id
         orchestrator_format['name'] = self.name
+        orchestrator_format['experiment_name'] = self.experiment_name
+        orchestrator_format['experiment_index'] = self.experiment_index
         orchestrator_format['is_causal'] = self.causal_delivery
         orchestrator_format['algorithm_type'] = self.algorithm_type
         orchestrator_format['vector_clock'] = self.vector_clock.as_string()
@@ -635,6 +637,7 @@ class Orchestrator:
 
     async def notify_replicas_of_vnf_forwarding_graph_update(self, replicas, vnf_forwarding_graph, vector_clock_as_json):
         self.log.info('Notifying replicas of VNFFG Update....')
+        result = ""
         for replica in replicas:
             for orchestrator in self.list_orchestrator:
                 if orchestrator['id'] == replica:
@@ -810,5 +813,6 @@ class Orchestrator:
         self.log.info('Updating VNF-FG: ' + str(old_vnf_fg.identifier[0:8]) + ' CLA: ' + str(new_matching_attribute.identifier[0:8]))
         result = await old_vnf_fg.update_unique_classifier_rule(new_matching_attribute, self.log)
         if self.algorithm_type == 'last_writer_wins':
-            self.log.info('After update: {' + str(self.orchestrator_index) + ',' + str(result['new_counter']) + ',' + str(result['new_max_couter']) + '}')
+            self.log.info(result)
+            self.log.info('After update: {' + str(self.orchestrator_index) + ',' + str(result['new_counter']) + ',' + str(result['new_max_counter']) + '}')
         return result

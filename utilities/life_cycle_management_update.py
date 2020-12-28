@@ -31,9 +31,9 @@ def return_in_process(message):
 
 
 async def send_message(message):
-    log.info('Sending message....')
+    # log.info('Sending message....')
     url = 'http://' + message.host + ':' + str(message.port) + '/' + message.type
-    log.info(url)
+    # log.info(url)
     async with aiohttp.ClientSession() as session:
         async with session.post(url, data=message.data) as resp:
             str_log_encoded = await (resp.text())

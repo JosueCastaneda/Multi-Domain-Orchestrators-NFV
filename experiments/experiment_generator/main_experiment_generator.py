@@ -12,7 +12,7 @@ from experiments.experiment_generator.experiment_generator import ExperimentGene
 
 
 def main():
-    local_deployment = False
+    local_deployment = True
     if len(sys.argv) >= 2 and sys.argv[1] == 'local':
         local_deployment = True
     experiment_configuration = ExperimentConfiguration('experiment_constraint.json')

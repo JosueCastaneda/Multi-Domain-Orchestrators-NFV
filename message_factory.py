@@ -140,15 +140,15 @@ async def get_all_results():
 
 
 async def send_message(command, message):
-    print(message)
+    # print(message)
     url = 'http://' + command.host + ':' + str(command.port) + '/' + command.message_type
-    print(url)
+    # print(url)
     try:
         timeout = aiohttp.ClientTimeout(total=180)
         async with aiohttp.ClientSession(timeout=timeout) as session:
             async with session.post(url, data=message.data) as resp:
-                print('Godzilla')
-                print(resp.status)
+                # print('Godzilla')
+                # print(resp.status)
                 print(await resp.text())
     except asyncio.TimeoutError as e:
         log.error('Scaling timeout, requesting results: ')
@@ -168,7 +168,7 @@ async def send_message(command, message):
 
 async def send_message_local(port):
     url = 'http://0.0.0.0:' + str(port) + '/'
-    print(url)
+    # print(url)
     async with aiohttp.ClientSession() as session:
         async with session.get(url) as resp:
             print(resp.status)

@@ -15,8 +15,10 @@ class DockerScriptGeneratorLocal:
         self.all_services = self.get_all_services()
         self.orchestrator_index = 0
         self.file_commands = None
+        self.file_commands_standard = None
+        self.file_commands_last_writer = None
         self.random_running_index = 0
-        self.number_of_vnffg_updates = 10
+        self.number_of_vnffg_updates = 8
         self.running_experiment = 0
         self.vnf_port = initial_vnf_port
         self.algorithm_index = configuration.algorithm_index
@@ -27,9 +29,13 @@ class DockerScriptGeneratorLocal:
     def create_orchestrator_file(self):
         file_directory = 'experiments/experiment_' + self.experiment_index + '/docker_files/'
         file_name = 'docker_commands_' + str(self.orchestrator_index) + '.sh'
+        file_name_standard = 'docker_commands_standard_' + str(self.orchestrator_index) + '.sh'
+        file_name_last_writer = 'docker_commands_last_writer_' + str(self.orchestrator_index) + '.sh'
         if not os.path.exists(file_directory):
             os.makedirs(file_directory)
         self.file_commands = open(file_directory + file_name, 'w+')
+        self.file_commands_standard = open(file_directory + file_name_standard, 'w+')
+        self.file_commands_last_writer = open(file_directory + file_name_last_writer, 'w+')
 
     def create_client_file(self):
         file_directory = 'experiments/experiment_' + self.experiment_index + '/'
@@ -81,6 +87,8 @@ class DockerScriptGeneratorLocal:
     def write_first_line_to_file(self):
         header = '#!/bin/sh' + '\n'
         self.file_commands.write(header + '\n')
+        self.file_commands_standard.write(header + '\n')
+        self.file_commands_last_writer.write(header + '\n')
 
     def set_up_run_orchestrators_local(self):
         random_seed = self.configuration.random_seed_list[self.running_experiment]
@@ -89,10 +97,16 @@ class DockerScriptGeneratorLocal:
         second_string = ' -e ' + str(self.experiment_index) + ' -h \'127.0.0.1\' -p '
         five_string = ' -a ' + str(self.algorithm_index)
         third_string = current_orchestrator['port'] + ' -r ' + str(random_seed) + five_string + ' &'
+        third_a_string = current_orchestrator['port'] + ' -r ' + str(random_seed) + ' -a 1' + ' &'
+        third_b_string = current_orchestrator['port'] + ' -r ' + str(random_seed) + ' -a 2' + ' &'
         self.file_commands.write(first_string + second_string + third_string + '\n')
+        self.file_commands_standard.write(first_string + second_string + third_a_string + '\n')
+        self.file_commands_last_writer.write(first_string + second_string + third_b_string + '\n')
 
     def set_up_run_orchestrators(self):
         self.file_commands.write('# Launch orchestrator' + '\n')
+        self.file_commands_standard.write('# Launch orchestrator' + '\n')
+        self.file_commands_last_writer.write('# Launch orchestrator' + '\n')
         self.set_up_run_orchestrators_local()
         self.write_new_line_to_file()
 
@@ -107,17 +121,8 @@ class DockerScriptGeneratorLocal:
                                other_orchestrator[
                                    'port'] + ' -x ' + other_orchestrator['id']
                 self.file_commands.write(first_string + second_string + third_string + '\n')
-        # for index in range(len((self.data['orchestrators']))):
-        #     current_orchestrator = self.data['orchestrators'][index]
-        #     for i in range(len(self.data['orchestrators'])):
-        #         if i != index:
-        #             other_orchestrator = self.data['orchestrators'][i]
-        #             first_string = 'docker exec -it mn.source python message_factory.py -t add_orchestrator -h '
-        #             second_string = current_orchestrator['ip'] + ' -p ' + current_orchestrator['port']
-        #             third_string = ' -n none -m none --vnf_host ' + other_orchestrator['ip'] + ' --vnf_port ' + \
-        #                            other_orchestrator[
-        #                                'port'] + ' -x ' + other_orchestrator['id']
-        #             self.file_commands.write(first_string + second_string + third_string + '\n')
+                self.file_commands_standard.write(first_string + second_string + third_string + '\n')
+                self.file_commands_last_writer.write(first_string + second_string + third_string + '\n')
 
     def set_up_chain_orchestrators(self):
         self.file_commands.write('# Add orchestrator\'s information to my orchestrator' + '\n')
@@ -126,23 +131,13 @@ class DockerScriptGeneratorLocal:
 
     def set_up_running_vnf_local(self):
         current_orchestrator = self.data['orchestrators'][self.orchestrator_index]
-        # self.port =
-        # vnf_port = 3001
         for vnf_index in range(len(current_orchestrator['vnfs'])):
             first_string = 'python vnf_script.py -i ' + str(vnf_index) + ' -o ' + str(self.orchestrator_index) + ' -e '
             third_string = str(self.experiment_index) + ' -h \'127.0.0.1\' -p ' + str(self.vnf_port) + ' &'
             self.file_commands.write(first_string + third_string + '\n')
+            self.file_commands_standard.write(first_string + third_string + '\n')
+            self.file_commands_last_writer.write(first_string + third_string + '\n')
             self.vnf_port += 1
-            # self.file_commands_normal.write(first_string + third_string + '\n')
-            # vnf_port += 1
-        # for orchestrator_index in range(len((self.data['orchestrators']))):
-        #     current_orchestrator = self.data['orchestrators'][orchestrator_index]
-        #     for vnf_index in range(len(current_orchestrator['vnfs'])):
-        #         vnf = current_orchestrator['vnfs'][vnf_index]
-        #         first_string = 'docker exec -it mn.' + vnf['id'] + ' python vnf_script.py'
-        #         second_string = ' -i ' + str(vnf_index) + ' -o ' + str(orchestrator_index) + ' -e '
-        #         third_string = str(self.experiment_index) + ' &'
-        #         self.file_commands.write(first_string + second_string + third_string + '\n')
 
     def set_up_running_vnf(self):
         self.file_commands.write('# Instantiate the orchestrator\'s VNFs \n')
@@ -209,6 +204,8 @@ class DockerScriptGeneratorLocal:
 
     def add_request_of_scaling(self):
         self.file_commands.write('# Request scaling \n')
+        self.file_commands_standard.write('# Request scaling \n')
+        self.file_commands_last_writer.write('# Request scaling \n')
         self.add_request_of_scaling_local()
         self.write_new_line_to_file()
 
@@ -252,9 +249,13 @@ class DockerScriptGeneratorLocal:
 
     def write_new_line_to_file(self):
         self.file_commands.write('\n')
+        self.file_commands_standard.write('\n')
+        self.file_commands_last_writer.write('\n')
 
     def close_file(self):
         self.file_commands.close()
+        # self.file_commands_standard.close()
+        # self.file_commands_last_writer.close()
 
     def generate_vnf_forwarding_graph_update(self):
         vnf_forwarding_graph_updates = list()

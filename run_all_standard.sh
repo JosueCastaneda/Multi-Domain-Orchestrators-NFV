@@ -4,7 +4,7 @@
 ./clean2.sh
 
 path_1="experiments/experiment_generator/experiments/experiment_"
-path_2="/docker_files/docker_commands_"
+path_2="/docker_files/docker_commands_standard_"
 path_3=".sh"
 
 # Activate the virtual environment
@@ -50,5 +50,5 @@ complete_file=$path_1$EXPERIMENT_NUMBER$path_2$ORCHESTRATOR_NUMBER$path_3
 ./$complete_file &
 
 sleep 5
-
+#
 ./test_reconfiguration_parallel.sh $EXPERIMENT_NUMBER

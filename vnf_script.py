@@ -76,8 +76,8 @@ def main(argv) -> None:
     if server_host == '' and server_port == 0:
         server_host, server_port = get_server_and_port(experiment_index, orchestrator_index, vnf_index)
 
-    print('Sever host: ' + str(server_host))
-    print('Server port: ' + str(server_port))
+    # print('Sever host: ' + str(server_host))
+    # print('Server port: ' + str(server_port))
 
     loop = asyncio.get_event_loop()
     app = loop.run_until_complete(init_app(experiment_index,

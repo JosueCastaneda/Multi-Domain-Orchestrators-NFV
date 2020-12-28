@@ -22,6 +22,9 @@ class OrchestratorHandler:
     async def index(self, request: web.Request) -> Response:
         return web.json_response(self.orchestrator.entry_as_dictionary())
 
+    async def info(self, request: web.Request) -> Response:
+        return web.json_response(self.orchestrator.entry_as_dictionary())
+
     async def get_services(self, request: web.Request) -> Response:
         try:
             result = await self.orchestrator.get_services()

@@ -1,23 +1,23 @@
 #!/bin/sh
 
 # Launch orchestrator
-python orchestrator_script.py -i 1 -e 3 -h '0.0.0.0' -p 5002 -r 276529 -a 0 &
+python orchestrator_script.py -i 1 -e 3 -h '127.0.0.1' -p 4439 -r 276529 -a 0 &
 
 # Add orchestrator's information to my orchestrator
-python message_factory.py -t add_orchestrator -h 0.0.0.0 -p 5002 -n none -m none --vnf_host 40.127.108.223 --vnf_port 5001 -x 820ecaa8-4394-11eb-954b-04ea56f99520
-python message_factory.py -t add_orchestrator -h 0.0.0.0 -p 5002 -n none -m none --vnf_host 52.141.61.172 --vnf_port 5003 -x 820ecaaa-4394-11eb-954b-04ea56f99520
-python message_factory.py -t add_orchestrator -h 0.0.0.0 -p 5002 -n none -m none --vnf_host 20.185.45.222 --vnf_port 5004 -x 820ecaab-4394-11eb-954b-04ea56f99520
-python message_factory.py -t add_orchestrator -h 0.0.0.0 -p 5002 -n none -m none --vnf_host 52.151.70.54 --vnf_port 5005 -x 820ecaac-4394-11eb-954b-04ea56f99520
+python message_factory.py -t add_orchestrator -h 127.0.0.1 -p 4439 -n none -m none --vnf_host 127.0.0.1 --vnf_port 4437 -x 99dfba54-4919-11eb-954b-04ea56f99520
+python message_factory.py -t add_orchestrator -h 127.0.0.1 -p 4439 -n none -m none --vnf_host 127.0.0.1 --vnf_port 4441 -x 99dfba56-4919-11eb-954b-04ea56f99520
+python message_factory.py -t add_orchestrator -h 127.0.0.1 -p 4439 -n none -m none --vnf_host 127.0.0.1 --vnf_port 4443 -x 99dfba57-4919-11eb-954b-04ea56f99520
+python message_factory.py -t add_orchestrator -h 127.0.0.1 -p 4439 -n none -m none --vnf_host 127.0.0.1 --vnf_port 4445 -x 99dfba58-4919-11eb-954b-04ea56f99520
 
 # Instantiate the orchestrator's VNFs 
-python vnf_script.py -i 0 -o 1 -e 3 -h '0.0.0.0' -p 3001 &
-python vnf_script.py -i 1 -o 1 -e 3 -h '0.0.0.0' -p 3002 &
-python vnf_script.py -i 2 -o 1 -e 3 -h '0.0.0.0' -p 3003 &
-python vnf_script.py -i 3 -o 1 -e 3 -h '0.0.0.0' -p 3004 &
-python vnf_script.py -i 4 -o 1 -e 3 -h '0.0.0.0' -p 3005 &
-python vnf_script.py -i 5 -o 1 -e 3 -h '0.0.0.0' -p 3006 &
-python vnf_script.py -i 6 -o 1 -e 3 -h '0.0.0.0' -p 3007 &
-python vnf_script.py -i 7 -o 1 -e 3 -h '0.0.0.0' -p 3008 &
-python vnf_script.py -i 8 -o 1 -e 3 -h '0.0.0.0' -p 3009 &
-python vnf_script.py -i 9 -o 1 -e 3 -h '0.0.0.0' -p 3010 &
+python vnf_script.py -i 0 -o 1 -e 3 -h '127.0.0.1' -p 3011 &
+python vnf_script.py -i 1 -o 1 -e 3 -h '127.0.0.1' -p 3012 &
+python vnf_script.py -i 2 -o 1 -e 3 -h '127.0.0.1' -p 3013 &
+python vnf_script.py -i 3 -o 1 -e 3 -h '127.0.0.1' -p 3014 &
+python vnf_script.py -i 4 -o 1 -e 3 -h '127.0.0.1' -p 3015 &
+python vnf_script.py -i 5 -o 1 -e 3 -h '127.0.0.1' -p 3016 &
+python vnf_script.py -i 6 -o 1 -e 3 -h '127.0.0.1' -p 3017 &
+python vnf_script.py -i 7 -o 1 -e 3 -h '127.0.0.1' -p 3018 &
+python vnf_script.py -i 8 -o 1 -e 3 -h '127.0.0.1' -p 3019 &
+python vnf_script.py -i 9 -o 1 -e 3 -h '127.0.0.1' -p 3020 &
 

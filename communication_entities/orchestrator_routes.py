@@ -6,6 +6,8 @@ from communication_entities.orchestrator_handler import OrchestratorHandler
 def init_routes(app: web.Application, handler: OrchestratorHandler) -> None:
     add_route = app.router.add_route
     add_route('GET', '/', handler.index, name='index')
+    add_route('POST', '/', handler.index, name='index')
+    add_route('POST', '/info', handler.index, name='info')
     add_route('POST', '/add_orchestrator', handler.add_orchestrator, name='add_orchestrator')
     add_route('POST', '/add_vnf', handler.add_vnf, name='add_vnf')
     add_route('POST', '/clear_inconsistencies', handler.clear_inconsistencies, name='clear_inconsistencies')

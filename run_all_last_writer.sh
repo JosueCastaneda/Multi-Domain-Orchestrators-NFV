@@ -4,7 +4,7 @@
 ./clean2.sh
 
 path_1="experiments/experiment_generator/experiments/experiment_"
-path_2="/docker_files/docker_commands_"
+path_2="/docker_files/docker_commands_last_writer_"
 path_3=".sh"
 
 # Activate the virtual environment
