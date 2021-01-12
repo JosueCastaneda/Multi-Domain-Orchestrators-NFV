@@ -1,3 +1,4 @@
+import os
 import random
 import uuid
 
@@ -18,12 +19,14 @@ def generate_random_port():
 # TODO: Remove number_of_services as parameter
 def generate_random_seeds(number, number_of_services):
     directory_path = 'random_seeds/size_' + str(number)
+    my_path = os.path.dirname(os.path.realpath(__file__))
+    full_path = my_path + '/../experiments/experiment_generator/' + directory_path
     random_seed_list = []
     random_np_seed_list = []
     random_collect_list = []
-    file = open(directory_path + '/seed_list.txt', 'r')
-    file_np = open(directory_path + '/np_seed_list.txt', 'r')
-    file_cl = open(directory_path + '/seed_to_collect_random_services.txt', 'r')
+    file = open(full_path + '/seed_list.txt', 'r')
+    file_np = open(full_path + '/np_seed_list.txt', 'r')
+    file_cl = open(full_path + '/seed_to_collect_random_services.txt', 'r')
     for line in file:
         random_seed_list.append(int(line))
 

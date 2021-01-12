@@ -70,7 +70,8 @@ class ExperimentGenerator:
     def generate_random_vnf_local(self, orchestrator):
         random_index = generate_random_integer(0, len(self.vnf_data) - 1)
         vnf_data = self.vnf_data[random_index]
-        with open(vnf_data['file']) as json_file:
+        my_path = os.path.dirname(os.path.realpath(__file__))
+        with open(my_path + '/' + vnf_data['file']) as json_file:
             vnf_blue_print = json.load(json_file)
         vnf_configuration = VNFDefinitionConfiguration(vnf_blue_print['operation'],
                                                        '127.0.0.1',

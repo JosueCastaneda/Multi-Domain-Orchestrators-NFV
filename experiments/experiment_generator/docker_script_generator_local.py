@@ -18,7 +18,7 @@ class DockerScriptGeneratorLocal:
         self.file_commands_standard = None
         self.file_commands_last_writer = None
         self.random_running_index = 0
-        self.number_of_vnffg_updates = 8
+        self.number_of_vnffg_updates = 128
         self.running_experiment = 0
         self.vnf_port = initial_vnf_port
         self.algorithm_index = configuration.algorithm_index

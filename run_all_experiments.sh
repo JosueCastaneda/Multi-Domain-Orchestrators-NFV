@@ -44,7 +44,7 @@ python3 get_results_vnffg_updates.py 8 $1 causal
 sleep $2
 python3 get_results_vnffg_updates.py 9 $1 causal
 
-##################################### First with all the standard algorithms
+###################################### First with all the standard algorithms
 ./run_all_standard.sh 0 $1
 sleep $2
 python3 get_results_vnffg_updates.py 0 $1 standard
@@ -86,7 +86,7 @@ python3 get_results_vnffg_updates.py 8 $1 standard
 sleep $2
 python3 get_results_vnffg_updates.py 9 $1 standard
 
-##################################### First with all the standard algorithms
+###################################### First with all the standard algorithms
 ./run_all_last_writer.sh 0 $1
 sleep $2
 python3 get_results_vnffg_updates.py 0 $1 last_writer
@@ -128,7 +128,4 @@ python3 get_results_vnffg_updates.py 8 $1 last_writer
 sleep $2
 python3 get_results_vnffg_updates.py 9 $1 last_writer
 
-
-#
-#echo 'Finish'
-#sleep 10
+echo 'Finish'

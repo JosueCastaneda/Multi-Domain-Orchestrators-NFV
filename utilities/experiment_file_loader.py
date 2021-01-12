@@ -1,4 +1,5 @@
 import json
+import os
 
 from experiments.experiment_generator.classes.constraints.orchestrator_definition import OrchestratorDefinition
 from experiments.experiment_generator.classes.experiment_constraints import ExperimentConstraints
@@ -6,10 +7,12 @@ from utilities.random_integer_generation import generate_unique_identifier
 
 
 def load_orchestrators(is_local=False):
+    my_path = os.path.dirname(os.path.realpath(__file__))
+    full_path = my_path + '/../experiments/experiment_generator/orchestrator_definitions/'
     if is_local:
-        file_path = 'orchestrator_definitions/orchestrator_local.json'
+        file_path = full_path + 'orchestrator_local.json'
     else:
-        file_path = 'orchestrator_definitions/orchestrator.json'
+        file_path = full_path + 'orchestrator.json'
     list_of_orchestrators = list()
     with open(file_path) as json_file:
         raw_data = json.load(json_file)
@@ -27,7 +30,11 @@ def load_orchestrators(is_local=False):
 
 
 def load_vnf_raw_data():
-    with open('vnf_info.json') as json_file:
+    my_path = os.path.dirname(os.path.realpath(__file__))
+    # print(my_path)
+    full_path = my_path + '/../experiments/experiment_generator/'
+    # print(full_path)
+    with open(full_path + 'vnf_info.json') as json_file:
         raw_data = json.load(json_file)
         vnf_data = raw_data['vnf']
     return vnf_data

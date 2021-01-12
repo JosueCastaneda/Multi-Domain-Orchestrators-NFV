@@ -144,7 +144,7 @@ async def send_message(command, message):
     url = 'http://' + command.host + ':' + str(command.port) + '/' + command.message_type
     # print(url)
     try:
-        timeout = aiohttp.ClientTimeout(total=180)
+        timeout = aiohttp.ClientTimeout(total=300)
         async with aiohttp.ClientSession(timeout=timeout) as session:
             async with session.post(url, data=message.data) as resp:
                 # print('Godzilla')

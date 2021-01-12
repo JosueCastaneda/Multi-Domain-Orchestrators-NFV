@@ -1,4 +1,5 @@
 import json
+import os
 
 from experiments.experiment_generator.classes.constraints.bandwidth_constraint import BandwidthConstraint
 from experiments.experiment_generator.classes.constraints.delay_constraint import DelayConstraint
@@ -28,7 +29,9 @@ class ExperimentConfiguration:
                                                                                                      self.number_of_services)
 
     def load_configuration_file(self):
-        with open(self.path) as json_file:
+        here = os.path.dirname(os.path.abspath(__file__))
+        filename = os.path.join(here, self.path)
+        with open(filename) as json_file:
             raw_data = json.load(json_file)
         return raw_data['experiment']
 

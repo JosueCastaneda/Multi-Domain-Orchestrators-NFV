@@ -654,6 +654,8 @@ class Orchestrator:
                                                            port=orchestrator['port'],
                                                            data=vnf_forwarding_graph)
                     result = await send_message(new_message)
+                    if self.algorithm_type == 'last_writer_wins':
+                        self.increment_sent_messages()
         return result
 
     async def notify_update_of_vnf_forwarding_graph(self, vnf_forwarding_graph):
