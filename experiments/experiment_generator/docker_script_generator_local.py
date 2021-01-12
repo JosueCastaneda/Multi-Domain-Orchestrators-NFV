@@ -18,7 +18,7 @@ class DockerScriptGeneratorLocal:
         self.file_commands_standard = None
         self.file_commands_last_writer = None
         self.random_running_index = 0
-        self.number_of_vnffg_updates = 128
+        self.number_of_vnffg_updates = 16
         self.running_experiment = 0
         self.vnf_port = initial_vnf_port
         self.algorithm_index = configuration.algorithm_index
@@ -93,7 +93,7 @@ class DockerScriptGeneratorLocal:
     def set_up_run_orchestrators_local(self):
         random_seed = self.configuration.random_seed_list[self.running_experiment]
         current_orchestrator = self.data['orchestrators'][self.orchestrator_index]
-        first_string = 'python orchestrator_script.py -i ' + str(self.orchestrator_index)
+        first_string = 'python3 orchestrator_script.py -i ' + str(self.orchestrator_index)
         second_string = ' -e ' + str(self.experiment_index) + ' -h \'127.0.0.1\' -p '
         five_string = ' -a ' + str(self.algorithm_index)
         third_string = current_orchestrator['port'] + ' -r ' + str(random_seed) + five_string + ' &'
@@ -115,7 +115,7 @@ class DockerScriptGeneratorLocal:
         for i in range(len(self.data['orchestrators'])):
             if i != self.orchestrator_index:
                 other_orchestrator = self.data['orchestrators'][i]
-                first_string = 'python message_factory.py -t add_orchestrator -h 127.0.0.1'
+                first_string = 'python3 message_factory.py -t add_orchestrator -h 127.0.0.1'
                 second_string = ' -p ' + current_orchestrator['port']
                 third_string = ' -n none -m none --vnf_host ' + other_orchestrator['ip'] + ' --vnf_port ' + \
                                other_orchestrator[
@@ -132,7 +132,7 @@ class DockerScriptGeneratorLocal:
     def set_up_running_vnf_local(self):
         current_orchestrator = self.data['orchestrators'][self.orchestrator_index]
         for vnf_index in range(len(current_orchestrator['vnfs'])):
-            first_string = 'python vnf_script.py -i ' + str(vnf_index) + ' -o ' + str(self.orchestrator_index) + ' -e '
+            first_string = 'python3 vnf_script.py -i ' + str(vnf_index) + ' -o ' + str(self.orchestrator_index) + ' -e '
             third_string = str(self.experiment_index) + ' -h \'127.0.0.1\' -p ' + str(self.vnf_port) + ' &'
             self.file_commands.write(first_string + third_string + '\n')
             self.file_commands_standard.write(first_string + third_string + '\n')
@@ -346,7 +346,7 @@ class DockerScriptGeneratorLocal:
         return new_update
 
     def write_new_rsp_entry(self, vnf_forwarding_graph_update:dict):
-        first = 'python message_factory.py --type update_vnffg_rsp --host ' + vnf_forwarding_graph_update['host']
+        first = 'python3 message_factory.py --type update_vnffg_rsp --host ' + vnf_forwarding_graph_update['host']
         second = ' --port ' + vnf_forwarding_graph_update['port'] + ' --vnf_identifier '
         third = vnf_forwarding_graph_update['vnf_identifier'] + ' --order ' + str(vnf_forwarding_graph_update['order'])
         fourth = ' --ingress_connection_point ' + vnf_forwarding_graph_update['ingress_connection_point']
@@ -354,7 +354,7 @@ class DockerScriptGeneratorLocal:
         self.file_vnf_forwarding_graph_update.write(first + second + third + fourth + fifth + ' & \n')
 
     def write_new_classifier_entry(self, vnf_forwarding_graph_update:dict):
-        first = 'python message_factory.py --type update_vnffg_classifier --host ' + vnf_forwarding_graph_update['host']
+        first = 'python3 message_factory.py --type update_vnffg_classifier --host ' + vnf_forwarding_graph_update['host']
         second = ' --port ' + vnf_forwarding_graph_update['port'] + ' --match_identifier '
         third = vnf_forwarding_graph_update['identifier'] + ' --ip_proto ' + vnf_forwarding_graph_update['ip_proto']
         fourth = ' --source_ip ' + str(vnf_forwarding_graph_update['source_ip'])

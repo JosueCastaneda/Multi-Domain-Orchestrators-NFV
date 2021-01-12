@@ -815,6 +815,6 @@ class Orchestrator:
         self.log.info('Updating VNF-FG: ' + str(old_vnf_fg.identifier[0:8]) + ' CLA: ' + str(new_matching_attribute.identifier[0:8]))
         result = await old_vnf_fg.update_unique_classifier_rule(new_matching_attribute, self.log)
         if self.algorithm_type == 'last_writer_wins':
-            self.log.info(result)
+            # self.log.info(result)
             self.log.info('After update: {' + str(self.orchestrator_index) + ',' + str(result['new_counter']) + ',' + str(result['new_max_counter']) + '}')
         return result

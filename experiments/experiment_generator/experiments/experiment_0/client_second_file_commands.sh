@@ -3060,3 +3060,81 @@ python3 message_factory.py -h 127.0.0.1 -p 4439 -r external
 python3 message_factory.py -h 127.0.0.1 -p 4441 -r external
 python3 message_factory.py -h 127.0.0.1 -p 4443 -r external
 python3 message_factory.py -h 127.0.0.1 -p 4445 -r external
+#!/bin/sh
+
+# Dependencies 0
+python3 message_factory.py -t request_scaling_of_service -h 127.0.0.1 -p 4445 -i 3f6d9e88-54f4-11eb-bec1-04ea56f99520
+python3 message_factory.py -r external
+#!/bin/sh
+
+# Dependencies 0
+python3 message_factory.py -t request_scaling_of_service -h 127.0.0.1 -p 4445 -i 3f6d9e20-54f4-11eb-bec1-04ea56f99520
+python3 message_factory.py -r external
+#!/bin/sh
+
+# Dependencies 1
+python3 message_factory.py -t request_scaling_of_service -h 127.0.0.1 -p 4439 -i 3f6d9f16-54f4-11eb-bec1-04ea56f99520
+python3 message_factory.py -r external
+#!/bin/sh
+
+# Dependencies 1
+python3 message_factory.py -t request_scaling_of_service -h 127.0.0.1 -p 4439 -i 3f6d9e5a-54f4-11eb-bec1-04ea56f99520
+python3 message_factory.py -r external
+# Add results 
+python3 message_factory.py -h 127.0.0.1 -p 4437 -r external
+python3 message_factory.py -h 127.0.0.1 -p 4439 -r external
+python3 message_factory.py -h 127.0.0.1 -p 4441 -r external
+python3 message_factory.py -h 127.0.0.1 -p 4443 -r external
+python3 message_factory.py -h 127.0.0.1 -p 4445 -r external
+#!/bin/sh
+
+# Dependencies 0
+python3 message_factory.py -t request_scaling_of_service -h 127.0.0.1 -p 4445 -i 0a374850-54f8-11eb-bec1-04ea56f99520
+python3 message_factory.py -r external
+#!/bin/sh
+
+# Dependencies 0
+python3 message_factory.py -t request_scaling_of_service -h 127.0.0.1 -p 4445 -i 0a3747e8-54f8-11eb-bec1-04ea56f99520
+python3 message_factory.py -r external
+#!/bin/sh
+
+# Dependencies 1
+python3 message_factory.py -t request_scaling_of_service -h 127.0.0.1 -p 4439 -i 0a3748de-54f8-11eb-bec1-04ea56f99520
+python3 message_factory.py -r external
+#!/bin/sh
+
+# Dependencies 1
+python3 message_factory.py -t request_scaling_of_service -h 127.0.0.1 -p 4439 -i 0a374822-54f8-11eb-bec1-04ea56f99520
+python3 message_factory.py -r external
+# Add results 
+python3 message_factory.py -h 127.0.0.1 -p 4437 -r external
+python3 message_factory.py -h 127.0.0.1 -p 4439 -r external
+python3 message_factory.py -h 127.0.0.1 -p 4441 -r external
+python3 message_factory.py -h 127.0.0.1 -p 4443 -r external
+python3 message_factory.py -h 127.0.0.1 -p 4445 -r external
+#!/bin/sh
+
+# Dependencies 0
+python3 message_factory.py -t request_scaling_of_service -h 127.0.0.1 -p 4445 -i f8dc8b4a-54fe-11eb-bec1-04ea56f99520
+python3 message_factory.py -r external
+#!/bin/sh
+
+# Dependencies 0
+python3 message_factory.py -t request_scaling_of_service -h 127.0.0.1 -p 4445 -i f8dc8ae2-54fe-11eb-bec1-04ea56f99520
+python3 message_factory.py -r external
+#!/bin/sh
+
+# Dependencies 1
+python3 message_factory.py -t request_scaling_of_service -h 127.0.0.1 -p 4439 -i f8dc8bd8-54fe-11eb-bec1-04ea56f99520
+python3 message_factory.py -r external
+#!/bin/sh
+
+# Dependencies 1
+python3 message_factory.py -t request_scaling_of_service -h 127.0.0.1 -p 4439 -i f8dc8b1c-54fe-11eb-bec1-04ea56f99520
+python3 message_factory.py -r external
+# Add results 
+python3 message_factory.py -h 127.0.0.1 -p 4437 -r external
+python3 message_factory.py -h 127.0.0.1 -p 4439 -r external
+python3 message_factory.py -h 127.0.0.1 -p 4441 -r external
+python3 message_factory.py -h 127.0.0.1 -p 4443 -r external
+python3 message_factory.py -h 127.0.0.1 -p 4445 -r external
