@@ -82,7 +82,6 @@ def read_parameters(argv):
             command.vnf_host = arg
         elif opt in ("-w", "--vnf_port"):
             command.vnf_port = arg
-            print('VNF PORT: ' + arg)
         elif opt in ("-e", "--experiment"):
             str_exp = 'experiments/first/480/exp_1_8/experiments/experiment_' + arg + '.json'
             command.experiment = str_exp
@@ -142,14 +141,14 @@ async def get_all_results():
 async def send_message(command, message):
     # print(message)
     url = 'http://' + command.host + ':' + str(command.port) + '/' + command.message_type
-    # print(url)
+    log.info(url)
     try:
-        timeout = aiohttp.ClientTimeout(total=300)
+        timeout = aiohttp.ClientTimeout(total=1000)
         async with aiohttp.ClientSession(timeout=timeout) as session:
             async with session.post(url, data=message.data) as resp:
                 # print('Godzilla')
                 # print(resp.status)
-                print(await resp.text())
+                log.info(await resp.text())
     except asyncio.TimeoutError as e:
         log.error('Scaling timeout, requesting results: ')
         await get_results_external('127.0.0.1', 4437)
@@ -296,10 +295,13 @@ async def main(argv):
 
     if command.is_valid():
         messages = generate_messages(command)
+
         if isinstance(messages, list):
+            log.info('Mensajes enviados: ' + str(len(messages)))
             for m in messages:
                 await send_message(command, m)
         else:
+            log.info('Single message')
             await send_message(command, messages)
     else:
         print(command.help_message)

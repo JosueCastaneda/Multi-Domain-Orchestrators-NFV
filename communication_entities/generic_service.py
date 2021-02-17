@@ -143,6 +143,7 @@ class GenericService:
                 exclude_list_of_orchestrators.append(dependency['orchestrator_id'])
         return exclude_list_of_orchestrators
 
+    # ERROR: Probably change this to outside of VNF-FG plus the notifiy has old method signature
     async def scale_from_external_orchestrator(self, service_id, original_service_id, original_service_orchestrator_id):
         old_value = self.orchestrator.vector_clock
         self.orchestrator.vector_clock.increment_clock(self.orchestrator.id)

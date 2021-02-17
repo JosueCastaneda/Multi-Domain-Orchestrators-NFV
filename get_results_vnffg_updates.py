@@ -11,10 +11,11 @@ from utilities.life_cycle_management_update import send_message
 from utilities.logger import *
 
 
-def append_entry_result_to_file(experiment_file, results, algorithm_type):
-    directory_path = 'results/results_experiment_' + str(experiment_file)
+def append_entry_result_to_file(exp_conf, results):
+    directory_path = 'results/results_experiment_' + exp_conf['number_of_updates']
     csv_columns = ['inconsistencies', 'messages_sent', 'time_for_experimentation']
-    csv_file = directory_path + '/result_' + algorithm_type + '.csv'
+    name_file = exp_conf['algorithm_type'] + '_' + exp_conf['delay_time'] + '_' + exp_conf['probability_repetitions'] + '_rep'
+    csv_file = directory_path + '/result_' + name_file + '.csv'
     if not os.path.exists(directory_path):
         os.makedirs(directory_path)
         try:
@@ -40,11 +41,8 @@ def append_entry_result_to_file(experiment_file, results, algorithm_type):
         print("I/O error")
 
 
-async def init_capture(experiment_file, number_of_updates, algorithm_type):
+async def init_capture(experiment_file, experiment_configuration):
     app = web.Application()
-    # print(experiment_file)
-    # print(number_of_updates)
-    # await test_all_and_save()
     orchestrators_ips = load_orchestrators(experiment_file)
     unique_vnf_forwarding_graph_entry = list()
     inconsistencies = 0
@@ -68,27 +66,29 @@ async def init_capture(experiment_file, number_of_updates, algorithm_type):
     log.info('Result: ')
     log.info(experiment_entry)
     list_entry.append(experiment_entry)
-    append_entry_result_to_file(number_of_updates, list_entry, algorithm_type)
+    append_entry_result_to_file(experiment_configuration, list_entry)
     exit()
     return app
 
 
 def main():
-
+    # print(sys.argv)
     experiment_number = sys.argv[1]
     print(f'Sending EXP to {experiment_number}')
     experiment_file = experiment_number
-    number_of_updates = 4
     number_of_updates = sys.argv[2]
-    print(f'Updates to {number_of_updates}')
-    algorithm_type = 'standard'
     algorithm_type = sys.argv[3]
-    print(f'Alg. type {algorithm_type}')
-
+    delay_time = sys.argv[4]
+    probability_repetitions = sys.argv[5]
+    experiment_configuration = dict()
+    experiment_configuration['number_of_updates'] = number_of_updates
+    experiment_configuration['algorithm_type'] = algorithm_type
+    experiment_configuration['delay_time'] = delay_time
+    experiment_configuration['probability_repetitions'] = probability_repetitions
     server_host = '127.0.0.1'
     server_port = 4444
     loop = asyncio.get_event_loop()
-    app = loop.run_until_complete(init_capture(experiment_file, number_of_updates, algorithm_type))
+    app = loop.run_until_complete(init_capture(experiment_file, experiment_configuration))
     web.run_app(app, host=server_host, port=server_port)
 
 
@@ -142,6 +142,9 @@ def count_how_many_differences_between_connection_points(first, second):
         differences += 1
     if first['egress_connection_point'] != second['egress_connection_point']:
         differences += 1
+    # TODO: This is because we have a different count
+    if differences > 1:
+        differences = 1
     return differences
 
 
@@ -157,6 +160,9 @@ def count_how_many_differences_between_matching_attributes(first, second):
         differences += 1
     if first['destination_port'] != second['destination_port']:
         differences += 1
+    # TODO: This is because we have a different count
+    if differences > 1:
+        differences = 1
     return differences
 
 

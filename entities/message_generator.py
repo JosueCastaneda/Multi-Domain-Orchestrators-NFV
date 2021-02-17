@@ -42,13 +42,13 @@ class MessageGenerator:
         elif self.command.message_type == "process":
             m = self.generate_process_message()
         elif self.command.message_type == "update_vnffg_rsp":
-            print('Ingress CP: ' + str(self.command.ingress_connection_point))
+            # print('Ingress CP: ' + str(self.command.ingress_connection_point))
             m = UpdateVnfFgRenderedServicePathMessage(self.command.vnf_identifier,
                                                       self.command.order,
                                                       self.command.ingress_connection_point,
                                                       self.command.egress_connection_point)
         elif self.command.message_type == "update_vnffg_classifier":
-            print('XXXIngress CP: ' + str(self.command.ingress_connection_point))
+            # print('XXXIngress CP: ' + str(self.command.ingress_connection_point))
             m = UpdateVnfFgClassifierMessage(self.command.match_identifier,
                                              self.command.ip_proto,
                                              self.command.source_ip,

@@ -16,7 +16,7 @@ class DockerScriptGeneratorExternal:
         self.orchestrator_index = 0
         self.file_commands = None
         self.random_running_index = 0
-        self.number_of_vnffg_updates = 300
+        self.number_of_vnffg_updates = 10
         self.running_experiment = 0
         self.is_external = True
         self.algorithm_index = configuration.algorithm_index

@@ -100,7 +100,6 @@ def load_orchestrators(experiment_number):
         raw_data = json.load(json_file)
     return raw_data['orchestrators']
 
-
 def get_inconsistencies_from_entry(first_entry, second_entry):
     new_inconsistencies = 0
     number_of_elements = len(first_entry['rendered_service_paths'][0]['vnf_descriptor_connection_points'])
@@ -127,6 +126,9 @@ def count_how_many_differences_between_connection_points(first, second):
         differences += 1
     if first['egress_connection_point'] != second['egress_connection_point']:
         differences += 1
+    # TODO: This change was done to correspond to the code that computes inconsistencies so all equal 1
+    if differences > 1:
+        differences = 1
     return differences
 
 
@@ -142,6 +144,8 @@ def count_how_many_differences_between_matching_attributes(first, second):
         differences += 1
     if first['destination_port'] != second['destination_port']:
         differences += 1
+    if differences > 1:
+        differences = 1
     return differences
 
 

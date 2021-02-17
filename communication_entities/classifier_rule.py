@@ -1,4 +1,5 @@
 import sys
+import time
 
 sys.path.append('../')
 
@@ -32,13 +33,14 @@ class ClassifierRule:
         self.rsp_identifier = another_classifier.rsp_identifier
         self.matching_attributes = another_classifier.matching_attributes
 
-    async def update_matching_attribute(self, new_matching_attribute: MatchingAttribute, vnffg_identifier: str, log, was_called_by_caller=False):
+    async def update_matching_attribute(self, new_matching_attribute: MatchingAttribute, vnffg_identifier: str, log, was_called_by_caller=None):
         result = dict()
         result['update_result'] = False
         result['matching_attribute'] = None
         result['new_counter'] = -1
         for matching_attribute in self.matching_attributes:
             if matching_attribute.get_identifier() == new_matching_attribute.get_identifier():
+                start = time.time()
                 new_result = matching_attribute.update(new_matching_attribute,
                                                        was_called_by_caller)
                 result['update_result'] = True
@@ -47,6 +49,12 @@ class ClassifierRule:
                 result['new_max_counter'] = new_result['new_max_couter']
                 result['vnffg_identifier'] = vnffg_identifier[0:8]
                 result['change_identifier'] = matching_attribute.identifier[0:8]
+                result['vector_clock'] = new_result['vector_clock']
+                result['vector_clock_s'] = new_result['vector_clock_s']
+                result['identifier'] = matching_attribute.get_identifier()
+                end = time.time()
+                time_difference = end - start
+                result['running_time'] = time_difference
                 return result
         return result
 
@@ -69,6 +77,12 @@ class ClassifierRule:
             if ma.get_identifier() == new_entry['change_identifier']:
                 return ma.get_counter()
         return -1
+
+    def get_clock_from_matching_attribute_entry(self, identifier):
+        for ma in self.matching_attributes:
+            if ma.get_identifier() == identifier:
+                return ma.get_vector_clock()
+        return '-1'
 
     def get_current_max_index_from_entry_rule(self, new_entry, orch_log):
         for ma in self.matching_attributes:

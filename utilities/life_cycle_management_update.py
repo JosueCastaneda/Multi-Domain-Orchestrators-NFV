@@ -4,7 +4,6 @@ import string
 
 import aiohttp
 
-from utilities.logger import log
 from utilities.random_integer_generation import generate_random_integer
 
 
@@ -15,6 +14,9 @@ def generate_number_of_updates(value):
 def generate_waiting_period():
     return generate_random_integer(0, 10)
 
+
+def generate_random_number_between_zero_one_hundred():
+    return generate_random_integer(0, 100)
 
 def return_success() -> json:
     data = dict()

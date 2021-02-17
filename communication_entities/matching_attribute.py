@@ -1,3 +1,7 @@
+import json
+
+from communication_entities.vector_clock import VectorClock
+from definitions import ROOT_DIR
 from utilities.logger import *
 
 
@@ -11,7 +15,9 @@ class MatchingAttribute:
                  source_port='',
                  destination_port='',
                  counter=0,
-                 current_max_orchestrator_index=-1):
+                 current_max_orchestrator_index=-1,
+                 orchestrator_sender_id='',
+                 list_of_orchestrator_id=[]):
         self.identifier = identifier
         self.ip_proto = ip_proto
         self.source_ip = source_ip
@@ -20,9 +26,56 @@ class MatchingAttribute:
         self.destination_port = destination_port
         self.counter = counter
         self.current_max_orchestrator_index = current_max_orchestrator_index
+        self.orchestrator_sender_id = orchestrator_sender_id
+        self.vector_clock = VectorClock()
+        self.list_of_orchestrator_id = list_of_orchestrator_id
+        # if experiment != -1:
+        #     self.add_clocks(experiment)
+        self.add_clocks()
+
+    def add_clocks(self):
+        # print('My IDS')
+        # print(self.list_of_orchestrator_id)
+        if len(self.list_of_orchestrator_id) > 0:
+            for id in self.list_of_orchestrator_id:
+                self.vector_clock.add_clock(id)
+            # print('Line 41 - MatchingAttribute- My clock: ' + self.vector_clock.as_string())
+        # else:
+        #     list_of_orchestrator_id = ["671fd36c-673a-11eb-b240-04ea56f99520",
+        #                                "671fd36d-673a-11eb-b240-04ea56f99520",
+        #                                "671fd36e-673a-11eb-b240-04ea56f99520",
+        #                                "671fd36f-673a-11eb-b240-04ea56f99520",
+        #                                "671fd370-673a-11eb-b240-04ea56f99520"]
+        #     self.vector_clock.add_clock(list_of_orchestrator_id[0])
+        #     self.vector_clock.add_clock(list_of_orchestrator_id[1])
+        #     self.vector_clock.add_clock(list_of_orchestrator_id[2])
+        #     self.vector_clock.add_clock(list_of_orchestrator_id[3])
+        #     self.vector_clock.add_clock(list_of_orchestrator_id[4])
+        #     print('Line 53 - MatchingAttribute- My clock: ' + self.vector_clock.as_string())
+        # print('Line 54 - MatchingAttribute- My clock: '+ self.vector_clock.as_string())
+        #     orchestrators_ids = self.list_of_orchestrator_id
+
+        # #TODO: Need to read the list from the json experiment...
+        # list_of_orchestrator_id = self.load_orchestrators_ids(experiment)
+        # print('List of orchestrators')
+        # print(list_of_orchestrator_id)
+
+    def load_orchestrators_ids(self, experiment):
+        orchestrators = []
+        string_1= ROOT_DIR + '/' + 'experiments/experiment_generator/experiments/experiment_'
+        directory_path = string_1 + str(experiment) + '/' + 'experiment_' + str(experiment)
+        print(directory_path)
+        with open(directory_path + '.json') as json_file:
+            raw_data = json.load(json_file)
+        for orchestrator in raw_data['orchestrators']:
+            orchestrators.append(orchestrator['id'])
+        return orchestrators
 
     def set_counter(self, val):
         self.counter = val
+
+    def get_vector_clock(self):
+        return self.vector_clock
 
     def get_counter(self):
         return self.counter
@@ -51,14 +104,19 @@ class MatchingAttribute:
     def update_destination_port(self, new_port):
         self.destination_port = new_port
 
-    def update(self, other_matching_attribute, was_called_by_caller=False):
+    def update(self, other_matching_attribute, was_called_by_caller=None):
+        if was_called_by_caller is None:
+            was_called_by_caller = dict()
+            was_called_by_caller['first_call'] = False
+            was_called_by_caller['caller'] = other_matching_attribute.orchestrator_sender_id
+
         self.ip_proto = other_matching_attribute.ip_proto
         self.source_ip = other_matching_attribute.source_ip
         self.destination_ip = other_matching_attribute.destination_ip
         self.source_port = other_matching_attribute.source_port
         self.destination_port = other_matching_attribute.destination_port
 
-        if was_called_by_caller:
+        if was_called_by_caller['first_call']:
             self.increase_counter()
             self.current_max_orchestrator_index = -1
         else:
@@ -71,9 +129,14 @@ class MatchingAttribute:
                 self.set_current_max_orchestrator_index(other_max_counter)
             elif self.current_max_orchestrator_index == -1:
                 self.increase_counter()
+        # print('Before increment: ' + str(self.vector_clock.as_string()) + ' Caller: ' + str(was_called_by_caller['caller']))
+        self.vector_clock.increment_clock(was_called_by_caller['caller'])
+        # print('After increment: ' + self.vector_clock.as_string())
         result = dict()
         result['counter'] = self.get_counter()
         result['new_max_couter'] = self.get_current_max_orchestrator_index()
+        result['vector_clock'] = self.vector_clock.to_json()
+        result['vector_clock_s'] = self.vector_clock.as_string()
         return result
 
     def log_information(self):

@@ -34,8 +34,3 @@ def init_routes(app: web.Application, handler: OrchestratorHandler) -> None:
     add_route('POST', '/update_vnffg_classifier', handler.update_vnffg_classifier, name='update_vnffg_classifier')
     str_end = 'scale_of_service_has_ended'
     add_route('POST', '/scale_of_service_has_ended', handler.scale_of_service_has_ended, name=str_end)
-
-
-    # TODO: Remove, for debuging purposes only
-    add_route('POST', '/modify_connection_point', handler.modify_connection_point, name='modify_connection_point')
-    add_route('GET', '/modify_connection_point', handler.modify_connection_point, name='modify_connection_point')

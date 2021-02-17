@@ -24,6 +24,9 @@ class VNFForwardingGraph:
         self.my_orchestrator = my_orchestrator
         self.type_of_change = ''
 
+    def as_string(self):
+        return self.identifier + ' ' + self.name + ' ' + self.short_name
+
     def get_identifier(self):
         return self.identifier
 
@@ -68,8 +71,7 @@ class VNFForwardingGraph:
     async def update_unique_rendered_service_path(self, new_vnf_connection_point_reference: VNFConnectionPointReference,
                                                   orch_log,
                                                   orch_index,
-                                                  was_called_by_caller=False):
-
+                                                  was_called_by_caller=None):
         replicas_to_send_notifications = list()
         path = self.rendered_service_paths[0]
         update_result_as_dictionary = dict()
@@ -93,16 +95,31 @@ class VNFForwardingGraph:
             update_result_as_dictionary['new_max_counter'] = result['new_max_counter']
             update_result_as_dictionary['vnffg_identifier'] = result['vnffg_identifier']
             update_result_as_dictionary['change_identifier'] = result['change_identifier']
+            update_result_as_dictionary['vector_clock'] = result['vector_clock']
+            update_result_as_dictionary['identifier'] = result['identifier']
+            update_result_as_dictionary['vnffg_identifier'] = self.identifier
+            update_result_as_dictionary['vnffg_name'] = self.name
+            update_result_as_dictionary['vnffg_short_name'] = self.short_name
+            update_result_as_dictionary['type_of_change_attribute'] = 'connection_point'
+            update_result_as_dictionary['running_time'] = result['running_time']
 
         update_result_as_dictionary['is_positive_result'] = result['update_result']
         update_result_as_dictionary['replicas'] = replicas_to_send_notifications
         update_result_as_dictionary['vnffg'] = vnf_fg_as_dict
         return update_result_as_dictionary
 
+    def has_matching_attribute(self, new_matching_attribute:MatchingAttribute):
+        rule = self.classification_rules[0]
+        for matching_attribute in rule.matching_attributes:
+            if matching_attribute.get_identifier() == new_matching_attribute.get_identifier():
+                return True
+        return False
+
+    # TODO: Separate repeated functions, clean code
     async def update_unique_classifier_rule(self,
                                             new_matching_attribute: MatchingAttribute,
                                             orch_log,
-                                            was_called_by_caller=False):
+                                            was_called_by_caller=None):
         replicas_to_send_notifications = list()
         rule = self.classification_rules[0]
         update_result_as_dictionary = dict()
@@ -114,9 +131,11 @@ class VNFForwardingGraph:
                                                       orch_log,
                                                       was_called_by_caller)
         if result['update_result']:
+            # orch_log.info('Doing the update.....')
             for orchestrator_replica in self.set_unique_orchestrators:
                 if orchestrator_replica != self.my_orchestrator:
                     replicas_to_send_notifications.append(orchestrator_replica)
+
             vnf_fg_as_dictionary['change_identifier'] = result['matching_attribute']['identifier']
             vnf_fg_as_dictionary['change_ip_proto'] = result['matching_attribute']['ip_proto']
             vnf_fg_as_dictionary['change_source_ip'] = result['matching_attribute']['source_ip']
@@ -128,6 +147,14 @@ class VNFForwardingGraph:
             update_result_as_dictionary['new_max_counter'] = result['new_max_counter']
             update_result_as_dictionary['vnffg_identifier'] = result['vnffg_identifier']
             update_result_as_dictionary['change_identifier'] = result['change_identifier']
+            update_result_as_dictionary['vector_clock'] = result['vector_clock']
+            update_result_as_dictionary['identifier'] = result['identifier']
+            update_result_as_dictionary['vector_clock_s'] = result['vector_clock_s']
+            update_result_as_dictionary['vnffg_identifier'] = self.identifier
+            update_result_as_dictionary['vnffg_name'] = self.name
+            update_result_as_dictionary['vnffg_short_name'] = self.short_name
+            update_result_as_dictionary['type_of_change_attribute'] = 'matching_attribute'
+            update_result_as_dictionary['running_time'] = result['running_time']
 
         update_result_as_dictionary['is_positive_result'] = result['update_result']
         update_result_as_dictionary['replicas'] = replicas_to_send_notifications
@@ -161,10 +188,13 @@ class VNFForwardingGraph:
     def get_first_rendered_service_path(self):
         return self.rendered_service_paths[0]
 
+    def get_first_classifier_rule(self):
+        return self.classification_rules[0]
+
     def get_first_rendered_service_path_id(self):
         return self.rendered_service_paths[0].get_id()
 
-    def instantiate_rendered_service_path(self, vnf_fg_entry):
+    def instantiate_rendered_service_path(self, vnf_fg_entry, list_of_orchestrator_id):
         for rendered_service_path_entry in vnf_fg_entry['rendered_service_paths']:
             new_rendered_service_path = RenderedServicePath(rendered_service_path_entry['rsp_id'],
                                                             rendered_service_path_entry['name'])
@@ -174,25 +204,31 @@ class VNFForwardingGraph:
                                                                    vnf_descriptor_connection_point[
                                                                        'ingress_connection_point'],
                                                                    vnf_descriptor_connection_point[
-                                                                       'egress_connection_point'])
+                                                                       'egress_connection_point'],
+                                                                   list_of_orchestrator_id=list_of_orchestrator_id)
 
                 new_rendered_service_path.append_vnf_connection_point_reference(new_connection_point)
             self.append_rendered_service_path(new_rendered_service_path)
 
-    def instantiate_classification_rules(self, vnf_fg_entry):
+    def instantiate_classification_rules(self, vnf_fg_entry, list_of_orchestrator_id):
         for classification_rule_entry in vnf_fg_entry['classification_rules']:
             new_classifier = ClassifierRule(classification_rule_entry['identifier'],
                                             classification_rule_entry['name'],
                                             classification_rule_entry['rsp_identifier'])
+            # print('Creando Atributos...')
+            # print(list_of_orchestrator_id)
             for matching_attribute_entry in classification_rule_entry['matching_attributes']:
                 new_matching_attribute = MatchingAttribute(matching_attribute_entry['identifier'],
                                                            matching_attribute_entry['ip_proto'],
                                                            matching_attribute_entry['source_ip'],
                                                            matching_attribute_entry['destination_ip'],
                                                            matching_attribute_entry['source_port'],
-                                                           matching_attribute_entry['destination_port'])
+                                                           matching_attribute_entry['destination_port'],
+                                                           list_of_orchestrator_id=list_of_orchestrator_id)
                 new_classifier.append_matching_attributes(new_matching_attribute)
+            # print('Atributos creados')
             self.append_classification(new_classifier)
+        # print('OHH NO!!!')
 
     def add_unique_orchestrators(self, orchestrators):
         for orchestrator in orchestrators:

@@ -7,7 +7,7 @@ from utilities.random_integer_generation import generate_random_integer, generat
 
 class DockerScriptGeneratorLocal:
 
-    def __init__(self, experiment_index, configuration, initial_vnf_port):
+    def __init__(self, experiment_index, configuration, initial_vnf_port, number_of_vnffg_updates=640):
         self.experiment_index = experiment_index
         self.configuration = configuration
         self.data = self.load_all_required_data()
@@ -18,7 +18,7 @@ class DockerScriptGeneratorLocal:
         self.file_commands_standard = None
         self.file_commands_last_writer = None
         self.random_running_index = 0
-        self.number_of_vnffg_updates = 16
+        self.number_of_vnffg_updates = number_of_vnffg_updates
         self.running_experiment = 0
         self.vnf_port = initial_vnf_port
         self.algorithm_index = configuration.algorithm_index
@@ -102,6 +102,10 @@ class DockerScriptGeneratorLocal:
         self.file_commands.write(first_string + second_string + third_string + '\n')
         self.file_commands_standard.write(first_string + second_string + third_a_string + '\n')
         self.file_commands_last_writer.write(first_string + second_string + third_b_string + '\n')
+        fourth_string = 'sleep 2'
+        self.file_commands.write(fourth_string + '\n')
+        self.file_commands_standard.write(fourth_string + '\n')
+        self.file_commands_last_writer.write(fourth_string + '\n')
 
     def set_up_run_orchestrators(self):
         self.file_commands.write('# Launch orchestrator' + '\n')
@@ -141,6 +145,14 @@ class DockerScriptGeneratorLocal:
 
     def set_up_running_vnf(self):
         self.file_commands.write('# Instantiate the orchestrator\'s VNFs \n')
+        self.file_commands_standard.write('# Instantiate the orchestrator\'s VNFs \n')
+        self.file_commands_last_writer.write('# Instantiate the orchestrator\'s VNFs \n')
+
+        fourth_string = 'sleep 2'
+        self.file_commands.write(fourth_string + '\n')
+        self.file_commands_standard.write(fourth_string + '\n')
+        self.file_commands_last_writer.write(fourth_string + '\n')
+
         self.set_up_running_vnf_local()
         self.write_new_line_to_file()
 
@@ -259,7 +271,7 @@ class DockerScriptGeneratorLocal:
 
     def generate_vnf_forwarding_graph_update(self):
         vnf_forwarding_graph_updates = list()
-        remaining_updates = self.number_of_vnffg_updates
+        remaining_updates = int(self.number_of_vnffg_updates)
         while remaining_updates:
             random_orchestrator = self.get_random_orchestrator()
             random_vnf_forwarding_graph = self.get_random_vnffg(random_orchestrator)

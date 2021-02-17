@@ -103,15 +103,6 @@ class OrchestratorHandler:
             response = {'status': 'failed', 'message': str(e)}
             return web.json_response(response)
 
-    async def modify_connection_point(self, request: web.Request) -> Response:
-        try:
-            result = await self.orchestrator.update_random_vnf_forwarding_graph()
-            answer = {'status': 'Good', 'result': result}
-            return web.json_response(answer)
-        except Exception as e:
-            response = {'status': 'failed', 'message': str(e)}
-            return web.json_response(response)
-
     async def update_vnffg_rsp(self, request: web.Request) -> Response:
         try:
             data = await request.post()
@@ -129,9 +120,11 @@ class OrchestratorHandler:
     async def notify_update_vnf_forwarding_graph(self, request: web.Request) -> Response:
         try:
             data = await request.post()
-            wait_period = random.randint(0, 10)
-            await asyncio.sleep(wait_period)
-            result = await self.orchestrator.notify_update_of_vnf_forwarding_graph(data)
+            # NOTE: Change this
+            # wait_period = random.randint(0, 10)
+            # await asyncio.sleep(wait_period)
+            # result = await self.orchestrator.notify_update_of_vnf_forwarding_graph(data)
+            result = await self.orchestrator.wait_before_notify_update_of_vnf_forwarding_graph(data)
             answer = {'status': 'Good', 'result': result}
             return web.json_response(answer)
         except Exception as e:
@@ -147,7 +140,6 @@ class OrchestratorHandler:
                                                        data['destination_ip'],
                                                        data['source_port'],
                                                        data['destination_port'])
-
             result = await self.orchestrator.update_unique_vnf_forwarding_graph_classifier_rule(new_matching_attribute)
             answer = {'status': 'Good', 'result': result}
             return web.json_response(answer)
@@ -158,8 +150,10 @@ class OrchestratorHandler:
     async def notify_scaling_has_ended(self, request: web.Request) -> Response:
         try:
             data = await request.post()
-            result = await self.orchestrator.wait_before_notification(data['vector_clock'],
-                                                                      data['orchestrator_sender_id'])
+            # ERROR: This shloud only be the data
+            result = await self.orchestrator.wait_before_notification(data)
+            # result = await self.orchestrator.wait_before_notification(data['vector_clock'],
+            #                                                           data['orchestrator_sender_id'])
             answer = {'status': 'Good', 'result': result}
             return web.json_response(answer)
         except Exception as e:
@@ -169,8 +163,10 @@ class OrchestratorHandler:
     async def notify_update_of_vector_clock(self, request: web.Request) -> Response:
         try:
             data = await request.post()
-            result = await self.orchestrator.wait_before_notification(data['vector_clock'],
-                                                                      data['orchestrator_sender_id'])
+            # result = await self.orchestrator.wait_before_notification(data['vector_clock'],
+            #                                                           data['orchestrator_sender_id'],
+            #                                                           data)
+            result = await self.orchestrator.wait_before_notification(data)
             answer = {'status': 'Good', 'result': result}
             return web.json_response(answer)
         except Exception as e:

@@ -12,7 +12,8 @@ class PendingLCMScalingOperation:
                  sender_vector_clock=None,
                  service_sender_id='',
                  original_service=None,
-                 data=None):
+                 data=None,
+                 vnffg_data=None):
         self.vnf_component_to_scale_id = vnf_component_to_scale_id
         self.operation = operation
         self.original_service_id = original_service_id
@@ -23,6 +24,7 @@ class PendingLCMScalingOperation:
         self.original_service = original_service
         self.is_not_done = True
         self.data = data
+        self.vnffg_data = vnffg_data
 
     def set_vector_clock(self, new_vector_clock):
         log.info(self.sender_vector_clock.to_json())

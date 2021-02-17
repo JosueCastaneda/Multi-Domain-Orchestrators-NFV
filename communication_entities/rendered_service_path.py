@@ -1,3 +1,5 @@
+import time
+
 from communication_entities.vnf_connection_point_reference import VNFConnectionPointReference
 from utilities.logger import *
 
@@ -52,16 +54,23 @@ class RenderedServicePath:
             rendered_service_path_dictionary['vnf_descriptor_connection_points'].append(vnf_connection_point_dict_entry)
         return rendered_service_path_dictionary
 
+    def get_clock_from_connection_point_entry(self, identifier):
+        for cp in self.vnf_descriptor_connection_points:
+            if cp.get_vnf_identifier() == identifier:
+                return cp.get_vector_clock()
+        return '-1'
+
     async def update_vnf_connection_point(self, vnf_connection_point_reference: VNFConnectionPointReference,
                                           vnffg_identifier,
                                           orch_log,
-                                          was_called_by_caller=False):
+                                          was_called_by_caller=None):
         result = dict()
         result['update_result'] = False
         result['connection_point'] = None
         result['new_counter'] = -1
         for cp in self.vnf_descriptor_connection_points:
             if cp.get_vnf_identifier() == vnf_connection_point_reference.get_vnf_identifier():
+                start = time.time()
                 new_result = cp.update(vnf_connection_point_reference,
                                        orch_log,
                                        was_called_by_caller)
@@ -71,6 +80,12 @@ class RenderedServicePath:
                 result['new_max_counter'] = new_result['new_max_counter']
                 result['vnffg_identifier'] = vnffg_identifier[0:8]
                 result['change_identifier'] = cp.vnf_identifier[0:8]
+                result['vector_clock'] = new_result['vector_clock']
+                result['vector_clock_s'] = new_result['vector_clock_s']
+                result['identifier'] = cp.get_vnf_identifier()
+                end = time.time()
+                time_difference = end - start
+                result['running_time'] = time_difference
                 return result
         return result
 
