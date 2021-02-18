@@ -2,7 +2,6 @@ import asyncio
 import json
 import logging
 import os
-import pickle
 import random
 import sys
 import time
@@ -36,16 +35,16 @@ def is_orchestrator_included_for_notification(id_orch, excluding_list):
 class Orchestrator:
 
     def __init__(self, experiment_index, orchestrator_index, server_host, server_port, random_seed,
-                 causal_delivery=False, algorithm_type='causal', waiting_time=30, probability_repeated_messages=50):
-        self.waiting_time = 10
-        self.probability_repeated_message = 0
+                 causal_delivery=False, algorithm_type='causal', waiting_time=30, probability_repeated_messages=30):
+        self.waiting_time = waiting_time
+        self.probability_repeated_message = probability_repeated_messages
         print('Waiting time: ' + str(self.waiting_time) + ' Probability: ' + str(self.probability_repeated_message))
         self.experiment_name = 'experiment_' + experiment_index
         self.experiment_index = experiment_index
         self.name = 'orch_' + orchestrator_index
         self.orchestrator_index = orchestrator_index
         self.orchestrator_counter = 0
-        self.directory_path = 'experiments/experiment_generator/experiments/experiment_' + self.experiment_index + '/'
+        self.directory_path = 'experiments/experiment_' + self.experiment_index + '/'
         self.id = ''
         self.location = ''
         self.orchestrators_ids = []
@@ -75,7 +74,7 @@ class Orchestrator:
         self.total_time_for_experimentation = 0.0
 
     def add_vnf_forwarding_graph(self, vnf_forwarding_graphs):
-        string_1 = ROOT_DIR + '/' + 'experiments/experiment_generator/experiments/experiment_'
+        string_1 = ROOT_DIR + '/' + 'experiments/experiment_'
         directory_path = string_1 + str(self.experiment_index) + '/' + 'experiment_' + str(self.experiment_index)
         with open(directory_path + '.json') as json_file:
             raw_data = json.load(json_file)
@@ -196,8 +195,8 @@ class Orchestrator:
         logging.basicConfig(filename=other_folder)
         self.log = logging.getLogger('logger')
         self.log.propagate = False
-        self.log.setLevel(logging.DEBUG)
-        # self.log.setLevel(logging.WARNING)
+        # self.log.setLevel(logging.DEBUG)
+        self.log.setLevel(logging.WARNING)
         log_str = '%(asctime)s - %(filename)s - %(lineno)s - %(message)s'
         formatter = logging.Formatter(log_str)
         fh = logging.FileHandler(other_folder, mode='w', encoding='utf-8')
@@ -645,7 +644,7 @@ class Orchestrator:
 
     async def update_unique_vnf_forwarding_graph_classifier_rule(self, matching_attribute: MatchingAttribute):
         # start = time.time()
-        print(matching_attribute.as_dictionary())
+
         # NOTE: We need to do this to populate the correct orchestrators
         if len(matching_attribute.list_of_orchestrator_id) == 0:
             matching_attribute.list_of_orchestrator_id = self.orchestrators_ids

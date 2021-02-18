@@ -7,6 +7,7 @@ from aiohttp import web
 
 from communication_entities.messages.get_orchestrator_information import GetOrchestratorInformation
 from communication_entities.messages.vnf_forwarding_graph.get_vnf_fg_message import GetVNFFGMessage
+from definitions import ROOT_DIR
 from utilities.life_cycle_management_update import send_message
 from utilities.logger import *
 
@@ -108,7 +109,7 @@ async def get_orchestrator_information(orchestrator):
 
 def load_orchestrators(experiment_number):
     base_dir = os.path.dirname(__file__)
-    file_path = base_dir + 'experiments/experiment_generator/experiments/experiment_'+ str(experiment_number)
+    file_path = ROOT_DIR + '/experiments/experiment_'+ str(experiment_number)
     file_name = '/experiment_' + str(experiment_number) + '.json'
     complete_file_path_name = file_path + file_name
     with open(complete_file_path_name ) as json_file:
@@ -130,9 +131,8 @@ def get_inconsistencies_from_entry(first_entry, second_entry):
         new_inconsistencies += count_how_many_differences_between_matching_attributes(first_connection_entry,
                                                                                       second_connection_entry)
         sum_lol = 0
-        # if new_inconsistencies == 10:
-        #     print('Inconsistentencies: ' + str(new_inconsistencies))
     return new_inconsistencies
+
 
 def count_how_many_differences_between_connection_points(first, second):
     differences = 0

@@ -13,10 +13,10 @@ from experiments.experiment_generator.experiment_generator import ExperimentGene
 
 def main():
     local_deployment = True
-    number_of_updates = 192
+    number_of_updates = 5
     if len(sys.argv) >= 2 and sys.argv[1] == 'local':
         local_deployment = True
-    number_of_updates = sys.argv[2]
+        number_of_updates = sys.argv[2]
     print(number_of_updates)
     experiment_configuration = ExperimentConfiguration('experiment_constraint.json')
     exp_gen = ExperimentGenerator(experiment_configuration, local_deployment)
