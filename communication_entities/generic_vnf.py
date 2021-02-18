@@ -55,7 +55,7 @@ class GenericVNF:
 
     def load_text_data(self):
         # all_route = ROOT_DIR + '/' + self.directory_path + self.experiment_name + '.json'
-        directory_path = ROOT_DIR + '/' + 'experiments/experiment_generator/experiments/experiment_' + self.experiment_index + '/'
+        directory_path = ROOT_DIR + '/' + 'experiments/experiment_' + self.experiment_index + '/'
         with open(directory_path + self.experiment_name + '.json') as json_file:
             raw_data = json.load(json_file)
         vnf_information = raw_data['orchestrators'][self.orchestrator_index]['vnfs'][self.vnf_index]

@@ -2,7 +2,7 @@
 
 experiment=$1
 
-path_1="experiments/experiment_generator/experiments/experiment_"$experiment
+path_1="experiments/experiment_"$experiment
 dock_commands_0="/docker_files/docker_commands_0.sh"
 dock_commands_1="/docker_files/docker_commands_1.sh"
 dock_commands_2="/docker_files/docker_commands_2.sh"

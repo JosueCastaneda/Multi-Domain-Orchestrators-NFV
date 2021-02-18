@@ -96,9 +96,9 @@ class DockerScriptGeneratorLocal:
         first_string = 'python3 orchestrator_script.py -i ' + str(self.orchestrator_index)
         second_string = ' -e ' + str(self.experiment_index) + ' -h \'127.0.0.1\' -p '
         five_string = ' -a ' + str(self.algorithm_index)
-        third_string = current_orchestrator['port'] + ' -r ' + str(random_seed) + five_string + ' &'
-        third_a_string = current_orchestrator['port'] + ' -r ' + str(random_seed) + ' -a 1' + ' &'
-        third_b_string = current_orchestrator['port'] + ' -r ' + str(random_seed) + ' -a 2' + ' &'
+        third_string = current_orchestrator['port'] + ' -r ' + str(random_seed) + five_string + ' -x $1 -y $2 &'
+        third_a_string = current_orchestrator['port'] + ' -r ' + str(random_seed) + ' -a 1' + ' -x $1 -y $2 &'
+        third_b_string = current_orchestrator['port'] + ' -r ' + str(random_seed) + ' -a 2' + ' -x $1 -y $2 &'
         self.file_commands.write(first_string + second_string + third_string + '\n')
         self.file_commands_standard.write(first_string + second_string + third_a_string + '\n')
         self.file_commands_last_writer.write(first_string + second_string + third_b_string + '\n')
@@ -294,6 +294,7 @@ class DockerScriptGeneratorLocal:
         self.file_vnf_forwarding_graph_update.flush()
         self.file_vnf_forwarding_graph_update.close()
 
+    # TODO: THE file_directory scrwws over....
     def create_vnf_forwarding_graph_update(self):
         file_directory = 'experiments/experiment_' + self.experiment_index + '/'
         file_name = 'updates_vnf_forwarding_graphs.sh'
