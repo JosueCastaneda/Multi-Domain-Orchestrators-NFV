@@ -34,3 +34,5 @@ def init_routes(app: web.Application, handler: OrchestratorHandler) -> None:
     add_route('POST', '/update_vnffg_classifier', handler.update_vnffg_classifier, name='update_vnffg_classifier')
     str_end = 'scale_of_service_has_ended'
     add_route('POST', '/scale_of_service_has_ended', handler.scale_of_service_has_ended, name=str_end)
+    add_route('GET', '/do_asynchronous_updates', handler.do_asynchronous_updates, name='do_asynchronous_updates')
+    add_route('POST', '/do_asynchronous_updates', handler.do_asynchronous_updates, name='do_asynchronous_updates')

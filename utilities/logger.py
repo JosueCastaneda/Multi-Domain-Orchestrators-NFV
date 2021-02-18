@@ -7,14 +7,14 @@ other_folder = os.path.abspath(os.path.join(os.path.dirname( __file__ ), '..', '
 log_dir = 'logs'
 logging.basicConfig(filename=other_folder)
 log = logging.getLogger('logger')
-# log.setLevel(logging.DEBUG)
-log.setLevel(logging.WARNING)
+log.setLevel(logging.DEBUG)
+# log.setLevel(logging.WARNING)
 log_str = '%(asctime)s - %(filename)s - %(lineno)s - %(message)s'
 formatter = logging.Formatter(log_str)
 
 fh = logging.FileHandler(other_folder, mode='w', encoding='utf-8')
-# fh.setLevel(logging.DEBUG)
-fh.setLevel(logging.WARNING)
+fh.setLevel(logging.DEBUG)
+# fh.setLevel(logging.WARNING)
 fh.setFormatter(formatter)
 log.addHandler(fh)
 

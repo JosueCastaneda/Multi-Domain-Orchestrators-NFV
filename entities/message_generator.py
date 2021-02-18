@@ -6,6 +6,7 @@ from communication_entities.messages.add_vnf_to_chain_message import AddVNFToCha
 from communication_entities.messages.lcm_messages.migration.migration_message import MigrationMessage
 from communication_entities.messages.lcm_messages.request_service_scale_message import RequestServiceScaleMessage
 from communication_entities.messages.process_data_message import ProcessDataMessage
+from communication_entities.messages.request_update_all_vnffg_message import RequestUpdateAllVNFFGMessage
 from communication_entities.messages.request_update_message import RequestUpdateMessage
 from communication_entities.messages.vnf_forwarding_graph.update_vnf_fg_classifier_message import \
     UpdateVnfFgClassifierMessage
@@ -42,24 +43,23 @@ class MessageGenerator:
         elif self.command.message_type == "process":
             m = self.generate_process_message()
         elif self.command.message_type == "update_vnffg_rsp":
-            # print('Ingress CP: ' + str(self.command.ingress_connection_point))
             m = UpdateVnfFgRenderedServicePathMessage(self.command.vnf_identifier,
                                                       self.command.order,
                                                       self.command.ingress_connection_point,
                                                       self.command.egress_connection_point)
         elif self.command.message_type == "update_vnffg_classifier":
-            # print('XXXIngress CP: ' + str(self.command.ingress_connection_point))
             m = UpdateVnfFgClassifierMessage(self.command.match_identifier,
                                              self.command.ip_proto,
                                              self.command.source_ip,
                                              self.command.destination_ip,
                                              self.command.source_port,
                                              self.command.destination_port)
-
         elif self.command.message_type == "request_update":
             m = RequestUpdateMessage(self.command.seed)
         elif self.command.message_type == "request_scaling_of_service":
             m = RequestServiceScaleMessage(self.command.service_id, self.command.seed)
+        elif self.command.message_type == 'do_asynchronous_updates':
+            m = RequestUpdateAllVNFFGMessage()
         return m
 
     @staticmethod

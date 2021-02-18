@@ -117,13 +117,19 @@ class OrchestratorHandler:
             response = {'status': 'failed', 'message': str(e)}
             return web.json_response(response)
 
+    async def do_asynchronous_updates(self, request: web.Request) -> Response:
+        try:
+            data = await request.post()
+            result = await self.orchestrator.apply_concurrent_updates()
+            answer = {'status': 'Good', 'result': result}
+            return web.json_response(answer)
+        except Exception as e:
+            response = {'status': 'failed', 'message': str(e)}
+            return web.json_response(response)
+
     async def notify_update_vnf_forwarding_graph(self, request: web.Request) -> Response:
         try:
             data = await request.post()
-            # NOTE: Change this
-            # wait_period = random.randint(0, 10)
-            # await asyncio.sleep(wait_period)
-            # result = await self.orchestrator.notify_update_of_vnf_forwarding_graph(data)
             result = await self.orchestrator.wait_before_notify_update_of_vnf_forwarding_graph(data)
             answer = {'status': 'Good', 'result': result}
             return web.json_response(answer)

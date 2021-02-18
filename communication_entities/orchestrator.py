@@ -2,6 +2,7 @@ import asyncio
 import json
 import logging
 import os
+import pickle
 import random
 import sys
 import time
@@ -36,8 +37,8 @@ class Orchestrator:
 
     def __init__(self, experiment_index, orchestrator_index, server_host, server_port, random_seed,
                  causal_delivery=False, algorithm_type='causal', waiting_time=30, probability_repeated_messages=50):
-        self.waiting_time = 30
-        self.probability_repeated_message = 50
+        self.waiting_time = 10
+        self.probability_repeated_message = 0
         print('Waiting time: ' + str(self.waiting_time) + ' Probability: ' + str(self.probability_repeated_message))
         self.experiment_name = 'experiment_' + experiment_index
         self.experiment_index = experiment_index
@@ -195,13 +196,13 @@ class Orchestrator:
         logging.basicConfig(filename=other_folder)
         self.log = logging.getLogger('logger')
         self.log.propagate = False
-        # self.log.setLevel(logging.DEBUG)
-        self.log.setLevel(logging.WARNING)
+        self.log.setLevel(logging.DEBUG)
+        # self.log.setLevel(logging.WARNING)
         log_str = '%(asctime)s - %(filename)s - %(lineno)s - %(message)s'
         formatter = logging.Formatter(log_str)
         fh = logging.FileHandler(other_folder, mode='w', encoding='utf-8')
-        # fh.setLevel(logging.DEBUG)
-        fh.setLevel(logging.WARNING)
+        fh.setLevel(logging.DEBUG)
+        # fh.setLevel(logging.WARNING)
         fh.setFormatter(formatter)
         self.log.addHandler(fh)
         ch = logging.StreamHandler()
@@ -644,7 +645,7 @@ class Orchestrator:
 
     async def update_unique_vnf_forwarding_graph_classifier_rule(self, matching_attribute: MatchingAttribute):
         # start = time.time()
-
+        print(matching_attribute.as_dictionary())
         # NOTE: We need to do this to populate the correct orchestrators
         if len(matching_attribute.list_of_orchestrator_id) == 0:
             matching_attribute.list_of_orchestrator_id = self.orchestrators_ids
@@ -900,3 +901,46 @@ class Orchestrator:
                 'After update: {' + str(self.orchestrator_index) + ',' + str(result['new_counter']) + ',' + str(
                     result['new_max_counter']) + '}')
         return result
+
+    async def wait_before_vnf_fg_update(self, update):
+        wait_period = random.randint(0, self.waiting_time)
+        await asyncio.sleep(wait_period)
+        if update['type'] == 'update_vnffg_classifier':
+            await self.update_unique_vnf_forwarding_graph_classifier_rule(update['data'])
+        elif update['type'] == 'update_vnffg_rsp':
+            await self.update_unique_vnf_forwarding_graph_rendered_service_path(update['data'])
+
+    async def apply_concurrent_updates(self):
+        vnffg_updates = self.read_vnffg_updates()
+        coroutines = []
+        my_updates = 0
+        for update in vnffg_updates:
+            if update['host'] == self.ip and update['port'] == str(self.port) and update['type'] != 'update_all_vnffg':
+                coroutines.append(self.wait_before_vnf_fg_update(update))
+                my_updates += 1
+        await asyncio.gather(*coroutines)
+        print('Number of updates: ' + str(my_updates))
+
+    def read_vnffg_updates(self):
+        updates = []
+        string_1 = ROOT_DIR  + '/experiments/experiment_'
+        directory_path = string_1 + str(self.experiment_index) + '/' + 'updates_vnf_forwarding_graphs.sh'
+        print(directory_path)
+        file1 = open(directory_path, 'r')
+        lines = file1.readlines()
+        for current_line in lines:
+            line = current_line.split()
+            if len(line) > 0:
+                update = dict()
+                update['type'] = line[3]
+                update['host'] = line[5]
+                update['port'] = line[7]
+                if update['type'] == 'update_vnffg_classifier':
+                    data = MatchingAttribute(line[9], line[11], line[13], line[15], line[17], line[19])
+                elif update['type'] == 'update_vnffg_rsp':
+                    data = VNFConnectionPointReference(line[9], line[11], line[13], line[15])
+                else:
+                    data = None
+                update['data'] = data
+                updates.append(update)
+        return updates
