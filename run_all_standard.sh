@@ -51,6 +51,9 @@ complete_file=$path_1$EXPERIMENT_NUMBER$path_2$ORCHESTRATOR_NUMBER$path_3
 ./$complete_file $3 $4 &
 sleep 3
 #
-echo "Testing Parallel reconfiguration"
-sleep 1
-./test_reconfiguration_parallel.sh $EXPERIMENT_NUMBER
+#echo "Testing Parallel reconfiguration"
+#sleep 1
+#./test_reconfiguration_parallel.sh $EXPERIMENT_NUMBER
+echo 'Testing asynchronous updates'
+sleep 2
+./test_asynchronous_vnffg_updates.sh

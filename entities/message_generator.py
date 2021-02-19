@@ -8,6 +8,8 @@ from communication_entities.messages.lcm_messages.request_service_scale_message 
 from communication_entities.messages.process_data_message import ProcessDataMessage
 from communication_entities.messages.request_update_all_vnffg_message import RequestUpdateAllVNFFGMessage
 from communication_entities.messages.request_update_message import RequestUpdateMessage
+from communication_entities.messages.vnf_forwarding_graph.request_update_all_vnffg_sequential_message import \
+    RequestUpdateAllVNFFGSequentialMessage
 from communication_entities.messages.vnf_forwarding_graph.update_vnf_fg_classifier_message import \
     UpdateVnfFgClassifierMessage
 from communication_entities.messages.vnf_forwarding_graph.update_vnf_fg_rended_service_path_message import \
@@ -60,6 +62,8 @@ class MessageGenerator:
             m = RequestServiceScaleMessage(self.command.service_id, self.command.seed)
         elif self.command.message_type == 'do_asynchronous_updates':
             m = RequestUpdateAllVNFFGMessage()
+        elif self.command.message_type == 'do_sequential_updates':
+            m = RequestUpdateAllVNFFGSequentialMessage()
         return m
 
     @staticmethod

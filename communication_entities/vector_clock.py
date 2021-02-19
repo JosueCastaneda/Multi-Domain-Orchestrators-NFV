@@ -71,7 +71,7 @@ class VectorClock(dict):
         for i in range(len(self.clock_list)):
             my_value = self.clock_list[i]['value']
             other_value = other_clock.clock_list[i]['value']
-            if my_value < other_value:
+            if my_value <= other_value:
                 return False
         return True
 

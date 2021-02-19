@@ -239,7 +239,7 @@ class Orchestrator:
         if my_clock_is_greater and self.algorithm_type == 'causal':
             pass
         else:
-            await self.apply_notification_of_lifecycle_management_operation(difference_in_vectors, other_clock, sender_id, data)
+            await self.apply_notification_of_lifecycle_management_operation(difference_in_vectors, other_clock, sender_id, data, my_clock_is_greater)
             first_string = 'Orch operations in ' + str(len(self.pending_lcm_operations)) + ' LCM operations: '
             second_string = str(len(self.life_cycle_manager.pending_operations)) + ' My ' + my_clock.as_string()
             self.log.info(first_string + second_string)
@@ -263,10 +263,12 @@ class Orchestrator:
         difference_in_vectors = first_clock.compare_clocks(second_clock, sender_id, causal_delivery, self.log)
         return difference_in_vectors
 
-    async def apply_notification_of_lifecycle_management_operation(self, difference_in_vectors, vector_clock, sender,data=None):
+    async def apply_notification_of_lifecycle_management_operation(self, difference_in_vectors, vector_clock, sender,data=None, my_clock_is_greater=False):
         if self.algorithm_type == 'causal':
             await self.notification_of_lcm_causal(difference_in_vectors, vector_clock, sender, data)
         elif self.algorithm_type == 'standard':
+            if difference_in_vectors > 1 or my_clock_is_greater:
+                self.add_inconsistency()
             await self.notification_of_lcm_normal(difference_in_vectors, vector_clock, sender)
         elif self.algorithm_type == 'last_writer_wins':
             await self.notification_of_lcm_last_writer_wins(difference_in_vectors, vector_clock, sender)
@@ -643,8 +645,6 @@ class Orchestrator:
         return return_failure('No VNF ID FOUND! ' + str(connection_point.get_vnf_identifier()))
 
     async def update_unique_vnf_forwarding_graph_classifier_rule(self, matching_attribute: MatchingAttribute):
-        # start = time.time()
-
         # NOTE: We need to do this to populate the correct orchestrators
         if len(matching_attribute.list_of_orchestrator_id) == 0:
             matching_attribute.list_of_orchestrator_id = self.orchestrators_ids
@@ -671,10 +671,6 @@ class Orchestrator:
                 elif self.algorithm_type == 'last_writer_wins':
                     self.log.info('Call from Handler... After update: {' + oi + ',' + nc + ',' + mc + '} for VNFFG ' + id + ' val: ' + ci)
                 result = await self.notify_all_replicas_and_orchestrators_of_positive_change(update_result)
-                # end = time.time()
-                # time_difference = end - start
-                # self.total_time_for_experimentation += time_difference
-                # self.log.info('Time taken: ' + str(time_difference))
                 return result
         return return_failure('No Matching attribute with ID found! ' + str(matching_attribute.get_identifier()))
 
@@ -684,7 +680,6 @@ class Orchestrator:
         if self.algorithm_type == 'causal':
         # if self.algorithm_type == 'causal' or self.algorithm_type == 'standard':
             await self.notify_all_orchestrators_of_change(result)
-        # elif self.algorithm_type == 'standard':
         self.total_time_for_experimentation += result['running_time']
         self.log.info('Time taken: ' + str(result['running_time']))
         return return_success()
@@ -714,16 +709,24 @@ class Orchestrator:
                     # Here we can simulate the repetition of messages
                     random_number = generate_random_number_between_zero_one_hundred()
                     if self.probability_repeated_message >= random_number:
-                        # if self.algorithm_type == 'standard':
-                        self.log.info('Sending repeated messages ' + str(self.algorithm_type))
+                        concurrent_updates = []
                         self.increment_sent_messages()
-                        result = await send_message(new_message)
+                        concurrent_updates.append(send_message(new_message))
                         while self.probability_repeated_message >= random_number:
                             self.increment_sent_messages()
-                            result = await send_message(new_message)
-                            wait_period = random.randint(0, self.waiting_time)
-                            await asyncio.sleep(wait_period)
+                            concurrent_updates.append(send_message(new_message))
                             random_number = generate_random_number_between_zero_one_hundred()
+                        await asyncio.gather(*concurrent_updates)
+
+                        # self.log.info('Sending repeated messages ' + str(self.algorithm_type))
+                        # self.increment_sent_messages()
+                        # result = await send_message(new_message)
+                        # while self.probability_repeated_message >= random_number:
+                        #     self.increment_sent_messages()
+                        #     result = await send_message(new_message)
+                        #     wait_period = random.randint(0, self.waiting_time)
+                        #     await asyncio.sleep(wait_period)
+                        #     random_number = generate_random_number_between_zero_one_hundred()
                     else:
                         self.increment_sent_messages()
                         result = await send_message(new_message)
@@ -749,17 +752,20 @@ class Orchestrator:
             string_1 = 'My clock: ' + my_vector_clock.as_string() + ' Other: ' + vector_clock.as_string()
             self.log.info(string_1 + ' Difference in Vectors: ' + str(difference_in_vectors))
         # Note: Toggle, in the standard there's no vector clock so this line could be removed for that case
+        # Check if this also needs to increment inconsistency for same one
         if my_clock_greater and self.algorithm_type == 'causal':
             pass
         else:
-            await self.apply_notification_using_type(difference_in_vectors, vector_clock, vnf_forwarding_graph)
+            await self.apply_notification_using_type(difference_in_vectors, vector_clock, vnf_forwarding_graph, my_clock_greater)
             if self.algorithm_type == 'causal' or self.algorithm_type == 'standard':
                 self.log.info('My clock after notification: ' + my_vector_clock.as_string() + ' Pending operations: ' + str(len(self.pending_lcm_operations)))
 
-    async def apply_notification_using_type(self, difference_in_vectors, vector_clock, vnf_forwarding_graph):
+    async def apply_notification_using_type(self, difference_in_vectors, vector_clock, vnf_forwarding_graph, my_clock_greater=False):
         if vnf_forwarding_graph['type'] == 'causal':
             await self.apply_notification_using_causal_algorithm(difference_in_vectors, vector_clock,vnf_forwarding_graph)
         elif vnf_forwarding_graph['type'] == 'standard':
+            if difference_in_vectors > 1 or my_clock_greater:
+                self.add_inconsistency()
             await self.apply_notification_using_standard_algorithm(vector_clock, vnf_forwarding_graph)
         elif vnf_forwarding_graph['type'] == 'last_writer_wins':
             await self.apply_notification_using_last_writer_win_algorithm(vnf_forwarding_graph)
@@ -920,9 +926,18 @@ class Orchestrator:
         await asyncio.gather(*coroutines)
         print('Number of updates: ' + str(my_updates))
 
+    async def apply_sequential_updates(self):
+        vnffg_updates = self.read_vnffg_updates()
+        my_updates = 0
+        for update in vnffg_updates:
+            if update['host'] == self.ip and update['port'] == str(self.port) and update['type'] != 'update_all_vnffg':
+                await self.wait_before_vnf_fg_update(update)
+                my_updates += 1
+        print('Number of updates: ' + str(my_updates))
+
     def read_vnffg_updates(self):
         updates = []
-        string_1 = ROOT_DIR  + '/experiments/experiment_'
+        string_1 = ROOT_DIR + '/experiments/experiment_'
         directory_path = string_1 + str(self.experiment_index) + '/' + 'updates_vnf_forwarding_graphs.sh'
         print(directory_path)
         file1 = open(directory_path, 'r')
