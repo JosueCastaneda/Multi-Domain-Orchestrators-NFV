@@ -49,11 +49,19 @@ ORCHESTRATOR_NUMBER=4
 complete_file=$path_1$EXPERIMENT_NUMBER$path_2$ORCHESTRATOR_NUMBER$path_3
 ./setup.sh $EXPERIMENT_NUMBER
 ./$complete_file $3 $4 &
-sleep 3
-#
+#sleep 3
+##
 #echo "Testing Parallel reconfiguration"
 #sleep 1
 #./test_reconfiguration_parallel.sh $EXPERIMENT_NUMBER
+
+if [ $5 -eq 0 ]
+then
 echo 'Testing asynchronous updates'
-sleep 2
+sleep 4
 ./test_asynchronous_vnffg_updates.sh
+else
+echo 'Testing sequential updates'
+sleep 4
+./test_sequential_vnffg_updates.sh
+fi

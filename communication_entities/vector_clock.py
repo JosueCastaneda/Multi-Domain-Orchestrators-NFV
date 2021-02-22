@@ -71,7 +71,8 @@ class VectorClock(dict):
         for i in range(len(self.clock_list)):
             my_value = self.clock_list[i]['value']
             other_value = other_clock.clock_list[i]['value']
-            if my_value <= other_value:
+            # print('My value: ' + str(my_value) + ' other value: ' + str(other_value))
+            if my_value < other_value:
                 return False
         return True
 
@@ -98,16 +99,16 @@ class VectorClock(dict):
                     other_value = other_clock_entry['value']
                     max_value = max(my_value, other_value)
                     clock_entry['value'] = max_value
-        orch_log.info('My clock after update: ' + str(self.as_string()))
+        # orch_log.info('My clock after update: ' + str(self.as_string()))
 
     def update_clock(self, other_vector_clock, id_sender, orch_log=None):
-        orch_log.info('My clock: ' + str(self.as_string()))
-        orch_log.info('Other clock: ' + str(other_vector_clock.as_string()))
+        # orch_log.info('My clock: ' + str(self.as_string()))
+        # orch_log.info('Other clock: ' + str(other_vector_clock.as_string()))
         for i in range(len(self.clock_list)):
             is_smaller_clock = self.clock_list[i]['value'] < other_vector_clock.clock_list[i]['value']
             if id_sender == self.clock_list[i]['id'] and is_smaller_clock:
                 self.clock_list[i]['value'] = max(self.clock_list[i]['value'], other_vector_clock.clock_list[i]['value'])
-        orch_log.info('Updated VT: ' + self.as_string())
+        # orch_log.info('Updated VT: ' + self.as_string())
 
     def as_string(self):
         str_log = 'VT: ['

@@ -128,7 +128,7 @@ class Orchestrator:
         return self.time_elapsed_in_reconfiguration
 
     async def request_service_scale(self, service_id) -> json:
-        self.log.info('Please scale service: ' + str(service_id))
+        # self.log.info('Please scale service: ' + str(service_id))
         self.time_elapsed_in_reconfiguration = 0.0
         self.inconsistencies = 0
         self.life_cycle_manager.are_VNFs_scaled = False
@@ -195,8 +195,8 @@ class Orchestrator:
         logging.basicConfig(filename=other_folder)
         self.log = logging.getLogger('logger')
         self.log.propagate = False
-        # self.log.setLevel(logging.DEBUG)
-        self.log.setLevel(logging.WARNING)
+        self.log.setLevel(logging.DEBUG)
+        # self.log.setLevel(logging.WARNING)
         log_str = '%(asctime)s - %(filename)s - %(lineno)s - %(message)s'
         formatter = logging.Formatter(log_str)
         fh = logging.FileHandler(other_folder, mode='w', encoding='utf-8')
@@ -210,9 +210,9 @@ class Orchestrator:
         self.log.addHandler(ch)
 
     def add_inconsistency(self, vector_clock):
-        str_log = 'A new inconsistency because Sender ' + vector_clock.as_string() + ' > '
-        str_log_2 = str_log + self.vector_clock.as_string()
-        self.log.info(str_log_2)
+        # str_log = 'A new inconsistency because Sender ' + vector_clock.as_string() + ' > '
+        # str_log_2 = str_log + self.vector_clock.as_string()
+        # self.log.info(str_log_2)
         # THIS HAS TO CHANGE BECAUSE IT SHOULD COUNT ALL VALUES either multiple or only one with the other
         self.inconsistencies += 1
 
@@ -220,9 +220,9 @@ class Orchestrator:
         my_clock_is_greater = False
         vector_clock_string = data['vector_clock']
         sender_id = data['orchestrator_sender_id']
-        self.log.info('notification_of_lcm -- Update')
+        # self.log.info('notification_of_lcm -- Update')
         other_clock = VectorClock()
-        self.log.info('Apply notification ....')
+        # self.log.info('Apply notification ....')
         other_clock.create_from_list(vector_clock_string)
         causal_delivery = False
         my_clock = self.get_clock_from_entry_of_vnffg(data)
@@ -233,7 +233,7 @@ class Orchestrator:
         else:
             first_string = 'Received ' + other_clock.as_string() + ' from: '
             second_string = str(sender_id[0:8]) + ' My clock ' + my_clock.as_string()
-            self.log.info(first_string + second_string)
+            # self.log.info(first_string + second_string)
             difference_in_vectors = self.compute_vector_clock_difference(my_clock, other_clock, sender_id, causal_delivery)
             my_clock_is_greater = my_clock.is_greater_than_other(other_clock)
         if my_clock_is_greater and self.algorithm_type == 'causal':
@@ -242,9 +242,9 @@ class Orchestrator:
             await self.apply_notification_of_lifecycle_management_operation(difference_in_vectors, other_clock, sender_id, data, my_clock_is_greater)
             first_string = 'Orch operations in ' + str(len(self.pending_lcm_operations)) + ' LCM operations: '
             second_string = str(len(self.life_cycle_manager.pending_operations)) + ' My ' + my_clock.as_string()
-            self.log.info(first_string + second_string)
+            # self.log.info(first_string + second_string)
             self.pending_operations_repetitions = 0
-            self.log.info('END Apply notification ....')
+            # self.log.info('END Apply notification ....')
         return_success()
 
     def get_clock_from_entry_of_vnffg(self, data) -> VectorClock:
@@ -268,7 +268,8 @@ class Orchestrator:
             await self.notification_of_lcm_causal(difference_in_vectors, vector_clock, sender, data)
         elif self.algorithm_type == 'standard':
             if difference_in_vectors > 1 or my_clock_is_greater:
-                self.add_inconsistency()
+                self.log.info('Adding inconsistency, so far: ' + str(self.inconsistencies))
+                self.add_inconsistency(vector_clock)
             await self.notification_of_lcm_normal(difference_in_vectors, vector_clock, sender)
         elif self.algorithm_type == 'last_writer_wins':
             await self.notification_of_lcm_last_writer_wins(difference_in_vectors, vector_clock, sender)
@@ -288,7 +289,7 @@ class Orchestrator:
             if data:
                 my_clock = self.get_clock_from_entry_of_vnffg(data)
                 if my_clock.are_different(vector_clock.clock_list):
-                    self.log.info('Saving notification as a pending operation')
+                    # self.log.info('Saving notification as a pending operation')
                     start = time.time()
                     data['buffer_time'] += start
                     new_pending_operation = PendingLCMScalingOperation(vnf_component_to_scale_id='',
@@ -303,19 +304,20 @@ class Orchestrator:
 
     async def notification_of_lcm_normal(self, difference_in_vectors, vector_clock, orchestrator_sender_id):
         if difference_in_vectors > 1:
+            self.log.info('Adding inconsistency, so far: ' + str(self.inconsistencies))
             self.add_inconsistency(vector_clock)
         await self.apply_notification_of_lcm_operation(vector_clock, orchestrator_sender_id)
 
     async def apply_notification_of_lcm_operation(self, vector_clock, orchestrator_sender_id, data=None):
         my_clock = self.get_clock_from_entry_of_vnffg(data)
         if not my_clock.is_equal(vector_clock):
-            self.log.info('Before update: ' + str(my_clock.as_string()))
+            # self.log.info('Before update: ' + str(my_clock.as_string()))
             start = time.time()
             my_clock.update_clock(vector_clock, orchestrator_sender_id, self.log)
             end_time = time.time()
             time_difference = end_time - start
             self.total_time_for_experimentation += time_difference
-            self.log.info('After update: ' + str(my_clock.as_string()) + ' Pending operations: ' + str(len(self.pending_lcm_operations)))
+            # self.log.info('After update: ' + str(my_clock.as_string()) + ' Pending operations: ' + str(len(self.pending_lcm_operations)))
         total_pending_operations = len(self.pending_lcm_operations)
         if total_pending_operations > 0:
             await self.do_pending_lcm_notifications_notifications()
@@ -344,27 +346,27 @@ class Orchestrator:
         self.messages_sent += 1
 
     async def do_pending_lcm_notifications_notifications(self):
-        self.log.info('Do pending LCM NOTIFICATION')
+        # self.log.info('Do pending LCM NOTIFICATION')
         at_least_one_clock_changed = True
         while at_least_one_clock_changed:
             change_took_place = await self.repeat_lcm_operations()
             at_least_one_clock_changed = change_took_place
-        self.log.info('Finish doing LCM notifications!')
+        # self.log.info('Finish doing LCM notifications!')
 
     async def repeat_lcm_operations(self):
         change_took_place = False
         repetitions_message = 0
         total_pending_operations = len(self.pending_lcm_operations)
-        self.log.info('Total operations: ' + str(total_pending_operations))
+        # self.log.info('Total operations: ' + str(total_pending_operations))
         while self.pending_lcm_operations and repetitions_message < total_pending_operations and self.pending_operations_repetitions < total_pending_operations:
-            self.log.info('Current repetitions: ' + str(repetitions_message))
+            # self.log.info('Current repetitions: ' + str(repetitions_message))
             repetitions_message += 1
             pending_operation = self.pending_lcm_operations.pop(0)
 
             if type(pending_operation.sender_vector_clock) == str:
                 new_vector_clock = VectorClock()
                 new_vector_clock.create_from_list(pending_operation.sender_vector_clock)
-                self.log.info(new_vector_clock.to_json())
+                # self.log.info(new_vector_clock.to_json())
                 pending_operation.set_vector_clock(new_vector_clock)
 
             difference_in_clocks = self.compute_clock_difference(pending_operation)
@@ -381,7 +383,7 @@ class Orchestrator:
     async def repeat_lcm_operations_causal(self, difference_in_clocks, pending_operation):
         change_took_place = False
         if difference_in_clocks <= 1 and pending_operation.is_not_done:
-            self.log.info('Applying operation')
+            # self.log.info('Applying operation')
             change_took_place = await self.apply_lcm_operation(pending_operation)
             if change_took_place:
                 end_time = time.time()
@@ -392,6 +394,7 @@ class Orchestrator:
 
     async def repeat_lcm_operations_normal(self, difference_in_clocks, pending_operation):
         if difference_in_clocks > 1:
+            self.log.info('Adding inconsistency, so far: ' + str(self.inconsistencies))
             self.add_inconsistency(pending_operation.sender_vector_clock)
         return await self.apply_lcm_operation(pending_operation)
 
@@ -403,11 +406,11 @@ class Orchestrator:
         other_clock = pending_operation.sender_vector_clock
         sender_id = pending_operation.orchestrator_sender_id
         difference_in_clocks = self.compute_vector_clock_difference(my_clock, other_clock, sender_id, causal_delivery)
-        self.log.info('Difference in clocks: ' + str(difference_in_clocks))
+        # self.log.info('Difference in clocks: ' + str(difference_in_clocks))
         return difference_in_clocks
 
     async def apply_lcm_operation(self, pending_operation):
-        self.log.info('Appliying LCM operation')
+        # self.log.info('Appliying LCM operation')
         change_result = True
         if pending_operation.operation == 'notification':
             pending_operation.is_not_done = False
@@ -416,24 +419,24 @@ class Orchestrator:
             pending_operation.is_not_done = False
             await self.apply_scaling_operation(pending_operation)
         elif pending_operation.operation == 'vnf_fg_update':
-            self.log.info('Appliying VNF FG UPDATE')
+            # self.log.info('Appliying VNF FG UPDATE')
             pending_operation.is_not_done = False
             my_clock = self.get_clock_from_entry_of_vnffg(pending_operation.vnffg_data)
             my_clock.update_clock_with_a_string(pending_operation.sender_vector_clock, self.log)
             await self.apply_vnf_fg_update_notification(pending_operation.data)
         else:
-            self.log.info('Something went horribly wrong')
+            # self.log.info('Something went horribly wrong')
             change_result = False
         return change_result
 
     async def apply_notification_operation(self, pending_operation):
-        self.log.info('Notification and pending operation is not done')
+        # self.log.info('Notification and pending operation is not done')
         my_clock = self.get_clock_from_entry_of_vnffg(pending_operation.vnffg_data)
         my_clock.update_clock(pending_operation.sender_vector_clock, pending_operation.orchestrator_sender_id, self.log)
         pending_operation.is_not_done = False
 
     async def apply_scaling_operation(self, pending_operation):
-        self.log.info('Scaling operation and pending operation is not done')
+        # self.log.info('Scaling operation and pending operation is not done')
         pending_operation.is_not_done = False
         await self.life_cycle_manager.scale_confirmation(pending_operation.vnf_component_to_scale_id,
                                                          pending_operation.original_service_id,
@@ -452,9 +455,9 @@ class Orchestrator:
 
     async def grant_lcm_operation_of_service(self, vnf_component_to_scale_id, operation, original_service,
                                              sender_vector_clock=None):
-        self.log.info('Can you please scale: ' + str(vnf_component_to_scale_id)[0:8] + ' originally from ' + str(
-            original_service['original_service_id'][0:8]))
-        self.log.info('Received ' + sender_vector_clock.as_string() + ' My clock ' + self.vector_clock.as_string())
+        # self.log.info('Can you please scale: ' + str(vnf_component_to_scale_id)[0:8] + ' originally from ' + str(
+        #     original_service['original_service_id'][0:8]))
+        # self.log.info('Received ' + sender_vector_clock.as_string() + ' My clock ' + self.vector_clock.as_string())
         if self.causal_delivery:
             await self.grant_lcm_operation_causal(vnf_component_to_scale_id, operation, original_service,
                                                   sender_vector_clock)
@@ -475,7 +478,7 @@ class Orchestrator:
         return 100
 
     async def do_lcm_operation(self, original_service, sender_vector_clock, operation, vnf_component_to_scale_id):
-        self.log.info('Doing LCM operations')
+        # self.log.info('Doing LCM operations')
         if original_service['orchestrator_id'] != self.id:
             self.vector_clock.update_clock(sender_vector_clock,
                                            original_service['orchestrator_id'],
@@ -503,11 +506,12 @@ class Orchestrator:
                                          sender_vector_clock=None):
         difference_in_vectors = self.compute_difference_in_vectors(original_service, sender_vector_clock)
         if difference_in_vectors > 1:
+            self.log.info('Adding inconsistency, so far: ' + str(self.inconsistencies))
             self.add_inconsistency(sender_vector_clock)
         await self.do_lcm_operation(original_service, sender_vector_clock, operation, vnf_component_to_scale_id)
 
     def add_pending_operation(self, new_operation) -> None:
-        self.log.info('Adding operation to pending LCM')
+        # self.log.info('Adding operation to pending LCM')
         self.pending_lcm_operations.append(new_operation)
 
     async def scale_vnfc_operation(self, vnf_component_to_scale_id, original_service):
@@ -520,8 +524,8 @@ class Orchestrator:
                                                             original_service['orchestrator_id'])
 
     async def do_pending_operations(self):
-        self.log.info('Grant Pending Operations ' + str(
-            self.pending_operations_repetitions) + ' are VNFs SCALED? ' + str(self.life_cycle_manager.are_VNFs_scaled))
+        # self.log.info('Grant Pending Operations ' + str(
+        #     self.pending_operations_repetitions) + ' are VNFs SCALED? ' + str(self.life_cycle_manager.are_VNFs_scaled))
         self.pending_operations_repetitions += 1
         clock_was_updated = True
         while clock_was_updated:
@@ -541,9 +545,9 @@ class Orchestrator:
                 if operation.operation == 'scale' or operation.operation == 'scaling':
                     operation.is_not_done = False
                     at_least_one_clock_changed = True
-                    self.log.info('Doing pending operation ' + str(
-                        operation.vnf_component_to_scale_id) + ' originally from: ' + str(
-                        operation.original_service_id))
+                    # self.log.info('Doing pending operation ' + str(
+                    #     operation.vnf_component_to_scale_id) + ' originally from: ' + str(
+                    #     operation.original_service_id))
                     await self.grant_lcm_operation_causal(operation.vnf_component_to_scale_id, 'scale',
                                                           operation.original_service, operation.sender_vector_clock)
             else:
@@ -636,10 +640,10 @@ class Orchestrator:
                 id = str(update_result['vnffg_identifier'])
                 ci = str(update_result['change_identifier'])
 
-                if self.algorithm_type == 'causal' or self.algorithm_type == 'standard':
-                    self.log.info('Call from Handler... My clock after update: ' + update_result['vector_clock']+ ' Pending operations: ' + str(len(self.pending_lcm_operations)))
-                elif self.algorithm_type == 'last_writer_wins':
-                    self.log.info('Call from Handler... After update: {' + oi + ',' + nc + ',' + mc + '} for VNFFG ' + id + ' val: ' + ci)
+                # if self.algorithm_type == 'causal' or self.algorithm_type == 'standard':
+                #     self.log.info('Call from Handler... My clock after update: ' + update_result['vector_clock']+ ' Pending operations: ' + str(len(self.pending_lcm_operations)))
+                # elif self.algorithm_type == 'last_writer_wins':
+                #     self.log.info('Call from Handler... After update: {' + oi + ',' + nc + ',' + mc + '} for VNFFG ' + id + ' val: ' + ci)
                 result = await self.notify_all_replicas_and_orchestrators_of_positive_change(update_result)
                 return result
         return return_failure('No VNF ID FOUND! ' + str(connection_point.get_vnf_identifier()))
@@ -667,21 +671,21 @@ class Orchestrator:
                 if self.algorithm_type == 'causal' or self.algorithm_type == 'standard':
                     first_string = 'Call from Handler... My clock after update: ' + str(update_result['vector_clock_s'])
                     second_string = ' Pending operations: ' + str(len(self.pending_lcm_operations))
-                    self.log.info(first_string + second_string)
-                elif self.algorithm_type == 'last_writer_wins':
-                    self.log.info('Call from Handler... After update: {' + oi + ',' + nc + ',' + mc + '} for VNFFG ' + id + ' val: ' + ci)
+                    # self.log.info(first_string + second_string)
+                # elif self.algorithm_type == 'last_writer_wins':
+                    # self.log.info('Call from Handler... After update: {' + oi + ',' + nc + ',' + mc + '} for VNFFG ' + id + ' val: ' + ci)
                 result = await self.notify_all_replicas_and_orchestrators_of_positive_change(update_result)
                 return result
         return return_failure('No Matching attribute with ID found! ' + str(matching_attribute.get_identifier()))
 
     async def notify_all_replicas_and_orchestrators_of_positive_change(self, result):
         answer_1 = await self.notify_replicas_of_vnf_forwarding_graph_update(result)
-        self.log.info('Return message after notifying ' + str(answer_1))
+        # self.log.info('Return message after notifying ' + str(answer_1))
         if self.algorithm_type == 'causal':
         # if self.algorithm_type == 'causal' or self.algorithm_type == 'standard':
             await self.notify_all_orchestrators_of_change(result)
         self.total_time_for_experimentation += result['running_time']
-        self.log.info('Time taken: ' + str(result['running_time']))
+        # self.log.info('Time taken: ' + str(result['running_time']))
         return return_success()
 
     def increase_my_counter(self):
@@ -713,20 +717,11 @@ class Orchestrator:
                         self.increment_sent_messages()
                         concurrent_updates.append(send_message(new_message))
                         while self.probability_repeated_message >= random_number:
-                            self.increment_sent_messages()
-                            concurrent_updates.append(send_message(new_message))
+                            # while self.probability_repeated_message >= random_number and self.algorithm_type == 'standard':
+                            # self.log.info('REPEATED MESSAGES')
+                            concurrent_updates.append(self.wait_before_repeated(new_message))
                             random_number = generate_random_number_between_zero_one_hundred()
                         await asyncio.gather(*concurrent_updates)
-
-                        # self.log.info('Sending repeated messages ' + str(self.algorithm_type))
-                        # self.increment_sent_messages()
-                        # result = await send_message(new_message)
-                        # while self.probability_repeated_message >= random_number:
-                        #     self.increment_sent_messages()
-                        #     result = await send_message(new_message)
-                        #     wait_period = random.randint(0, self.waiting_time)
-                        #     await asyncio.sleep(wait_period)
-                        #     random_number = generate_random_number_between_zero_one_hundred()
                     else:
                         self.increment_sent_messages()
                         result = await send_message(new_message)
@@ -735,58 +730,57 @@ class Orchestrator:
                     #     self.increment_sent_messages()
         return result
 
+    async def wait_before_repeated(self, message):
+        wait_period = random.randint(0, self.waiting_time)
+        await asyncio.sleep(wait_period)
+        await send_message(message)
+
     async def wait_before_notify_update_of_vnf_forwarding_graph(self, vnf_forwarding_graph):
         wait_period = random.randint(0, self.waiting_time)
         await asyncio.sleep(wait_period)
         await self.notify_update_of_vnf_forwarding_graph(vnf_forwarding_graph)
 
+    # CHANGE THIS CODE IT NEVER UPDATES IT REFLECT A CHANGE IN THE VECTOR< SO IT ALWAYS APPLIES IT>>>>>
     async def notify_update_of_vnf_forwarding_graph(self, vnf_forwarding_graph):
-        self.log.info('Received Notification for: ' + str(vnf_forwarding_graph['identifier'][0:8]) + ' ' + str(vnf_forwarding_graph['change_identifier'][0:8]))
+        # self.log.info('Received Notification for: ' + str(vnf_forwarding_graph['identifier'][0:8]) + ' ' + str(vnf_forwarding_graph['change_identifier'][0:8]))
         vector_clock = VectorClock()
         vector_clock.create_from_list(vnf_forwarding_graph['vector_clock'])
         sender_id = vnf_forwarding_graph['orchestrator_id']
         my_vector_clock = self.get_clock_from_entry_of_vnffg(vnf_forwarding_graph)
         difference_in_vectors = my_vector_clock.compare_with_list_of_values(vector_clock, sender_id, self.log)
         my_clock_greater = my_vector_clock.is_greater_than_other(vector_clock)
-        if self.algorithm_type == 'causal' or self.algorithm_type == 'standard':
-            string_1 = 'My clock: ' + my_vector_clock.as_string() + ' Other: ' + vector_clock.as_string()
-            self.log.info(string_1 + ' Difference in Vectors: ' + str(difference_in_vectors))
-        # Note: Toggle, in the standard there's no vector clock so this line could be removed for that case
-        # Check if this also needs to increment inconsistency for same one
-        if my_clock_greater and self.algorithm_type == 'causal':
-            pass
-        else:
-            await self.apply_notification_using_type(difference_in_vectors, vector_clock, vnf_forwarding_graph, my_clock_greater)
-            if self.algorithm_type == 'causal' or self.algorithm_type == 'standard':
-                self.log.info('My clock after notification: ' + my_vector_clock.as_string() + ' Pending operations: ' + str(len(self.pending_lcm_operations)))
-
-    async def apply_notification_using_type(self, difference_in_vectors, vector_clock, vnf_forwarding_graph, my_clock_greater=False):
+        are_clocks_equal = my_vector_clock.is_equal(vector_clock)
         if vnf_forwarding_graph['type'] == 'causal':
-            await self.apply_notification_using_causal_algorithm(difference_in_vectors, vector_clock,vnf_forwarding_graph)
+            if difference_in_vectors <= 1:
+                my_vector_clock.update_clock(vector_clock, sender_id, self.log)
+                await self.apply_vnf_fg_update_notification(vnf_forwarding_graph)
+                if len(self.pending_lcm_operations) > 0:
+                    await self.do_pending_lcm_notifications_notifications()
+            else:
+                self.save_vnf_fg_update(vnf_forwarding_graph)
+            # await self.apply_notification_using_causal_algorithm(difference_in_vectors, vector_clock, vnf_forwarding_graph)
         elif vnf_forwarding_graph['type'] == 'standard':
-            if difference_in_vectors > 1 or my_clock_greater:
-                self.add_inconsistency()
+            # self.log.info('My clock: ' + str(my_vector_clock.as_string()) + ' other: ' + str(vector_clock.as_string()))
+            # str1 = 'My clock: ' + str(my_vector_clock.as_string()) + ' other: ' + str(vector_clock.as_string())
+            # self.log.info(str1 + ' Difference in vector: ' + str(difference_in_vectors) + ' is clock greater ' + str(my_clock_greater))
+            if difference_in_vectors > 1 or my_clock_greater or are_clocks_equal:
+                # self.log.info('Adding inconsistency, so far: ' + str(self.inconsistencies))
+                self.add_inconsistency(vector_clock)
+            my_vector_clock.update_clock(vector_clock, sender_id, self.log)
             await self.apply_notification_using_standard_algorithm(vector_clock, vnf_forwarding_graph)
         elif vnf_forwarding_graph['type'] == 'last_writer_wins':
             await self.apply_notification_using_last_writer_win_algorithm(vnf_forwarding_graph)
-        elif vnf_forwarding_graph['type'] == 'multi_value':
-            self.log.info('Applying multi-value')
-            await self.apply_notification_using_multi_value_algorithm()
-        else:
-            self.log.info('ERROR!')
 
     async def apply_notification_using_causal_algorithm(self, difference_in_vectors, vector_clock, data):
         if difference_in_vectors <= 1:
             await self.apply_vnf_fg_update_notification(data)
             total_pending_operations = len(self.pending_lcm_operations)
             if total_pending_operations > 0:
-                self.log.info('Total pending operations: ' + str(total_pending_operations))
                 await self.do_pending_lcm_notifications_notifications()
         else:
             self.save_vnf_fg_update(data)
 
     async def apply_notification_using_standard_algorithm(self, vector_clock, vnf_forwarding_graph):
-        self.vector_clock.update_clock_with_a_string(vector_clock, self.log)
         await self.apply_vnf_fg_update_notification(vnf_forwarding_graph)
 
     async def apply_notification_using_last_writer_win_algorithm(self, vnf_forwarding_graph):
@@ -804,18 +798,18 @@ class Orchestrator:
                 op_string = ' OP Value: {' + str(other_index) + ',' + str(other_counter) + '}'
                 my_string = ' My Value: {' + str(self.orchestrator_index) + ',' + str(my_counter) + ', ' + str(
                     my_current_max_index) + '}'
-                self.log.info(debug_string + op_string + my_string)
+                # self.log.info(debug_string + op_string + my_string)
                 debug_first_condition = other_counter > my_counter
                 debug_second_first_condition = other_counter == my_counter
                 debug_second_second_condition = other_index > int(my_current_max_index)
                 debug_second_condition = debug_second_first_condition and debug_second_second_condition
                 if debug_first_condition or debug_second_condition:
-                    self.log.info('Applying update because First condition is ' + str(
-                        debug_first_condition) + ' Second condition is: ' + str(debug_second_condition))
+                    # self.log.info('Applying update because First condition is ' + str(
+                    #     debug_first_condition) + ' Second condition is: ' + str(debug_second_condition))
                     debug_change = True
                     await self.apply_vnf_fg_update_notification(vnf_forwarding_graph)
 
-        self.log.info('Applying notification or not?: ' + str(debug_change))
+        # self.log.info('Applying notification or not?: ' + str(debug_change))
 
     async def apply_notification_using_multi_value_algorithm(self):
         print('apply_notification_using_multi_value_algorithm')
@@ -887,7 +881,7 @@ class Orchestrator:
     async def update_vnf_forwarding_graph_unique_rsp(self,
                                                      old_vnf_fg: VNFForwardingGraph,
                                                      new_cp: VNFConnectionPointReference):
-        self.log.info('Updating VNF-FG: ' + str(old_vnf_fg.identifier[0:8]) + ' RSP: ' + str(new_cp.vnf_identifier[0:8]))
+        # self.log.info('Updating VNF-FG: ' + str(old_vnf_fg.identifier[0:8]) + ' RSP: ' + str(new_cp.vnf_identifier[0:8]))
         result = await old_vnf_fg.update_unique_rendered_service_path(new_cp, self.log, self.orchestrator_index)
         if self.algorithm_type == 'last_writer_wins':
             self.log.info(
@@ -898,8 +892,8 @@ class Orchestrator:
     async def update_vnf_forwarding_graph_unique_classifier(self,
                                                             old_vnf_fg: VNFForwardingGraph,
                                                             new_matching_attribute: MatchingAttribute):
-        self.log.info('Updating VNF-FG: ' + str(old_vnf_fg.identifier[0:8]) + ' CLA: ' + str(
-            new_matching_attribute.identifier[0:8]))
+        # self.log.info('Updating VNF-FG: ' + str(old_vnf_fg.identifier[0:8]) + ' CLA: ' + str(
+        #     new_matching_attribute.identifier[0:8]))
         result = await old_vnf_fg.update_unique_classifier_rule(new_matching_attribute, self.log)
         if self.algorithm_type == 'last_writer_wins':
             self.log.info(

@@ -9,32 +9,32 @@ sleep $2
 python3 get_results_vnffg_updates.py 0 $1 causal $3 $4
 sleep $2
 ./clean2.sh
-
-# Second
+#
+#### Second
 ./clean2.sh
 ./run_all.sh 1 $1 $3 $4 0
 sleep $2
 python3 get_results_vnffg_updates.py 1 $1 causal $3 $4
 sleep $2
 ./clean2.sh
-
-# Third
+#
+### Third
 ./clean2.sh
 ./run_all.sh 2 $1 $3 $4 0
 sleep $2
 python3 get_results_vnffg_updates.py 2 $1 causal $3 $4
 sleep $2
 ./clean2.sh
-
-# Fourth
+#
+## Fourth
 ./clean2.sh
 ./run_all.sh 3 $1 $3 $4 0
 sleep $2
 python3 get_results_vnffg_updates.py 3 $1 causal $3 $4
 sleep $2
 ./clean2.sh
-
-# Fifth
+#
+## Fifth
 ./clean2.sh
 ./run_all.sh 4 $1 $3 $4 0
 sleep $2
@@ -50,7 +50,7 @@ python3 get_results_vnffg_updates.py 0 $1 causal $3 $4
 sleep $2
 ./clean2.sh
 
-# Second
+## Second
 ./clean2.sh
 ./run_all.sh 1 $1 $3 $4 1
 sleep $2
@@ -58,7 +58,7 @@ python3 get_results_vnffg_updates.py 1 $1 causal $3 $4
 sleep $2
 ./clean2.sh
 
-# Third
+## Third
 ./clean2.sh
 ./run_all.sh 2 $1 $3 $4 1
 sleep $2
@@ -66,7 +66,7 @@ python3 get_results_vnffg_updates.py 2 $1 causal $3 $4
 sleep $2
 ./clean2.sh
 
-# Fourth
+## Fourth
 ./clean2.sh
 ./run_all.sh 3 $1 $3 $4 1
 sleep $2
@@ -127,15 +127,15 @@ python3 get_results_vnffg_updates.py 0 $1 standard $3 $4
 sleep $2
 ./clean2.sh
 
-# Second
+## Second
 ./clean2.sh
 ./run_all_standard.sh 1 $1 $3 $4 0
 sleep $2
 python3 get_results_vnffg_updates.py 1 $1 standard $3 $4
 sleep $2
 ./clean2.sh
-
-# Third
+#
+## Third
 ./clean2.sh
 ./run_all_standard.sh 2 $1 $3 $4 0
 sleep $2
@@ -166,8 +166,8 @@ sleep $2
 python3 get_results_vnffg_updates.py 0 $1 standard $3 $4
 sleep $2
 ./clean2.sh
-
-# Second
+#
+## Second
 ./clean2.sh
 ./run_all_standard.sh 1 $1 $3 $4 1
 sleep $2
