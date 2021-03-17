@@ -2,7 +2,7 @@
 
 #python3 experiments/experiment_generator/main_experiment_generator.py local 20
 #./run_all_experiments.sh 20 60 30 50
-#./run_all_experiments.sh 20 120 30 30
+##./run_all_experiments.sh 20 120 30 30
 
 ## 64 Concurrent messages
 python3 experiments/experiment_generator/main_experiment_generator.py local 64

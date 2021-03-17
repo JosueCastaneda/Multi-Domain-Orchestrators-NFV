@@ -9,7 +9,7 @@ sleep $2
 python3 get_results_vnffg_updates.py 0 $1 causal $3 $4
 sleep $2
 ./clean2.sh
-#
+
 #### Second
 ./clean2.sh
 ./run_all.sh 1 $1 $3 $4 0
