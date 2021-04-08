@@ -1,4 +1,5 @@
 import json
+import logging
 import os
 import random
 
@@ -6,7 +7,7 @@ import numpy as np
 
 from communication_entities.classifier_rule import ClassifierRule
 from communication_entities.rendered_service_path import RenderedServicePath
-from communication_entities.vnf_connection_point_reference import VNFConnectionPointReference
+from communication_entities.vnf_connection_point_reference import ConnectionPointReference
 from communication_entities.vnf_forwarding_graph import VNFForwardingGraph
 from experiments.experiment_generator.classes.constraints.service_definition import ServiceDefinition
 from experiments.experiment_generator.classes.constraints.vnf_definition import VNFDefinition
@@ -20,6 +21,8 @@ class ExperimentGenerator:
 
     def __init__(self, configuration, local_deployment=False):
         self.number_of_experiments = configuration.number_of_experiments
+        self.log = None
+        self.set_up_my_logger()
         self.number_of_services = configuration.number_of_services
         self.length_of_vnfs = configuration.number_of_vnf_components
         self.number_of_vnf = configuration.number_of_vnfs
@@ -38,6 +41,7 @@ class ExperimentGenerator:
         self.vnf_port = 5500
         self.local_deployment = local_deployment
         self.port_vnfs = 3001
+        self.unique_identifiers = list()
 
     def add_vnfs_to_orchestrators(self):
         for orchestrator in self.list_orchestrators:
@@ -157,16 +161,44 @@ class ExperimentGenerator:
     def generate_vnf_forwarding_from_service(self, new_service: ServiceDefinition):
         vnf_forwarding_graph = self.create_emtpy_vnf_forwarding_graph(new_service.id)
         self.add_rendered_service_path_of_vnf_forwarding_graph(vnf_forwarding_graph)
-        unique_orchestrators = self.add_connection_points_to_reference_service_path(vnf_forwarding_graph.get_first_rendered_service_path(),
-                                                             new_service.list_of_vnf_components)
+        unique_orchestrators = self.add_connection_points_to_reference_service_path(vnf_forwarding_graph.get_first_rendered_service_path(), new_service.list_of_vnf_components)
         self.add_classifier_rules_to_vnf_forwarding_graph(vnf_forwarding_graph)
         unique_orchestrators.add(new_service.orchestrator_id)
         vnf_forwarding_graph.set_unique_orchestrators = unique_orchestrators
         return vnf_forwarding_graph.as_dictionary()
 
+    def add_dependencies_to_vnf_forwarding_graph(self, vnf_forwarding_graph):
+        pass
+
+    def set_up_my_logger(self):
+        file_name = 'logs/file_experiment_generator.log'
+        other_folder = os.path.abspath(os.path.join(os.path.dirname(__file__), '..//..', file_name))
+        logging.basicConfig(filename=other_folder)
+        self.log = logging.getLogger('logger')
+        self.log.propagate = False
+        self.log.setLevel(logging.WARNING)
+        log_str = '%(message)s'
+        formatter = logging.Formatter(log_str)
+        fh = logging.FileHandler(other_folder, mode='w', encoding='utf-8')
+        fh.setLevel(logging.WARNING)
+        fh.setFormatter(formatter)
+        self.log.addHandler(fh)
+        ch = logging.StreamHandler()
+        ch.setLevel(logging.INFO)
+        ch.setFormatter(formatter)
+        self.log.addHandler(ch)
+
+    def generate_unrepeated_unique_identifier(self):
+        new_value = generate_unique_identifier()
+        while new_value in self.unique_identifiers:
+            new_value = generate_unique_identifier()
+        self.unique_identifiers.append(new_value)
+        self.log.info(new_value)
+        return new_value
+
     def add_classifier_rules_to_vnf_forwarding_graph(self, vnf_forwarding_graph):
-        classifier_identifier = generate_unique_identifier()
-        classifier_name = generate_unique_identifier()
+        classifier_identifier = self.generate_unrepeated_unique_identifier()
+        classifier_name = self.generate_unrepeated_unique_identifier()
         rsp_id = vnf_forwarding_graph.get_first_rendered_service_path_id()
         classifier = ClassifierRule(classifier_identifier, classifier_name, rsp_id)
         vnf_forwarding_graph.append_classification(classifier)
@@ -176,8 +208,8 @@ class ExperimentGenerator:
     def add_matching_attributes_to_classifier(self, classifier:ClassifierRule, vnf_descriptor_connection_points):
         for vnf_connection_point in vnf_descriptor_connection_points:
             new_matching_attribute_as_dictionary = dict()
-            new_matching_attribute_as_dictionary['identifier'] = generate_unique_identifier()
-            new_matching_attribute_as_dictionary['ip_proto'] = generate_unique_identifier()
+            new_matching_attribute_as_dictionary['identifier'] = self.generate_unrepeated_unique_identifier()
+            new_matching_attribute_as_dictionary['ip_proto'] = self.generate_unrepeated_unique_identifier()
             new_matching_attribute_as_dictionary['source_ip'] = generate_random_ip()
             new_matching_attribute_as_dictionary['destination_ip'] = generate_random_ip()
             new_matching_attribute_as_dictionary['source_port'] = generate_random_port()
@@ -186,15 +218,15 @@ class ExperimentGenerator:
             classifier.append_matching_attributes(new_matching_attribute_as_dictionary)
 
     def add_rendered_service_path_of_vnf_forwarding_graph(self, vnf_forwarding_graph):
-        name_rsp = generate_unique_identifier()
-        rsp_id = generate_unique_identifier()
+        name_rsp = self.generate_unrepeated_unique_identifier()
+        rsp_id = self.generate_unrepeated_unique_identifier()
         rendered_service_path = RenderedServicePath(rsp_id, name_rsp)
         vnf_forwarding_graph.append_rendered_service_path(rendered_service_path)
 
     def create_emtpy_vnf_forwarding_graph(self, new_service_id):
-        vnf_forwarding_graph_identifier = generate_unique_identifier()
-        vnf_forwarding_graph_name = generate_unique_identifier()
-        vnf_forwarding_graph_short_name = generate_unique_identifier()
+        vnf_forwarding_graph_identifier = self.generate_unrepeated_unique_identifier()
+        vnf_forwarding_graph_name = self.generate_unrepeated_unique_identifier()
+        vnf_forwarding_graph_short_name = self.generate_unrepeated_unique_identifier()
         vnf_forwarding_graph_service_identifier = new_service_id
         vnf_forwarding_graph = VNFForwardingGraph(identifier=vnf_forwarding_graph_identifier,
                                                   name=vnf_forwarding_graph_name,
@@ -205,7 +237,6 @@ class ExperimentGenerator:
     def add_connection_points_to_reference_service_path(self, rendered_service_path, list_of_vnf_components):
         vnf_component_counter = 0
         unique_orchestrators = set()
-
         for vnf_component in list_of_vnf_components:
             new_connection_point = self.create_new_connection_point_reference_from_vnf_component(vnf_component,
                                                                                                  vnf_component_counter,
@@ -217,8 +248,8 @@ class ExperimentGenerator:
     def create_new_connection_point_reference_from_vnf_component(self, vnf_component, counter, unique_orchestrators):
         vnf_component_identifier = vnf_component.id
         vnf_component_order = counter
-        vnf_component_ingress_connection_point = vnf_component.id + generate_unique_identifier()
-        vnf_component_egress_connection_point = vnf_component.id + generate_unique_identifier()
+        vnf_component_ingress_connection_point = vnf_component.id + self.generate_unrepeated_unique_identifier()
+        vnf_component_egress_connection_point = vnf_component.id + self.generate_unrepeated_unique_identifier()
 
         if vnf_component.type == 'Service':
             vnf_service_component_id_first = self.get_vnf_service_component_id_first(
@@ -226,13 +257,13 @@ class ExperimentGenerator:
             last_index = len(vnf_component.list_of_vnf_components) - 1
             vnf_service_component_id_last = self.get_vnf_service_component_id_first(
                 vnf_component.list_of_vnf_components[last_index])
-            vnf_component_ingress_connection_point = vnf_service_component_id_first + generate_unique_identifier()
-            vnf_component_egress_connection_point = vnf_service_component_id_last + generate_unique_identifier()
+            vnf_component_ingress_connection_point = vnf_service_component_id_first + self.generate_unrepeated_unique_identifier()
+            vnf_component_egress_connection_point = vnf_service_component_id_last + self.generate_unrepeated_unique_identifier()
             unique_orchestrators.add(vnf_component.orchestrator_id)
-        new_connection_point_reference = VNFConnectionPointReference(vnf_component_identifier,
-                                                                     vnf_component_order,
-                                                                     vnf_component_ingress_connection_point,
-                                                                     vnf_component_egress_connection_point)
+        new_connection_point_reference = ConnectionPointReference(vnf_component_identifier,
+                                                                  vnf_component_order,
+                                                                  vnf_component_ingress_connection_point,
+                                                                  vnf_component_egress_connection_point)
         return new_connection_point_reference
 
     def get_vnf_service_component_id_first(self, vnf_component):

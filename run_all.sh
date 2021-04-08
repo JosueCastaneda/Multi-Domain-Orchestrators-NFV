@@ -7,13 +7,7 @@ path_1="experiments/experiment_"
 path_2="/docker_files/docker_commands_"
 path_3=".sh"
 
-## Activate the virtual environment
-#source ../my_env/bin/activate
-#source my_env/bin/activate
-
 # Orch 0
-#echo -n "Please type experiment: "
-#read EXPERIMENT_NUMBER
 EXPERIMENT_NUMBER=$1
 ORCHESTRATOR_NUMBER=0
 complete_file=$path_1$EXPERIMENT_NUMBER$path_2$ORCHESTRATOR_NUMBER$path_3

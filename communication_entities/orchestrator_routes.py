@@ -38,4 +38,12 @@ def init_routes(app: web.Application, handler: OrchestratorHandler) -> None:
     add_route('POST', '/do_asynchronous_updates', handler.do_asynchronous_updates, name='do_asynchronous_updates')
     add_route('GET', '/do_sequential_updates', handler.do_sequential_updates, name='do_sequential_updates')
     add_route('POST', '/do_sequential_updates', handler.do_sequential_updates, name='do_sequential_updates')
+    add_route('POST', '/notify_proposal_vnf_forwarding_graph', handler.notify_proposal_vnf_forwarding_graph, name='notify_proposal_vnf_forwarding_graph')
+    add_route('POST', '/reply_to_notify_proposal_vnf_forwarding_graph', handler.reply_to_notify_proposal_vnf_forwarding_graph, name='reply_to_notify_proposal_vnf_forwarding_graph')
+    add_route('POST', '/notify_proposal_vnf_forwarding_graph_corrective', handler.notify_proposal_vnf_forwarding_graph_corrective, name='notify_proposal_vnf_forwarding_graph_corrective')
+    add_route('POST', '/notify_negative_corrective', handler.notify_negative_corrective, name='notify_negative_corrective')
+
+
+
+
 

@@ -36,6 +36,7 @@ async def send_message(message):
     # log.info('Sending message....')
     url = 'http://' + message.host + ':' + str(message.port) + '/' + message.type
     # log.info(url)
+    print('39 - life_cycle_management_update.py ' + str(url))
     async with aiohttp.ClientSession() as session:
         async with session.post(url, data=message.data) as resp:
             str_log_encoded = await (resp.text())

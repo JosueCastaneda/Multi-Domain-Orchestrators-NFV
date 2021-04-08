@@ -5,11 +5,10 @@ import traceback
 
 from aiohttp import web
 from aiohttp.web_response import Response
-from numpy import random
 
 from communication_entities.matching_attribute import MatchingAttribute
 from communication_entities.vector_clock import VectorClock
-from communication_entities.vnf_connection_point_reference import VNFConnectionPointReference
+from communication_entities.vnf_connection_point_reference import ConnectionPointReference
 from entities.vnf_entities.vnf_information import VnfInformation
 
 
@@ -106,10 +105,10 @@ class OrchestratorHandler:
     async def update_vnffg_rsp(self, request: web.Request) -> Response:
         try:
             data = await request.post()
-            new_vnf_connection_point_reference = VNFConnectionPointReference(data['vnf_identifier'],
-                                                                             data['order'],
-                                                                             data['ingress_connection_point'],
-                                                                             data['egress_connection_point'])
+            new_vnf_connection_point_reference = ConnectionPointReference(data['vnf_identifier'],
+                                                                          data['order'],
+                                                                          data['ingress_connection_point'],
+                                                                          data['egress_connection_point'])
             result = await self.orchestrator.update_unique_vnf_forwarding_graph_rendered_service_path(new_vnf_connection_point_reference)
             answer = {'status': 'Good', 'result': result}
             return web.json_response(answer)
@@ -157,6 +156,56 @@ class OrchestratorHandler:
                                                        data['source_port'],
                                                        data['destination_port'])
             result = await self.orchestrator.update_unique_vnf_forwarding_graph_classifier_rule(new_matching_attribute)
+            answer = {'status': 'Good', 'result': result}
+            return web.json_response(answer)
+        except Exception as e:
+            response = {'status': 'failed', 'message': str(e)}
+            return web.json_response(response)
+
+    async def notify_proposal_vnf_forwarding_graph(self, request: web.Request) -> Response:
+        try:
+            data_raw = await request.json()
+            data = json.loads(data_raw)
+            result = await self.orchestrator.notify_proposal_for_vnf_forwarding_graph(data)
+            answer = {'status': 'Good', 'result': result}
+            return web.json_response(answer)
+        except Exception as e:
+            response = {'status': 'failed', 'message': str(e)}
+            return web.json_response(response)
+
+    async def notify_proposal_vnf_forwarding_graph_corrective(self, request: web.Request) -> Response:
+        try:
+            data_raw = await request.json()
+            data = json.loads(data_raw)
+            result = await self.orchestrator.notify_update_vnf_forwarding_graph_corrective(data)
+            answer = {'status': 'Good', 'result': result}
+            return web.json_response(answer)
+        except Exception as e:
+            response = {'status': 'failed', 'message': str(e)}
+            return web.json_response(response)
+
+    async def notify_negative_corrective(self, request: web.Request) -> Response:
+        try:
+            data_raw = await request.json()
+            data = json.loads(data_raw)
+            result = await self.orchestrator.notify_reject_corrective(data)
+            answer = {'status': 'Good', 'result': result}
+            return web.json_response(answer)
+        except Exception as e:
+            response = {'status': 'failed', 'message': str(e)}
+            return web.json_response(response)
+
+    async def reply_to_notify_proposal_vnf_forwarding_graph(self, request: web.Request) -> Response:
+        try:
+            # data = await request.post()
+            # print('180 - reply_to_notify_proposal_vnf_forwarding_graph - Called')
+            # data = await request.json()
+            data_raw = await request.json()
+            # print(data_raw)
+            # print('182 - reply_to_notify_proposal_vnf_forwarding_graph - loading json')
+            data = json.loads(data_raw)
+            # print('184 - reply_to_notify_proposal_vnf_forwarding_graph - data loaded')
+            result = await self.orchestrator.reply_notify_proposal_for_vnf_forwarding_graph(data)
             answer = {'status': 'Good', 'result': result}
             return web.json_response(answer)
         except Exception as e:

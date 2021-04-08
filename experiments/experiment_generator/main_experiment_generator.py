@@ -13,7 +13,7 @@ from experiments.experiment_generator.experiment_generator import ExperimentGene
 
 def main():
     local_deployment = True
-    number_of_updates = 5
+    number_of_updates = 256
     if len(sys.argv) >= 2 and sys.argv[1] == 'local':
         local_deployment = True
         number_of_updates = sys.argv[2]

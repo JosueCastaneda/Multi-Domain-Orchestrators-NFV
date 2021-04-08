@@ -1,7 +1,7 @@
 from communication_entities.classifier_rule import ClassifierRule
 from communication_entities.matching_attribute import MatchingAttribute
 from communication_entities.rendered_service_path import RenderedServicePath
-from communication_entities.vnf_connection_point_reference import VNFConnectionPointReference
+from communication_entities.vnf_connection_point_reference import ConnectionPointReference
 
 
 class VNFForwardingGraph:
@@ -20,6 +20,7 @@ class VNFForwardingGraph:
         self.classification_rules = list()
         self.is_shared = is_shared
         self.set_unique_orchestrators = list()
+        self.set_unique_dependencies = list()
         self.service_identifier = service_identifier
         self.my_orchestrator = my_orchestrator
         self.type_of_change = ''
@@ -68,7 +69,7 @@ class VNFForwardingGraph:
         self.rendered_service_paths = another_vnf_forwarding_graph.rendered_service_paths
         self.classification_rules = another_vnf_forwarding_graph.list_classification_rules
 
-    async def update_unique_rendered_service_path(self, new_vnf_connection_point_reference: VNFConnectionPointReference,
+    async def update_unique_rendered_service_path(self, new_vnf_connection_point_reference: ConnectionPointReference,
                                                   orch_log,
                                                   orch_index,
                                                   was_called_by_caller=None):
@@ -108,12 +109,176 @@ class VNFForwardingGraph:
         update_result_as_dictionary['vnffg'] = vnf_fg_as_dict
         return update_result_as_dictionary
 
-    def has_matching_attribute(self, new_matching_attribute:MatchingAttribute):
+    async def remove_item_from_heap_and_reconfigure(self, item, orchestrator_log):
+        if item['type'] == 'matching_attribute':
+            rule = self.classification_rules[0]
+            for matching_attribute in rule.matching_attributes:
+                if matching_attribute.get_identifier() == item['attribute_id']:
+                    orchestrator_log.info('Removing item ' + str(item['attribute_id'][0:8]) + ' from attribute')
+                    return matching_attribute.remove_item_from_positive_add_to_negative(item, orchestrator_log)
+        if item['type'] == 'connection_point':
+            path = self.rendered_service_paths[0]
+            for connection_point in path.vnf_descriptor_connection_points:
+                if connection_point.get_vnf_identifier() == item['attribute_id']:
+                    orchestrator_log.info('Removing item from connection_point')
+                    return connection_point.remove_item_from_positive_add_to_negative(item, orchestrator_log)
+
+    def check_item_is_negated(self, item, orchestrator_log=None):
+        if item['type'] == 'matching_attribute':
+            # orchestrator_log.info('Checking if matching attribute for ' + str(item['attribute_id'][0:8]) +' is negated')
+            rule = self.classification_rules[0]
+            for matching_attribute in rule.matching_attributes:
+                if matching_attribute.get_identifier() == item['attribute_id']:
+                    return matching_attribute.check_if_item_is_negated(item, orchestrator_log)
+
+        if item['type'] == 'connection_point':
+            orchestrator_log.info('Checking connection point for ' + str(item['attribute_id'][0:8]))
+            path = self.rendered_service_paths[0]
+            for connection_point in path.vnf_descriptor_connection_points:
+                if connection_point.get_vnf_identifier() == item['attribute_id']:
+                    return connection_point.check_if_cp_item_is_negated(item, orchestrator_log)
+        return True
+
+    def check_item_is_accepted(self, item, orchestrator_log=None):
+        if item['type'] == 'matching_attribute':
+            rule = self.classification_rules[0]
+            for matching_attribute in rule.matching_attributes:
+                if matching_attribute.get_identifier() == item['attribute_id']:
+                    # orchestrator_log.info(
+                    #     'Checking if matching attribute for ' + str(item['attribute_id'][0:8]) + ' is accepted')
+                    return matching_attribute.check_if_item_is_accepted(item, orchestrator_log)
+
+        if item['type'] == 'connection_point':
+            path = self.rendered_service_paths[0]
+            for connection_point in path.vnf_descriptor_connection_points:
+                if connection_point.get_vnf_identifier() == item['attribute_id']:
+                    orchestrator_log.info('Checking if connection point for ' + str(item['attribute_id'][0:8]) + ' is accepted')
+                    return connection_point.check_if_item_is_accepted(item, orchestrator_log)
+        return True
+
+    def has_item(self, item, orchestrator_log=None):
+        # orchestrator_log.info('Has item')
+        # orchestrator_log.info(item)
+        if item['type'] == 'matching_attribute':
+            # orchestrator_log.info('Checking matching attribute')
+            rule = self.classification_rules[0]
+            for matching_attribute in rule.matching_attributes:
+                # orchestrator_log.info('Checking matching attribute AGAIN')
+                if matching_attribute.get_identifier() == item['attribute_id']:
+                    return True
+        elif item['type'] == 'connection_point':
+            path = self.rendered_service_paths[0]
+            for connection_point in path.vnf_descriptor_connection_points:
+                if connection_point.get_vnf_identifier() == item['attribute_id']:
+                    return True
+        return False
+
+    # TODO: Implement this method
+    async def add_item_to_negated_list(self, item, orchestrator_log):
+        if item['type'] == 'matching_attribute':
+            rule = self.classification_rules[0]
+            for matching_attribute in rule.matching_attributes:
+                if matching_attribute.get_identifier() == item['attribute_id']:
+                    return matching_attribute.add_invalid_corrective_update(item, orchestrator_log)
+        if item['type'] == 'connection_point':
+            # ERROR: IMPLEMENT GODZILLA
+            orchestrator_log.info('Please implement me')
+
+    # TODO: IMPLEMENT THIS FUNCTION NOW IS STUB
+    def has_item_negated(self, item, orchestrator_log):
+        if item['type'] == 'matching_attribute':
+            rule = self.classification_rules[0]
+            for matching_attribute in rule.matching_attributes:
+                if matching_attribute.get_identifier() == item['attribute_id']:
+                    # orchestrator_log.info('Checking if item is negated....')
+                    return matching_attribute.check_if_item_is_negated(item, orchestrator_log)
+        elif item['type'] == 'connection_point':
+            path = self.rendered_service_paths[0]
+            for connection_point in path.vnf_descriptor_connection_points:
+                if connection_point.get_vnf_identifier() == item['attribute_id']:
+                    # orchestrator_log.info('Checking if item is negated....')
+                    return connection_point.check_if_cp_item_is_negated(item, orchestrator_log)
+        return True
+
+    def has_matching_attribute(self, new_matching_attribute: MatchingAttribute):
         rule = self.classification_rules[0]
         for matching_attribute in rule.matching_attributes:
             if matching_attribute.get_identifier() == new_matching_attribute.get_identifier():
                 return True
         return False
+
+    def has_connection_point(self, new_connection_point: ConnectionPointReference):
+        path = self.rendered_service_paths[0]
+        for connection_point in path.vnf_descriptor_connection_points:
+            if connection_point.get_vnf_identifier() == new_connection_point.get_vnf_identifier():
+                return True
+        return False
+
+    def increase_message_for_connection_point(self, new_connection_point: ConnectionPointReference):
+        path = self.rendered_service_paths[0]
+        for connection_point in path.vnf_descriptor_connection_points:
+            if connection_point.get_vnf_identifier() == new_connection_point.get_vnf_identifier():
+                connection_point.update_sent_messages()
+
+    def get_counter_for_connection_point(self, new_connection_point: ConnectionPointReference):
+        path = self.rendered_service_paths[0]
+        data = dict()
+        for connection_point in path.vnf_descriptor_connection_points:
+            if connection_point.get_vnf_identifier() == new_connection_point.get_vnf_identifier():
+                data['attribute_counter'] = connection_point.counter
+                data['current_max_orchestrator_index'] = connection_point.current_max_orchestrator_index
+                data['messages_sent'] = connection_point.messages_sent
+                if connection_point.messages_sent > 0:
+                    data['attribute_counter'] += connection_point.messages_sent
+                return data
+        return data
+
+    def get_affected_orchestrators(self):
+        list_affected_orchestrators = []
+        for orch in self.set_unique_orchestrators:
+            list_affected_orchestrators.append(orch)
+        for orch in self.set_unique_dependencies:
+            list_affected_orchestrators.append(orch)
+        # Remove duplicates
+        list_affected_orchestrators = list(dict.fromkeys(list_affected_orchestrators))
+        return list_affected_orchestrators
+
+    def increase_message_for_attribute(self, new_matching_attribute: MatchingAttribute):
+        rule = self.classification_rules[0]
+        for matching_attribute in rule.matching_attributes:
+            if matching_attribute.get_identifier() == new_matching_attribute.get_identifier():
+                matching_attribute.update_sent_messages()
+
+    def get_counter_for_attribute(self, new_matching_attribute: MatchingAttribute):
+        rule = self.classification_rules[0]
+        data = dict()
+        for matching_attribute in rule.matching_attributes:
+            if matching_attribute.get_identifier() == new_matching_attribute.get_identifier():
+                data['attribute_counter'] = matching_attribute.counter
+                data['current_max_orchestrator_index'] = matching_attribute.current_max_orchestrator_index
+                data['messages_sent'] = matching_attribute.messages_sent
+                if matching_attribute.messages_sent > 0:
+                    data['attribute_counter'] += matching_attribute.messages_sent
+                return data
+        return data
+
+    async def update_data(self, data, orchestrator_log):
+        new_item = None
+        if data['type'] == 'matching_attribute':
+            rule = self.classification_rules[0]
+            for matching_attribute in rule.matching_attributes:
+                if matching_attribute.get_identifier() == data['attribute_id']:
+                    new_item = matching_attribute.try_to_update_with_data(data, orchestrator_log)
+                    break
+        elif data['type'] == 'connection_point':
+            path = self.rendered_service_paths[0]
+            orchestrator_log.info('Got path + CP ID: ' + str(data['attribute_id'][0:8]))
+            for connection_point in path.vnf_descriptor_connection_points:
+                if connection_point.get_vnf_identifier() == data['attribute_id']:
+                    orchestrator_log.info('Update connection point: ' + str(data['attribute_id']))
+                    new_item = connection_point.try_to_update_cp_with_data(data, orchestrator_log)
+                    break
+        return new_item
 
     # TODO: Separate repeated functions, clean code
     async def update_unique_classifier_rule(self,
@@ -131,7 +296,6 @@ class VNFForwardingGraph:
                                                       orch_log,
                                                       was_called_by_caller)
         if result['update_result']:
-            # orch_log.info('Doing the update.....')
             for orchestrator_replica in self.set_unique_orchestrators:
                 if orchestrator_replica != self.my_orchestrator:
                     replicas_to_send_notifications.append(orchestrator_replica)
@@ -199,13 +363,13 @@ class VNFForwardingGraph:
             new_rendered_service_path = RenderedServicePath(rendered_service_path_entry['rsp_id'],
                                                             rendered_service_path_entry['name'])
             for vnf_descriptor_connection_point in rendered_service_path_entry['vnf_descriptor_connection_points']:
-                new_connection_point = VNFConnectionPointReference(vnf_descriptor_connection_point['vnf_identifier'],
-                                                                   vnf_descriptor_connection_point['order'],
-                                                                   vnf_descriptor_connection_point[
+                new_connection_point = ConnectionPointReference(vnf_descriptor_connection_point['vnf_identifier'],
+                                                                vnf_descriptor_connection_point['order'],
+                                                                vnf_descriptor_connection_point[
                                                                        'ingress_connection_point'],
-                                                                   vnf_descriptor_connection_point[
+                                                                vnf_descriptor_connection_point[
                                                                        'egress_connection_point'],
-                                                                   list_of_orchestrator_id=list_of_orchestrator_id)
+                                                                list_of_orchestrator_id=list_of_orchestrator_id)
 
                 new_rendered_service_path.append_vnf_connection_point_reference(new_connection_point)
             self.append_rendered_service_path(new_rendered_service_path)
@@ -215,8 +379,6 @@ class VNFForwardingGraph:
             new_classifier = ClassifierRule(classification_rule_entry['identifier'],
                                             classification_rule_entry['name'],
                                             classification_rule_entry['rsp_identifier'])
-            # print('Creando Atributos...')
-            # print(list_of_orchestrator_id)
             for matching_attribute_entry in classification_rule_entry['matching_attributes']:
                 new_matching_attribute = MatchingAttribute(matching_attribute_entry['identifier'],
                                                            matching_attribute_entry['ip_proto'],
@@ -226,9 +388,7 @@ class VNFForwardingGraph:
                                                            matching_attribute_entry['destination_port'],
                                                            list_of_orchestrator_id=list_of_orchestrator_id)
                 new_classifier.append_matching_attributes(new_matching_attribute)
-            # print('Atributos creados')
             self.append_classification(new_classifier)
-        # print('OHH NO!!!')
 
     def add_unique_orchestrators(self, orchestrators):
         for orchestrator in orchestrators:

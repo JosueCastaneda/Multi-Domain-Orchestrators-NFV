@@ -4,11 +4,13 @@ import uuid
 
 
 def generate_random_integer(low, high):
+    # random.seed(10)
     return random.randint(low, high)
 
 
 def generate_unique_identifier():
     return str(uuid.uuid1())
+
 
 def generate_random_ip():
     return str('127.0.0.1')

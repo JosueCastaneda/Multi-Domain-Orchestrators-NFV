@@ -5,6 +5,8 @@ import sys
 from aiohttp import web
 
 from communication_entities.orchestrator import Orchestrator
+from communication_entities.orchestrator_classes.orchestrator_definition import OrchestratorDefinition
+from communication_entities.orchestrator_classes.preventive_orchestrator import PreventiveOrchestrator
 from communication_entities.orchestrator_handler import OrchestratorHandler
 from communication_entities.orchestrator_routes import init_routes
 
@@ -20,7 +22,23 @@ async def init_app(parameters) -> web.Application:
         algorithm_type = 'last_writer_wins'
     elif parameters['algorithm_index'] == 3:
         algorithm_type = 'multi_value'
+
+    algorithm_type = 'corrective'
     app = web.Application()
+    data = dict()
+    data['orchestrator_index'] = parameters['orchestrator_index']
+    data['experiment_index'] = parameters['experiment_index']
+    data['server_host'] = parameters['server_host']
+    data['server_port'] = parameters['server_port']
+    data['random_seed'] = parameters['random_seed']
+    data['causal_delivery'] = False
+    data['waiting_time'] = parameters['waiting_time']
+    data['probability_repeated_messages'] = parameters['probability_redundancy']
+    data['algorithm_type'] = algorithm_type
+    orchestrator_definition = OrchestratorDefinition(data)
+    # orchestrator = PreventiveOrchestrator(orchestrator_definition)
+
+
     orchestrator = Orchestrator(orchestrator_index=parameters['orchestrator_index'],
                                 experiment_index=parameters['experiment_index'],
                                 server_host=parameters['server_host'],

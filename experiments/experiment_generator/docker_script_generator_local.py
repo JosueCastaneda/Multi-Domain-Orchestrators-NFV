@@ -472,6 +472,8 @@ class DockerScriptGeneratorLocal:
         print('Error!!!')
 
     def generate_random_list_from_np_seeds(self, index, max_numbers):
+        # print('Max numbers: ' + str(max_numbers))
+        # print('Other: ' + str(self.configuration.collect_random[index]))
         random.seed(self.configuration.collect_random[index])
         return random.sample(range(0, max_numbers), 5)
 

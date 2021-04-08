@@ -1,7 +1,6 @@
 import time
 
-from communication_entities.vnf_connection_point_reference import VNFConnectionPointReference
-from utilities.logger import *
+from communication_entities.vnf_connection_point_reference import ConnectionPointReference
 
 
 class RenderedServicePath:
@@ -30,16 +29,16 @@ class RenderedServicePath:
             if connection_point.get_vnf_identifier() == identifier:
                 return connection_point
 
-    def append_vnf_connection_point_reference(self, new_vnf_connection_point_reference: VNFConnectionPointReference):
+    def append_vnf_connection_point_reference(self, new_vnf_connection_point_reference: ConnectionPointReference):
         self.vnf_descriptor_connection_points.append(new_vnf_connection_point_reference)
 
     def update_vnf_connection_point_reference_by_position(self,
-                                                          vnf_connection_point_reference: VNFConnectionPointReference,
+                                                          vnf_connection_point_reference: ConnectionPointReference,
                                                           position: int):
         self.vnf_descriptor_connection_points[position].update_all_with_new_vnf_connection(vnf_connection_point_reference)
 
     def update_vnf_connection_point_reference_by_index(self,
-                                                       new_vnf_connection_point_reference: VNFConnectionPointReference):
+                                                       new_vnf_connection_point_reference: ConnectionPointReference):
         for connection_point in self.vnf_descriptor_connection_points:
             if connection_point.get_vnf_identifier() == new_vnf_connection_point_reference.get_vnf_identifier():
                 connection_point.update_all_with_new_vnf_connection(new_vnf_connection_point_reference)
@@ -60,7 +59,7 @@ class RenderedServicePath:
                 return cp.get_vector_clock()
         return '-1'
 
-    async def update_vnf_connection_point(self, vnf_connection_point_reference: VNFConnectionPointReference,
+    async def update_vnf_connection_point(self, vnf_connection_point_reference: ConnectionPointReference,
                                           vnffg_identifier,
                                           orch_log,
                                           was_called_by_caller=None):
