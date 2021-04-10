@@ -1,7 +1,7 @@
 #!/bin/bash
 
-python3 experiments/experiment_generator/main_experiment_generator.py local 100000
-./run_all_experiments.sh 100000 160 90 50
+python3 experiments/experiment_generator/main_experiment_generator.py local 10
+./run_all_experiments.sh 10 30 90 50
 #./run_all_experiments.sh 20 120 30 30
 
 ## 64 Concurrent messages

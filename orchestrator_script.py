@@ -2,17 +2,15 @@ import asyncio
 import getopt
 import json
 import sys
+
 from aiohttp import web
 
 from communication_entities.orchestrator import Orchestrator
-from communication_entities.orchestrator_classes.orchestrator_definition import OrchestratorDefinition
-from communication_entities.orchestrator_classes.preventive_orchestrator import PreventiveOrchestrator
 from communication_entities.orchestrator_handler import OrchestratorHandler
 from communication_entities.orchestrator_routes import init_routes
 
 
 async def init_app(parameters) -> web.Application:
-# async def init_app(experiment_index, orchestrator_index, server_host, server_port, random_seed, index_algorithm) -> web.Application:
     algorithm_type = 'causal'
     if parameters['algorithm_index'] == 0:
         algorithm_type = 'causal'
@@ -22,8 +20,11 @@ async def init_app(parameters) -> web.Application:
         algorithm_type = 'last_writer_wins'
     elif parameters['algorithm_index'] == 3:
         algorithm_type = 'multi_value'
+    elif parameters['algorithm_index'] == 4:
+        algorithm_type = 'preventive'
+    elif parameters['algorithm_index'] == 5:
+        algorithm_type = 'corrective'
 
-    algorithm_type = 'corrective'
     app = web.Application()
     data = dict()
     data['orchestrator_index'] = parameters['orchestrator_index']
@@ -35,37 +36,15 @@ async def init_app(parameters) -> web.Application:
     data['waiting_time'] = parameters['waiting_time']
     data['probability_repeated_messages'] = parameters['probability_redundancy']
     data['algorithm_type'] = algorithm_type
-    orchestrator_definition = OrchestratorDefinition(data)
-    # orchestrator = PreventiveOrchestrator(orchestrator_definition)
-
-
-    orchestrator = Orchestrator(orchestrator_index=parameters['orchestrator_index'],
-                                experiment_index=parameters['experiment_index'],
-                                server_host=parameters['server_host'],
-                                server_port=parameters['server_port'],
-                                random_seed=parameters['random_seed'],
-                                causal_delivery=False,
-                                waiting_time=parameters['waiting_time'],
-                                probability_repeated_messages=parameters['probability_redundancy'],
-                                algorithm_type=algorithm_type)
-
-    # algorithm_type = 'causal'
-    # if index_algorithm == 0:
-    #     algorithm_type = 'causal'
-    # elif index_algorithm == 1:
-    #     algorithm_type = 'standard'
-    # elif index_algorithm == 2:
-    #     algorithm_type = 'last_writer_wins'
-    # elif index_algorithm == 3:
-    #     algorithm_type = 'multi_value'
-    # app = web.Application()
-    # orchestrator = Orchestrator(orchestrator_index=orchestrator_index,
-    #                             experiment_index=experiment_index,
-    #                             server_host=server_host,
-    #                             server_port=server_port,
-    #                             random_seed=random_seed,
-    #                             causal_delivery=False,
-    #                             algorithm_type=algorithm_type)
+    orchestrator=Orchestrator(orchestrator_index=parameters['orchestrator_index'],
+                              experiment_index=parameters['experiment_index'],
+                              server_host=parameters['server_host'],
+                              server_port=parameters['server_port'],
+                              random_seed=parameters['random_seed'],
+                              causal_delivery=False,
+                              waiting_time=parameters['waiting_time'],
+                              probability_repeated_messages=parameters['probability_redundancy'],
+                              algorithm_type=algorithm_type)
     handler = OrchestratorHandler(orchestrator)
     init_routes(app, handler)
     return app
@@ -124,9 +103,9 @@ def main(argv) -> None:
     if server_host == '' and server_port == 0:
         server_host, server_port = get_server_and_port(experiment_index, orchestrator_index)
 
-    print('Sever host: ' + str(server_host))
-    print('Server port: ' + str(server_port))
-    print('Algorithm index: ' + str(algorithm_index))
+    # print('Sever host: ' + str(server_host))
+    # print('Server port: ' + str(server_port))
+    # print('Algorithm index: ' + str(algorithm_index))
 
     loop = asyncio.get_event_loop()
     experiment_parameters = dict()
@@ -140,13 +119,6 @@ def main(argv) -> None:
     experiment_parameters['probability_redundancy'] = int(probability_redundancy)
 
     app = loop.run_until_complete(init_app(experiment_parameters))
-
-    # app = loop.run_until_complete(init_app(experiment_index,
-    #                                        orchestrator_index,
-    #                                        server_host,
-    #                                        server_port,
-    #                                        random_seed,
-    #                                        int(algorithm_index)))
     web.run_app(app, host=server_host, port=server_port)
 
 

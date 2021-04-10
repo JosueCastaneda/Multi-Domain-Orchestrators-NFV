@@ -1,279 +1,418 @@
 #!/bin/bash
 
-################################# Concurrent updates #################################
+################################# Concurrent - Causal ################################################################
+# Definition
+#TEST_TYPE=0 Concurrent
+#TEST_TYPE=1 Sequential
 
-# First
+#ALGO_TYPE=0 Causal
+#ALGO_TYPE=1 Standard
+#ALGO_TYPE=2 Last-writer wins
+#ALGO_TYPE=3 Multi-value
+#ALGO_TYPE=4 Preventive
+#ALGO_TYPE=5 Corrective
+
+EXPERIMENT_NUMBER=0
+ALGO_TYPE=0
+TEST_TYPE=0
+TEST_STRING=concurrent
 ./clean2.sh
-./run_all.sh 0 $1 $3 $4 0
+./run_all.sh $EXPERIMENT_NUMBER $1 $3 $4 $TEST_TYPE $ALGO_TYPE
 sleep $2
-python3 get_results_vnffg_updates.py 0 $1 causal $3 $4
-#sleep $2
-#./clean2.sh
+python3 get_results_vnffg_updates.py $EXPERIMENT_NUMBER $1 causal $3 $4 $TEST_STRING
+sleep $2
+./clean2.sh
 
 ##### Second
+#EXPERIMENT_NUMBER=1
 #./clean2.sh
-#./run_all.sh 1 $1 $3 $4 0
+#./run_all.sh $EXPERIMENT_NUMBER $1 $3 $4 $TEST_TYPE $ALGO_TYPE
 #sleep $2
-#python3 get_results_vnffg_updates.py 1 $1 causal $3 $4
+#python3 get_results_vnffg_updates.py $EXPERIMENT_NUMBER $1 causal $3 $4 $TEST_STRING
 #sleep $2
 #./clean2.sh
-##
+#
 #### Third
+#EXPERIMENT_NUMBER=2
 #./clean2.sh
-#./run_all.sh 2 $1 $3 $4 0
+#./run_all.sh $EXPERIMENT_NUMBER $1 $3 $4 $TEST_TYPE $ALGO_TYPE
 #sleep $2
-#python3 get_results_vnffg_updates.py 2 $1 causal $3 $4
+#python3 get_results_vnffg_updates.py $EXPERIMENT_NUMBER $1 causal $3 $4 $TEST_STRING
 #sleep $2
 #./clean2.sh
 ##
 ### Fourth
+#EXPERIMENT_NUMBER=3
 #./clean2.sh
-#./run_all.sh 3 $1 $3 $4 0
+#./run_all.sh $EXPERIMENT_NUMBER $1 $3 $4 $TEST_TYPE $ALGO_TYPE
 #sleep $2
-#python3 get_results_vnffg_updates.py 3 $1 causal $3 $4
+#python3 get_results_vnffg_updates.py $EXPERIMENT_NUMBER $1 causal $3 $4 $TEST_STRING
+#sleep $2
+#./clean2.sh
+#
+### Fifth
+#EXPERIMENT_NUMBER=4
+#./clean2.sh
+##./run_all.sh 4 $1 $3 $4 0 0
+#./run_all.sh $EXPERIMENT_NUMBER $1 $3 $4 $TEST_TYPE $ALGO_TYPE
+#sleep $2
+##python3 get_results_vnffg_updates.py 4 $1 causal $3 $4
+#python3 get_results_vnffg_updates.py $EXPERIMENT_NUMBER $1 causal $3 $4 $TEST_STRING
+#sleep $2
+#./clean2.sh
+
+################################## Sequential - Causal ################################################################
+EXPERIMENT_NUMBER=0
+ALGO_TYPE=0
+TEST_TYPE=1
+TEST_STRING=sequential
+
+./clean2.sh
+./run_all.sh $EXPERIMENT_NUMBER $1 $3 $4 $TEST_TYPE $ALGO_TYPE
+sleep $2
+python3 get_results_vnffg_updates.py $EXPERIMENT_NUMBER $1 causal $3 $4 $TEST_STRING
+sleep $2
+./clean2.sh
+
+## Second
+#EXPERIMENT_NUMBER=1
+#./clean2.sh
+#./run_all.sh $EXPERIMENT_NUMBER $1 $3 $4 $TEST_TYPE $ALGO_TYPE
+#sleep $2
+#python3 get_results_vnffg_updates.py $EXPERIMENT_NUMBER $1 causal $3 $4 $TEST_STRING
+#sleep $2
+#./clean2.sh
+
+### Third
+#EXPERIMENT_NUMBER=2
+#./clean2.sh
+#./run_all.sh $EXPERIMENT_NUMBER $1 $3 $4 $TEST_TYPE $ALGO_TYPE
+#sleep $2
+#python3 get_results_vnffg_updates.py $EXPERIMENT_NUMBER $1 causal $3 $4 $TEST_STRING
+#sleep $2
+#./clean2.sh
+
+### Fourth
+#EXPERIMENT_NUMBER=3
+#./clean2.sh
+#./run_all.sh $EXPERIMENT_NUMBER $1 $3 $4 $TEST_TYPE $ALGO_TYPE
+#sleep $2
+#python3 get_results_vnffg_updates.py $EXPERIMENT_NUMBER $1 causal $3 $4 $TEST_STRING
+#sleep $2
+#./clean2.sh
+
+## Fifth
+#EXPERIMENT_NUMBER=4
+#./clean2.sh
+#./run_all.sh $EXPERIMENT_NUMBER $1 $3 $4 $TEST_TYPE $ALGO_TYPE
+#sleep $2
+#python3 get_results_vnffg_updates.py $EXPERIMENT_NUMBER $1 causal $3 $4 $TEST_STRING
+#sleep $2
+#./clean2.sh
+echo 'Finish Causal'
+
+########################################### Concurrent - Standard ###################################
+EXPERIMENT_NUMBER=0
+ALGO_TYPE=1
+TEST_TYPE=0
+TEST_STRING=concurrent
+
+## First
+./clean2.sh
+./run_all.sh $EXPERIMENT_NUMBER $1 $3 $4 $TEST_TYPE $ALGO_TYPE
+sleep $2
+python3 get_results_vnffg_updates.py $EXPERIMENT_NUMBER $1 standard $3 $4 $TEST_STRING
+sleep $2
+./clean2.sh
+
+## Second
+#EXPERIMENT_NUMBER=1
+#./clean2.sh
+#./run_all.sh $EXPERIMENT_NUMBER $1 $3 $4 $TEST_TYPE $ALGO_TYPE
+#sleep $2
+#python3 get_results_vnffg_updates.py $EXPERIMENT_NUMBER $1 standard $3 $4 $TEST_STRING
+#sleep $2
+#./clean2.sh
+#
+#### Third
+#EXPERIMENT_NUMBER=2
+#./clean2.sh
+#./run_all.sh $EXPERIMENT_NUMBER $1 $3 $4 $TEST_TYPE $ALGO_TYPE
+#sleep $2
+#python3 get_results_vnffg_updates.py $EXPERIMENT_NUMBER $1 standard $3 $4 $TEST_STRING
+#sleep $2
+#./clean2.sh
+#
+### Fourth
+#EXPERIMENT_NUMBER=3
+#./clean2.sh
+#./run_all.sh $EXPERIMENT_NUMBER $1 $3 $4 $TEST_TYPE $ALGO_TYPE
+#sleep $2
+#python3 get_results_vnffg_updates.py $EXPERIMENT_NUMBER $1 standard $3 $4 $TEST_STRING
 #sleep $2
 #./clean2.sh
 ##
 ### Fifth
+#EXPERIMENT_NUMBER=4
 #./clean2.sh
-#./run_all.sh 4 $1 $3 $4 0
+#./run_all.sh $EXPERIMENT_NUMBER $1 $3 $4 $TEST_TYPE $ALGO_TYPE
 #sleep $2
-#python3 get_results_vnffg_updates.py 4 $1 causal $3 $4
-#sleep $2
-#./clean2.sh
-#
-################################## Sequential updates #################################
-#./clean2.sh
-#./run_all.sh 0 $1 $3 $4 1
-#sleep $2
-#python3 get_results_vnffg_updates.py 0 $1 causal $3 $4
+#python3 get_results_vnffg_updates.py $EXPERIMENT_NUMBER $1 standard $3 $4 $TEST_STRING
 #sleep $2
 #./clean2.sh
-#
+
+################################## Sequential - Standard #################################
+EXPERIMENT_NUMBER=0
+ALGO_TYPE=1
+TEST_TYPE=1
+TEST_STRING=sequential
+
+#First
+./clean2.sh
+./run_all.sh $EXPERIMENT_NUMBER $1 $3 $4 $TEST_TYPE $ALGO_TYPE
+sleep $2
+python3 get_results_vnffg_updates.py $EXPERIMENT_NUMBER $1 standard $3 $4 $TEST_STRING
+sleep $2
+./clean2.sh
+
 ### Second
+#EXPERIMENT_NUMBER=1
 #./clean2.sh
-#./run_all.sh 1 $1 $3 $4 1
+#./run_all.sh $EXPERIMENT_NUMBER $1 $3 $4 $TEST_TYPE $ALGO_TYPE
 #sleep $2
-#python3 get_results_vnffg_updates.py 1 $1 causal $3 $4
-#sleep $2
-#./clean2.sh
-#
-### Third
-#./clean2.sh
-#./run_all.sh 2 $1 $3 $4 1
-#sleep $2
-#python3 get_results_vnffg_updates.py 2 $1 causal $3 $4
-#sleep $2
-#./clean2.sh
-#
-### Fourth
-#./clean2.sh
-#./run_all.sh 3 $1 $3 $4 1
-#sleep $2
-#python3 get_results_vnffg_updates.py 3 $1 causal $3 $4
-#sleep $2
-#./clean2.sh
-#
-## Fifth
-#./clean2.sh
-#./run_all.sh 4 $1 $3 $4 1
-#sleep $2
-#python3 get_results_vnffg_updates.py 4 $1 causal $3 $4
-#sleep $2
-#./clean2.sh
-#
-###./clean2.sh
-###./run_all.sh 5 $1 $3 $4
-###sleep $2
-###python3 get_results_vnffg_updates.py 5 $1 causal $3 $4
-###sleep $2
-###./clean2.sh
-###
-###./clean2.sh
-###./run_all.sh 6 $1 $3 $4
-###sleep $2
-###python3 get_results_vnffg_updates.py 6 $1 causal $3 $4
-###sleep $2
-###./clean2.sh
-###
-###./clean2.sh
-###./run_all.sh 7 $1 $3 $4
-###sleep $2
-###python3 get_results_vnffg_updates.py 7 $1 causal $3 $4
-###sleep $2
-###./clean2.sh
-###
-###./clean2.sh
-###./run_all.sh 8 $1 $3 $4
-###sleep $2
-###python3 get_results_vnffg_updates.py 8 $1 causal $3 $4
-###sleep $2
-###./clean2.sh
-####
-###./clean2.sh
-###./run_all.sh 9 $1 $3 $4
-###sleep $2
-###python3 get_results_vnffg_updates.py 9 $1 causal $3 $4
-###sleep $2
-###./clean2.sh
-####
-########################################### First with all the standard algorithms
-#
-## First
-#./clean2.sh
-#./run_all_standard.sh 0 $1 $3 $4 0
-#sleep $2
-#python3 get_results_vnffg_updates.py 0 $1 standard $3 $4
-#sleep $2
-#./clean2.sh
-#
-### Second
-#./clean2.sh
-#./run_all_standard.sh 1 $1 $3 $4 0
-#sleep $2
-#python3 get_results_vnffg_updates.py 1 $1 standard $3 $4
-#sleep $2
-#./clean2.sh
-##
-### Third
-#./clean2.sh
-#./run_all_standard.sh 2 $1 $3 $4 0
-#sleep $2
-#python3 get_results_vnffg_updates.py 2 $1 standard $3 $4
-#sleep $2
-#./clean2.sh
-#
-## Fourth
-#./clean2.sh
-#./run_all_standard.sh 3 $1 $3 $4 0
-#sleep $2
-#python3 get_results_vnffg_updates.py 3 $1 standard $3 $4
-#sleep $2
-#./clean2.sh
-#
-## Fifth
-#./clean2.sh
-#./run_all_standard.sh 4 $1 $3 $4 0
-#sleep $2
-#python3 get_results_vnffg_updates.py 4 $1 standard $3 $4
-#sleep $2
-#./clean2.sh
-#
-################################## Sequential updates #################################
-#./clean2.sh
-#./run_all_standard.sh 0 $1 $3 $4 1
-#sleep $2
-#python3 get_results_vnffg_updates.py 0 $1 standard $3 $4
-#sleep $2
-#./clean2.sh
-##
-### Second
-#./clean2.sh
-#./run_all_standard.sh 1 $1 $3 $4 1
-#sleep $2
-#python3 get_results_vnffg_updates.py 1 $1 standard $3 $4
+#python3 get_results_vnffg_updates.py $EXPERIMENT_NUMBER $1 standard $3 $4 $TEST_STRING
 #sleep $2
 #./clean2.sh
 #
 ## Third
+#EXPERIMENT_NUMBER=2
 #./clean2.sh
-#./run_all_standard.sh 2 $1 $3 $4 1
+#./run_all.sh $EXPERIMENT_NUMBER $1 $3 $4 $TEST_TYPE $ALGO_TYPE
 #sleep $2
-#python3 get_results_vnffg_updates.py 2 $1 standard $3 $4
+#python3 get_results_vnffg_updates.py $EXPERIMENT_NUMBER $1 standard $3 $4 $TEST_STRING
 #sleep $2
 #./clean2.sh
 #
 ## Fourth
+#EXPERIMENT_NUMBER=3
 #./clean2.sh
-#./run_all_standard.sh 3 $1 $3 $4 1
+#./run_all.sh $EXPERIMENT_NUMBER $1 $3 $4 $TEST_TYPE $ALGO_TYPE
 #sleep $2
-#python3 get_results_vnffg_updates.py 3 $1 standard $3 $4
+#python3 get_results_vnffg_updates.py $EXPERIMENT_NUMBER $1 standard $3 $4 $TEST_STRING
 #sleep $2
 #./clean2.sh
 #
 ## Fifth
+#EXPERIMENT_NUMBER=4
 #./clean2.sh
-#./run_all_standard.sh 4 $1 $3 $4 1
+#./run_all.sh $EXPERIMENT_NUMBER $1 $3 $4 $TEST_TYPE $ALGO_TYPE
 #sleep $2
-#python3 get_results_vnffg_updates.py 4 $1 standard $3 $4
+#python3 get_results_vnffg_updates.py $EXPERIMENT_NUMBER $1 standard $3 $4 $TEST_STRING
+#sleep $2
+#./clean2.sh
+echo 'Finish Standard'
+
+########################################### Concurrent - Preventive ###################################
+EXPERIMENT_NUMBER=0
+ALGO_TYPE=4
+TEST_TYPE=0
+TEST_STRING=concurrent
+
+## First
+./clean2.sh
+./run_all.sh $EXPERIMENT_NUMBER $1 $3 $4 $TEST_TYPE $ALGO_TYPE
+sleep $2
+python3 get_results_vnffg_updates.py $EXPERIMENT_NUMBER $1 preventive $3 $4 $TEST_STRING
+sleep $2
+./clean2.sh
+
+## Second
+#EXPERIMENT_NUMBER=1
+#./clean2.sh
+#./run_all.sh $EXPERIMENT_NUMBER $1 $3 $4 $TEST_TYPE $ALGO_TYPE
+#sleep $2
+#python3 get_results_vnffg_updates.py $EXPERIMENT_NUMBER $1 preventive $3 $4 $TEST_STRING
 #sleep $2
 #./clean2.sh
 #
-###./clean2.sh
-###./run_all_standard.sh 5 $1 $3 $4
-###sleep $2
-###python3 get_results_vnffg_updates.py 5 $1 standard $3 $4
-###sleep $2
-###./clean2.sh
-###
-###./clean2.sh
-###./run_all_standard.sh 6 $1 $3 $4
-###sleep $2
-###python3 get_results_vnffg_updates.py 6 $1 standard $3 $4
-###sleep $2
-###./clean2.sh
-###
-###./clean2.sh
-###./run_all_standard.sh 7 $1 $3 $4
-###sleep $2
-###python3 get_results_vnffg_updates.py 7 $1 standard $3 $4
-###sleep $2
-###./clean2.sh
-###
-###./clean2.sh
-###./run_all_standard.sh 8 $1 $3 $4
-###sleep $2
-###python3 get_results_vnffg_updates.py 8 $1 standard $3 $4
-###sleep $2
-###./clean2.sh
-###
-###./clean2.sh
-###./run_all_standard.sh 9 $1 $3 $4
-###sleep $2
-###python3 get_results_vnffg_updates.py 9 $1 standard $3 $4
-###sleep $2
-###./clean2.sh
-##
-######################################### First with all the standard algorithms
-###./run_all_last_writer.sh 0 $1 $3 $4
-###sleep $2
-###python3 get_results_vnffg_updates.py 0 $1 last_writer
-###sleep 1
-###
-###./run_all_last_writer.sh 1 $1 $3 $4
-###sleep $2
-###python3 get_results_vnffg_updates.py 1 $1 last_writer
-###
-###./run_all_last_writer.sh 2 $1 $3 $4
-###sleep $2
-###python3 get_results_vnffg_updates.py 2 $1 last_writer
-###
-###./run_all_last_writer.sh 3 $1 $3 $4
-###sleep $2
-###python3 get_results_vnffg_updates.py 3 $1 last_writer
-###
-###./run_all_last_writer.sh 4 $1 $3 $4
-###sleep $2
-###python3 get_results_vnffg_updates.py 4 $1 last_writer
-###
-###./run_all_last_writer.sh 5 $1 $3 $4
-###sleep $2
-###python3 get_results_vnffg_updates.py 5 $1 last_writer
-###
-###./run_all_last_writer.sh 6 $1 $3 $4
-###sleep $2
-###python3 get_results_vnffg_updates.py 6 $1 last_writer
-###
-###./run_all_last_writer.sh 7 $1 $3 $4
-###sleep $2
-###python3 get_results_vnffg_updates.py 7 $1 last_writer
-###
-###./run_all_last_writer.sh 8 $1 $3 $4
-###sleep $2
-###python3 get_results_vnffg_updates.py 8 $1 last_writer
-##
-###./run_all_last_writer.sh 9 $1 $3 $4
-###sleep $2
-###python3 get_results_vnffg_updates.py 9 $1 last_writer
-##
-##echo 'Finish'
+## Third
+#EXPERIMENT_NUMBER=2
+#./clean2.sh
+#./run_all.sh $EXPERIMENT_NUMBER $1 $3 $4 $TEST_TYPE $ALGO_TYPE
+#sleep $2
+#python3 get_results_vnffg_updates.py $EXPERIMENT_NUMBER $1 preventive $3 $4 $TEST_STRING
+#sleep $2
+#./clean2.sh
+#
+## Fourth
+#EXPERIMENT_NUMBER=3
+#./clean2.sh
+#./run_all.sh $EXPERIMENT_NUMBER $1 $3 $4 $TEST_TYPE $ALGO_TYPE
+#sleep $2
+#python3 get_results_vnffg_updates.py $EXPERIMENT_NUMBER $1 preventive $3 $4 $TEST_STRING
+#sleep $2
+#./clean2.sh
+#
+## Fifth
+#EXPERIMENT_NUMBER=4
+#./clean2.sh
+#./run_all.sh $EXPERIMENT_NUMBER $1 $3 $4 $TEST_TYPE $ALGO_TYPE
+#sleep $2
+#python3 get_results_vnffg_updates.py $EXPERIMENT_NUMBER $1 preventive $3 $4 $TEST_STRING
+#sleep $2
+#./clean2.sh
+
+########################################### Sequential - Preventive ###################################
+EXPERIMENT_NUMBER=0
+ALGO_TYPE=4
+TEST_TYPE=1
+TEST_STRING=sequential
+
+## First
+./clean2.sh
+./run_all.sh $EXPERIMENT_NUMBER $1 $3 $4 $TEST_TYPE $ALGO_TYPE
+sleep $2
+python3 get_results_vnffg_updates.py $EXPERIMENT_NUMBER $1 preventive $3 $4 $TEST_STRING
+sleep $2
+./clean2.sh
+
+## Second
+#EXPERIMENT_NUMBER=1
+#./clean2.sh
+#./run_all.sh $EXPERIMENT_NUMBER $1 $3 $4 $TEST_TYPE $ALGO_TYPE
+#sleep $2
+#python3 get_results_vnffg_updates.py $EXPERIMENT_NUMBER $1 preventive $3 $4 $TEST_STRING
+#sleep $2
+#./clean2.sh
+#
+## Third
+#EXPERIMENT_NUMBER=2
+#./clean2.sh
+#./run_all.sh $EXPERIMENT_NUMBER $1 $3 $4 $TEST_TYPE $ALGO_TYPE
+#sleep $2
+#python3 get_results_vnffg_updates.py $EXPERIMENT_NUMBER $1 preventive $3 $4 $TEST_STRING
+#sleep $2
+#./clean2.sh
+#
+## Fourth
+#EXPERIMENT_NUMBER=3
+#./clean2.sh
+#./run_all.sh $EXPERIMENT_NUMBER $1 $3 $4 $TEST_TYPE $ALGO_TYPE
+#sleep $2
+#python3 get_results_vnffg_updates.py $EXPERIMENT_NUMBER $1 preventive $3 $4 $TEST_STRING
+#sleep $2
+#./clean2.sh
+#
+## Fifth
+#EXPERIMENT_NUMBER=4
+#./clean2.sh
+#./run_all.sh $EXPERIMENT_NUMBER $1 $3 $4 $TEST_TYPE $ALGO_TYPE
+#sleep $2
+#python3 get_results_vnffg_updates.py $EXPERIMENT_NUMBER $1 preventive $3 $4 $TEST_STRING
+#sleep $2
+#./clean2.sh
+echo 'Finish Preventive'
+
+########################################### Concurrent - Corrective ###################################
+EXPERIMENT_NUMBER=0
+ALGO_TYPE=5
+TEST_TYPE=0
+TEST_STRING=concurrent
+
+## First
+./clean2.sh
+./run_all.sh $EXPERIMENT_NUMBER $1 $3 $4 $TEST_TYPE $ALGO_TYPE
+sleep $2
+python3 get_results_vnffg_updates.py $EXPERIMENT_NUMBER $1 corrective $3 $4 $TEST_STRING
+sleep $2
+./clean2.sh
+
+## Second
+#EXPERIMENT_NUMBER=1
+#./clean2.sh
+#./run_all.sh $EXPERIMENT_NUMBER $1 $3 $4 $TEST_TYPE $ALGO_TYPE
+#sleep $2
+#python3 get_results_vnffg_updates.py $EXPERIMENT_NUMBER $1 corrective $3 $4 $TEST_STRING
+#sleep $2
+#./clean2.sh
+#
+## Third
+#EXPERIMENT_NUMBER=2
+#./clean2.sh
+#./run_all.sh $EXPERIMENT_NUMBER $1 $3 $4 $TEST_TYPE $ALGO_TYPE
+#sleep $2
+#python3 get_results_vnffg_updates.py $EXPERIMENT_NUMBER $1 corrective $3 $4 $TEST_STRING
+#sleep $2
+#./clean2.sh
+#
+## Fourth
+#EXPERIMENT_NUMBER=3
+#./clean2.sh
+#./run_all.sh $EXPERIMENT_NUMBER $1 $3 $4 $TEST_TYPE $ALGO_TYPE
+#sleep $2
+#python3 get_results_vnffg_updates.py $EXPERIMENT_NUMBER $1 corrective $3 $4 $TEST_STRING
+#sleep $2
+#./clean2.sh
+#
+## Fifth
+#EXPERIMENT_NUMBER=4
+#./clean2.sh
+#./run_all.sh $EXPERIMENT_NUMBER $1 $3 $4 $TEST_TYPE $ALGO_TYPE
+#sleep $2
+#python3 get_results_vnffg_updates.py $EXPERIMENT_NUMBER $1 corrective $3 $4 $TEST_STRING
+#sleep $2
+#./clean2.sh
+
+########################################### Sequential - Corrective ###################################
+EXPERIMENT_NUMBER=0
+ALGO_TYPE=5
+TEST_TYPE=1
+TEST_STRING=sequential
+
+## First
+./clean2.sh
+./run_all.sh $EXPERIMENT_NUMBER $1 $3 $4 $TEST_TYPE $ALGO_TYPE
+sleep $2
+python3 get_results_vnffg_updates.py $EXPERIMENT_NUMBER $1 corrective $3 $4 $TEST_STRING
+sleep $2
+./clean2.sh
+
+## Second
+#EXPERIMENT_NUMBER=1
+#./clean2.sh
+#./run_all.sh $EXPERIMENT_NUMBER $1 $3 $4 $TEST_TYPE $ALGO_TYPE
+#sleep $2
+#python3 get_results_vnffg_updates.py $EXPERIMENT_NUMBER $1 corrective $3 $4 $TEST_STRING
+#sleep $2
+#./clean2.sh
+#
+## Third
+#EXPERIMENT_NUMBER=2
+#./clean2.sh
+#./run_all.sh $EXPERIMENT_NUMBER $1 $3 $4 $TEST_TYPE $ALGO_TYPE
+#sleep $2
+#python3 get_results_vnffg_updates.py $EXPERIMENT_NUMBER $1 corrective $3 $4 $TEST_STRING
+#sleep $2
+#./clean2.sh
+#
+## Fourth
+#EXPERIMENT_NUMBER=3
+#./clean2.sh
+#./run_all.sh $EXPERIMENT_NUMBER $1 $3 $4 $TEST_TYPE $ALGO_TYPE
+#sleep $2
+#python3 get_results_vnffg_updates.py $EXPERIMENT_NUMBER $1 corrective $3 $4 $TEST_STRING
+#sleep $2
+#./clean2.sh
+#
+## Fifth
+#EXPERIMENT_NUMBER=4
+#./clean2.sh
+#./run_all.sh $EXPERIMENT_NUMBER $1 $3 $4 $TEST_TYPE $ALGO_TYPE
+#sleep $2
+#python3 get_results_vnffg_updates.py $EXPERIMENT_NUMBER $1 corrective $3 $4 $TEST_STRING
+#sleep $2
+#./clean2.sh
+echo 'Finish Corrective'
+
+
+echo 'Finish all algorithms'

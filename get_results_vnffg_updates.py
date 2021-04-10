@@ -15,7 +15,7 @@ from utilities.logger import *
 def append_entry_result_to_file(exp_conf, results):
     directory_path = 'results/results_experiment_' + exp_conf['number_of_updates']
     csv_columns = ['inconsistencies', 'messages_sent', 'time_for_experimentation']
-    name_file = exp_conf['algorithm_type'] + '_' + exp_conf['delay_time'] + '_' + exp_conf['probability_repetitions'] + '_rep'
+    name_file = exp_conf['algorithm_type'] + '_' + exp_conf['delay_time'] + '_' + exp_conf['probability_repetitions'] + '_rep'+'_type_' + exp_conf['save_type']
     csv_file = directory_path + '/result_' + name_file + '.csv'
     if not os.path.exists(directory_path):
         os.makedirs(directory_path)
@@ -73,7 +73,7 @@ async def init_capture(experiment_file, experiment_configuration):
 
 
 def main():
-    # print(sys.argv)
+    print(sys.argv)
     experiment_number = sys.argv[1]
     print(f'Sending EXP to {experiment_number}')
     experiment_file = experiment_number
@@ -81,11 +81,14 @@ def main():
     algorithm_type = sys.argv[3]
     delay_time = sys.argv[4]
     probability_repetitions = sys.argv[5]
+    save_type = sys.argv[6]
+    print('SAVE TYPE: ' + str(save_type))
     experiment_configuration = dict()
     experiment_configuration['number_of_updates'] = number_of_updates
     experiment_configuration['algorithm_type'] = algorithm_type
     experiment_configuration['delay_time'] = delay_time
     experiment_configuration['probability_repetitions'] = probability_repetitions
+    experiment_configuration['save_type'] = save_type
     server_host = '127.0.0.1'
     server_port = 4444
     loop = asyncio.get_event_loop()
