@@ -11,7 +11,7 @@ from utilities.random_integer_generation import generate_random_seeds
 
 class ExperimentConfiguration:
 
-    def __init__(self, path):
+    def __init__(self, path, number_of_updates, external_deployment=False):
         self.path = path
         experiment = self.load_configuration_file()
         self.number_of_experiments = experiment['number_of_experiments']
@@ -25,6 +25,9 @@ class ExperimentConfiguration:
         self.number_of_scalings = experiment['number_of_scalings']
         self.algorithm_index = experiment['algorithm_index']
         self.number_of_vnfs_per_orchestrator = experiment['number_of_vnfs_per_orchestrator']
+        self.number_of_updates = number_of_updates
+        self.vnf_port_local = 3001
+        self.is_external = external_deployment
         self.random_seed_list, self.random_np_seed_list, self.collect_random = generate_random_seeds(self.number_of_vnf_components,
                                                                                                      self.number_of_services)
 

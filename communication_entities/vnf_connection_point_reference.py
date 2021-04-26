@@ -23,6 +23,7 @@ class ConnectionPointReference:
         self.current_max_orchestrator_index = current_max_orchestrator_index
         self.messages_sent = 0
         self.save_messages = -1
+        self.initial_time = 0
         self.vector_clock = VectorClock()
         self.orchestrator_sender_id = orchestrator_sender_id
         # if experiment != -1:
@@ -33,6 +34,12 @@ class ConnectionPointReference:
         self.list_positive_entries = []
         self.list_negative_entries = []
         self.add_clocks()
+
+    def set_time(self, initial_time):
+        self.initial_time = initial_time
+
+    def get_time(self):
+        return self.initial_time
 
     def add_clocks(self):
         if len(self.list_of_orchestrator_id) > 0:

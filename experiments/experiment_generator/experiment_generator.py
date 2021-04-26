@@ -19,7 +19,7 @@ from utilities.random_integer_generation import generate_random_integer, generat
 
 class ExperimentGenerator:
 
-    def __init__(self, configuration, local_deployment=False):
+    def __init__(self, configuration):
         self.number_of_experiments = configuration.number_of_experiments
         self.log = None
         self.set_up_my_logger()
@@ -30,8 +30,9 @@ class ExperimentGenerator:
         self.path = configuration.path
         self.random_seed_list = configuration.random_seed_list
         self.random_np_seed_list = configuration.random_np_seed_list
+        self.number_of_updates = configuration.number_of_updates
         self.number_of_vnfs_per_orchestrator = configuration.number_of_vnfs_per_orchestrator
-        self.list_orchestrators = load_orchestrators(local_deployment)
+        self.list_orchestrators = load_orchestrators(configuration.is_external)
         self.current_queues_number = 0
         self.list_vnf_components = list()
         self.vnf_data = load_vnf_raw_data()
@@ -39,18 +40,22 @@ class ExperimentGenerator:
         self.remaining_vnfc_components = 0
         # TODO: This is only for local deployments
         self.vnf_port = 5500
-        self.local_deployment = local_deployment
         self.port_vnfs = 3001
+        self.is_external = configuration.is_external
         self.unique_identifiers = list()
 
     def add_vnfs_to_orchestrators(self):
         for orchestrator in self.list_orchestrators:
             remaining_vnfs_per_orchestrator = self.number_of_vnfs_per_orchestrator
             while remaining_vnfs_per_orchestrator > 0:
-                if self.local_deployment:
-                    new_vnf = self.generate_random_vnf_local(orchestrator)
-                else:
+                if self.is_external:
                     new_vnf = self.generate_random_vnf(orchestrator)
+                else:
+                    new_vnf = self.generate_random_vnf_local(orchestrator)
+                # if self.local_deployment:
+                #     new_vnf = self.generate_random_vnf_local(orchestrator)
+                # else:
+                #     new_vnf = self.generate_random_vnf(orchestrator)
                 orchestrator.add_vnf(new_vnf)
                 remaining_vnfs_per_orchestrator -= 1
             self.port_vnfs = 3001
@@ -58,7 +63,8 @@ class ExperimentGenerator:
     def generate_random_vnf(self, orchestrator):
         random_index = generate_random_integer(0, len(self.vnf_data) - 1)
         vnf_data = self.vnf_data[random_index]
-        with open(vnf_data['file']) as json_file:
+        my_path = os.path.dirname(os.path.realpath(__file__))
+        with open(my_path + '/' + vnf_data['file']) as json_file:
             vnf_blue_print = json.load(json_file)
         vnf_configuration = VNFDefinitionConfiguration(vnf_blue_print['operation'],
                                                        orchestrator.get_new_ip(),
@@ -285,7 +291,6 @@ class ExperimentGenerator:
 
     def generate_experiment(self):
         for experiment_counter in range(self.number_of_experiments):
-            # print('Experiment number: ' + str(experiment_counter))
             self.change_random_seeds(experiment_counter)
             self.add_vnfs_to_orchestrators()
             new_experiment = create_empty_experiment_entry()

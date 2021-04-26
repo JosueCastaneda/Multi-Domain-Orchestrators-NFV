@@ -1,3 +1,4 @@
+import datetime
 import sys
 import time
 
@@ -41,6 +42,7 @@ class ClassifierRule:
         for matching_attribute in self.matching_attributes:
             if matching_attribute.get_identifier() == new_matching_attribute.get_identifier():
                 start = time.time()
+                start_now = datetime.datetime.now()
                 new_result = matching_attribute.update(new_matching_attribute,
                                                        was_called_by_caller)
                 result['update_result'] = True
@@ -52,9 +54,12 @@ class ClassifierRule:
                 result['vector_clock'] = new_result['vector_clock']
                 result['vector_clock_s'] = new_result['vector_clock_s']
                 result['identifier'] = matching_attribute.get_identifier()
+                result['initial_time'] = new_result['initial_time']
                 end = time.time()
+                end_now = datetime.datetime.now()
                 time_difference = end - start
                 result['running_time'] = time_difference
+                result['reconfiguration_time'] = (end_now - start_now).total_seconds()
                 return result
         return result
 

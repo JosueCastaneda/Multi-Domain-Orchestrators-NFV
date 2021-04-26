@@ -6,13 +6,13 @@ from experiments.experiment_generator.classes.experiment_constraints import Expe
 from utilities.random_integer_generation import generate_unique_identifier
 
 
-def load_orchestrators(is_local=False):
+def load_orchestrators(is_external=False):
     my_path = os.path.dirname(os.path.realpath(__file__))
     full_path = my_path + '/../experiments/experiment_generator/orchestrator_definitions/'
-    if is_local:
-        file_path = full_path + 'orchestrator_local.json'
-    else:
+    if is_external:
         file_path = full_path + 'orchestrator.json'
+    else:
+        file_path = full_path + 'orchestrator_local.json'
     list_of_orchestrators = list()
     with open(file_path) as json_file:
         raw_data = json.load(json_file)

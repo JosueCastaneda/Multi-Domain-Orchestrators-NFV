@@ -36,7 +36,7 @@ async def init_app(parameters) -> web.Application:
     data['waiting_time'] = parameters['waiting_time']
     data['probability_repeated_messages'] = parameters['probability_redundancy']
     data['algorithm_type'] = algorithm_type
-    orchestrator=Orchestrator(orchestrator_index=parameters['orchestrator_index'],
+    orchestrator = Orchestrator(orchestrator_index=parameters['orchestrator_index'],
                               experiment_index=parameters['experiment_index'],
                               server_host=parameters['server_host'],
                               server_port=parameters['server_port'],
@@ -44,7 +44,8 @@ async def init_app(parameters) -> web.Application:
                               causal_delivery=False,
                               waiting_time=parameters['waiting_time'],
                               probability_repeated_messages=parameters['probability_redundancy'],
-                              algorithm_type=algorithm_type)
+                              algorithm_type=algorithm_type,
+                              probability_negated=parameters['probability_negated'])
     handler = OrchestratorHandler(orchestrator)
     init_routes(app, handler)
     return app
@@ -70,15 +71,16 @@ def main(argv) -> None:
     debug = True
     algorithm_index = 0
     waiting_time = 0
-    probability_redundancy = 0
+    probability_redundancy = 0.0
+    probability_negated = 0.0
     if debug:
         orchestrator_index = '0'
         experiment_index = '0'
         server_host = '127.0.0.1'
         server_port = 4437
     try:
-        valid_arguments_as_string = "i:e:h:p:r:a:x:y:"
-        list_valid_arguments = ["service_id=", "experiment_id=", "host=", "port=", "random_seed=", "algorithm=", "wait_time", "prob_redundant"]
+        valid_arguments_as_string = "i:e:h:p:r:a:x:y:w:"
+        list_valid_arguments = ["service_id=", "experiment_id=", "host=", "port=", "random_seed=", "algorithm=", "wait_time", "prob_redundant", "prob_negated"]
         opts, args = getopt.getopt(argv, valid_arguments_as_string, list_valid_arguments)
     except getopt.GetoptError:
         sys.exit(2)
@@ -99,6 +101,8 @@ def main(argv) -> None:
             waiting_time = arg
         elif opt in ("-y", "--prob_redundant"):
             probability_redundancy = arg
+        elif opt in ("-w", "--prob_negated"):
+            probability_negated = arg
 
     if server_host == '' and server_port == 0:
         server_host, server_port = get_server_and_port(experiment_index, orchestrator_index)
@@ -115,8 +119,9 @@ def main(argv) -> None:
     experiment_parameters['server_port'] = server_port
     experiment_parameters['random_seed'] = random_seed
     experiment_parameters['algorithm_index'] = int(algorithm_index)
-    experiment_parameters['waiting_time'] = int(waiting_time)
-    experiment_parameters['probability_redundancy'] = int(probability_redundancy)
+    experiment_parameters['waiting_time'] = float(waiting_time)
+    experiment_parameters['probability_redundancy'] = float(probability_redundancy)
+    experiment_parameters['probability_negated'] = float(probability_negated)
 
     app = loop.run_until_complete(init_app(experiment_parameters))
     web.run_app(app, host=server_host, port=server_port)

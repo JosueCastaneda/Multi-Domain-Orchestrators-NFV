@@ -35,9 +35,15 @@ class MatchingAttribute:
         self.list_positive_entries = []
         self.list_negative_entries = []
         self.max_counter = 0
-        # if experiment != -1:
-        #     self.add_clocks(experiment)
+        self.initial_time = None
+        self.time_so_far = []
         self.add_clocks()
+
+    def set_time(self, time):
+        self.initial_time = time
+
+    def get_time(self):
+        return self.initial_time
 
     def get_identifier(self):
         return self.identifier
@@ -102,8 +108,8 @@ class MatchingAttribute:
         return new_matching_attribute
 
     def add_invalid_corrective_update(self, data, orchestrator_log):
-        # orchestrator_log.info('Creating from data')
-        # orchestrator_log.info(data)
+        orchestrator_log.info('Creating from data')
+        orchestrator_log.info(data)
         new_matching_attribute = self.create_from_data(data)
 
         if 'value' in data:
@@ -112,16 +118,13 @@ class MatchingAttribute:
         else:
             identifier = data['identifier']
 
-        # orchestrator_log.info('New matching attribute')
-        # orchestrator_log.info(new_matching_attribute.as_dictionary())
+        orchestrator_log.info('New matching attribute')
+        orchestrator_log.info(new_matching_attribute.as_dictionary())
         str_before = 'Adding invalid corrective update ' + str(identifier[0:8]) + ' . Before adding: ' + str(len(self.list_positive_entries)) + ' ' + str(
             len(self.list_negative_entries))
-        # orchestrator_log.info(str_before)
         heappush(self.list_negative_entries, new_matching_attribute)
         if len(self.list_positive_entries) > 0:
             my_top_value = self.list_positive_entries[0]
-
-            # str_top = ' [' + str(my_top_value.counter) + ' ,' + str(my_top_value.current_max_orchestrator_index) + '] '
             str_top = ' '
             for my_entry in self.list_positive_entries:
                 str_top += ' [' + str(my_entry.counter) + ' ,' + str(my_entry.current_max_orchestrator_index) + '] '
@@ -134,8 +137,8 @@ class MatchingAttribute:
                 len(self.list_negative_entries)) + ' No elements in top '
             orchestrator_log.info(str_before + str_after)
 
-        # orchestrator_log.info('After adding: ' + str(len(self.list_positive_entries)) + ' ' + str(
-        #     len(self.list_negative_entries)))
+        orchestrator_log.info('After adding: ' + str(len(self.list_positive_entries)) + ' ' + str(
+            len(self.list_negative_entries)))
         return new_matching_attribute
 
     def try_to_update_with_data(self, data, orchestrator_log):
@@ -170,7 +173,6 @@ class MatchingAttribute:
                 self.current_max_orchestrator_index = data_max_counter
                 self.save_messages = data_message_repetitions
                 self.messages_sent = 0
-            #     GODZILLA
             str_after = 'After update- ' + str(self.identifier) + ' Counter:' + str(self.counter) + ' Max ID: ' + str(self.current_max_orchestrator_index)
             orchestrator_log.info(str_after)
         return new_item
@@ -201,9 +203,6 @@ class MatchingAttribute:
     def set_current_max_orchestrator_index(self, val):
         self.current_max_orchestrator_index = val
 
-    # def get_current_max_orchestrator_index(self):
-    #     return self.current_max_orchestrator_index
-
     def increase_counter(self):
         self.counter += 1
 
@@ -230,6 +229,11 @@ class MatchingAttribute:
         self.destination_ip = other_matching_attribute.destination_ip
         self.source_port = other_matching_attribute.source_port
         self.destination_port = other_matching_attribute.destination_port
+        if self.initial_time is None:
+            self.initial_time = other_matching_attribute.initial_time
+        else:
+            # TODO: Need to use a list due to concurrent
+            self.initial_time = other_matching_attribute.initial_time
 
         if was_called_by_caller['first_call']:
             self.increase_counter()
@@ -250,6 +254,7 @@ class MatchingAttribute:
         result['new_max_couter'] = self.get_current_max_orchestrator_index()
         result['vector_clock'] = self.vector_clock.to_json()
         result['vector_clock_s'] = self.vector_clock.as_string()
+        result['initial_time'] = self.initial_time
         return result
 
     def log_information(self):
@@ -275,19 +280,6 @@ class MatchingAttribute:
             my_counter = self.max_counter
             self.counter += 1
 
-
-        # if len(self.list_positive_entries) == 0:
-        #     my_counter = self.counter + 1
-        # else:
-        #     top_attribute = self.list_positive_entries[0]
-        #     my_counter = top_attribute.counter + 1
-        #
-        # self.counter += 1
-
-        # if data['update'] == 'corrective' and data['first_update'] == 'True':
-        #     # ERROR: This is because theres a case where the same identity is used
-        #     self.counter += 1
-
         if 'value' in data:
             data_value = data['value']
             new_matching_attribute = MatchingAttribute(identifier=data_value['identifier'],
@@ -312,16 +304,6 @@ class MatchingAttribute:
 
     # ERROR: This code is used for creating objects but also increasing, which makes bugs as messages get new ids or equal...
     def create_from_data(self, data):
-        # if len(self.list_positive_entries) == 0:
-        #     my_counter = self.counter + 1
-        # else:
-        #     top_attribute = self.list_positive_entries[0]
-        #     my_counter = top_attribute.counter + 1
-        #
-        # if data['update'] == 'corrective' and data['first_update'] == 'True':
-        #     # ERROR: This is because theres a case where the same identity is used
-        #     self.counter += 1
-
         if 'value' in data:
             data_value = data['value']
             new_matching_attribute = MatchingAttribute(identifier=data_value['identifier'],
@@ -357,6 +339,7 @@ class MatchingAttribute:
             matching_attribute_as_dictionary['current_max_orchestrator_index'] = self.current_max_orchestrator_index
             matching_attribute_as_dictionary['messages_sent'] = self.messages_sent
             matching_attribute_as_dictionary['save_messages'] = self.save_messages
+            matching_attribute_as_dictionary['initial_time'] = self.initial_time
         else:
             if orchestrator_log:
                 orchestrator_log.info('Getting latest value....')
@@ -370,10 +353,7 @@ class MatchingAttribute:
             matching_attribute_as_dictionary['counter'] = my_value.counter
             matching_attribute_as_dictionary['current_max_orchestrator_index'] = my_value.current_max_orchestrator_index
             matching_attribute_as_dictionary['messages_sent'] = my_value.messages_sent
-            # if orchestrator_log:
-            #     orchestrator_log.info('My value')
-            # print(my_value.as_dictionary())
-
+            matching_attribute_as_dictionary['initial_time'] = my_value.initial_time
         return matching_attribute_as_dictionary
 
     def remove_item_from_positive_add_to_negative(self, item, orchestrator_log):
@@ -381,7 +361,9 @@ class MatchingAttribute:
         number_of_positive_entries = len(self.list_positive_entries)
         repetitions = 0
         entries_not_ordered = []
+        number_of_reconfigurations = 0
         while element_is_not_found and repetitions < number_of_positive_entries:
+            number_of_reconfigurations += 1
             entry = heappop(self.list_positive_entries)
             same_id = entry.get_identifier() == item['attribute_id']
             same_counter = entry.get_counter() == item['counter']
@@ -395,13 +377,10 @@ class MatchingAttribute:
                 entries_not_ordered.append(entry)
             repetitions += 1
         str_before = 'Heapify again the union of positive elements and not_ordered'
-        # orchestrator_log.info(str_before)
         self.list_positive_entries.extend(entries_not_ordered)
         heapify(self.list_positive_entries)
 
         if len(self.list_positive_entries) > 0:
-            my_top_value = self.list_positive_entries[0]
-            # str_top = ' [' + str(my_top_value.counter) + ' ,' + str(my_top_value.current_max_orchestrator_index) + '] '
             str_top = ' '
 
             for my_entry in self.list_positive_entries:
@@ -413,10 +392,10 @@ class MatchingAttribute:
         else:
             str_after = ' After removing: ' + str(len(self.list_positive_entries)) + ' ' + str(len(self.list_negative_entries)) + ' Empty positives'
             orchestrator_log.info(str_before + str_after)
+        return number_of_reconfigurations
 
     def update_sent_messages(self):
         self.messages_sent += 1
-        # self.counter += 1
 
     # Note: By default a heap stores the smallest element on top, so neet to change this because we want a max-heap
     def __lt__(self, cmp):
@@ -430,8 +409,3 @@ class MatchingAttribute:
         elif counters_are_equal and is_my_max_orchestrator_greater:
             return True
         return False
-        # return is_my_counter_greater and is_my_max_orchestrator_greater
-
-# self.counter = counter
-#         self.current_max_orchestrator_index = current_max_orchestrator_index
-#         self.messages_sent = 0

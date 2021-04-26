@@ -12,407 +12,153 @@
 #ALGO_TYPE=4 Preventive
 #ALGO_TYPE=5 Corrective
 
-EXPERIMENT_NUMBER=0
+NUMBER_OF_UPDATES=$1
+WAITING_TIME=$2
+MAX_DELAY=$3
+REPETITION_PROBABILITY=$4
+NEGATION_PROBABILITY=$5
+EXPERIMENT_REPETITIONS=4
+
+#echo "NUMBER_OF_UPDATES $1  MAX_DELAY $3 REPETITION_PROBABILITY $4 NEGATION_PROBABILITY $5"
+#echo "NUMBER_OF_UPDATES $NUMBER_OF_UPDATES  MAX_DELAY $MAX_DELAY REPETITION_PROBABILITY $REPETITION_PROBABILITY NEGATION_PROBABILITY $NEGATION_PROBABILITY"
+#sleep 10
+
+#EXPERIMENT_NUMBER=0
+
 ALGO_TYPE=0
 TEST_TYPE=0
 TEST_STRING=concurrent
-./clean2.sh
-./run_all.sh $EXPERIMENT_NUMBER $1 $3 $4 $TEST_TYPE $ALGO_TYPE
-sleep $2
-python3 get_results_vnffg_updates.py $EXPERIMENT_NUMBER $1 causal $3 $4 $TEST_STRING
-sleep $2
-./clean2.sh
+ALGO_NAME=causal
 
-##### Second
-#EXPERIMENT_NUMBER=1
-#./clean2.sh
-#./run_all.sh $EXPERIMENT_NUMBER $1 $3 $4 $TEST_TYPE $ALGO_TYPE
-#sleep $2
-#python3 get_results_vnffg_updates.py $EXPERIMENT_NUMBER $1 causal $3 $4 $TEST_STRING
-#sleep $2
-#./clean2.sh
-#
-#### Third
-#EXPERIMENT_NUMBER=2
-#./clean2.sh
-#./run_all.sh $EXPERIMENT_NUMBER $1 $3 $4 $TEST_TYPE $ALGO_TYPE
-#sleep $2
-#python3 get_results_vnffg_updates.py $EXPERIMENT_NUMBER $1 causal $3 $4 $TEST_STRING
-#sleep $2
-#./clean2.sh
-##
-### Fourth
-#EXPERIMENT_NUMBER=3
-#./clean2.sh
-#./run_all.sh $EXPERIMENT_NUMBER $1 $3 $4 $TEST_TYPE $ALGO_TYPE
-#sleep $2
-#python3 get_results_vnffg_updates.py $EXPERIMENT_NUMBER $1 causal $3 $4 $TEST_STRING
-#sleep $2
-#./clean2.sh
-#
-### Fifth
-#EXPERIMENT_NUMBER=4
-#./clean2.sh
-##./run_all.sh 4 $1 $3 $4 0 0
-#./run_all.sh $EXPERIMENT_NUMBER $1 $3 $4 $TEST_TYPE $ALGO_TYPE
-#sleep $2
-##python3 get_results_vnffg_updates.py 4 $1 causal $3 $4
-#python3 get_results_vnffg_updates.py $EXPERIMENT_NUMBER $1 causal $3 $4 $TEST_STRING
-#sleep $2
-#./clean2.sh
+for EXPERIMENT_NUMBER in $( seq 0 $EXPERIMENT_REPETITIONS )
+  do
+    ./clean2.sh
+    ./run_all.sh $EXPERIMENT_NUMBER $NUMBER_OF_UPDATES $MAX_DELAY $REPETITION_PROBABILITY $TEST_TYPE $ALGO_TYPE $NEGATION_PROBABILITY
+    sleep $WAITING_TIME
+    python3 get_results_vnffg_updates.py $EXPERIMENT_NUMBER $NUMBER_OF_UPDATES $ALGO_NAME $MAX_DELAY $REPETITION_PROBABILITY $TEST_STRING $NEGATION_PROBABILITY
+    sleep $WAITING_TIME
+    ./clean2.sh
+done
 
-################################## Sequential - Causal ################################################################
-EXPERIMENT_NUMBER=0
+
+################################### Sequential - Causal ################################################################
 ALGO_TYPE=0
 TEST_TYPE=1
 TEST_STRING=sequential
+ALGO_NAME=causal
 
-./clean2.sh
-./run_all.sh $EXPERIMENT_NUMBER $1 $3 $4 $TEST_TYPE $ALGO_TYPE
-sleep $2
-python3 get_results_vnffg_updates.py $EXPERIMENT_NUMBER $1 causal $3 $4 $TEST_STRING
-sleep $2
-./clean2.sh
+for EXPERIMENT_NUMBER in $( seq 0 $EXPERIMENT_REPETITIONS )
+  do
+    ./clean2.sh
+    ./run_all.sh $EXPERIMENT_NUMBER $NUMBER_OF_UPDATES $MAX_DELAY $REPETITION_PROBABILITY $TEST_TYPE $ALGO_TYPE $NEGATION_PROBABILITY
+    sleep $WAITING_TIME
+    python3 get_results_vnffg_updates.py $EXPERIMENT_NUMBER $NUMBER_OF_UPDATES $ALGO_NAME $MAX_DELAY $REPETITION_PROBABILITY $TEST_STRING $NEGATION_PROBABILITY
+    sleep $WAITING_TIME
+    ./clean2.sh
+done
 
-## Second
-#EXPERIMENT_NUMBER=1
-#./clean2.sh
-#./run_all.sh $EXPERIMENT_NUMBER $1 $3 $4 $TEST_TYPE $ALGO_TYPE
-#sleep $2
-#python3 get_results_vnffg_updates.py $EXPERIMENT_NUMBER $1 causal $3 $4 $TEST_STRING
-#sleep $2
-#./clean2.sh
-
-### Third
-#EXPERIMENT_NUMBER=2
-#./clean2.sh
-#./run_all.sh $EXPERIMENT_NUMBER $1 $3 $4 $TEST_TYPE $ALGO_TYPE
-#sleep $2
-#python3 get_results_vnffg_updates.py $EXPERIMENT_NUMBER $1 causal $3 $4 $TEST_STRING
-#sleep $2
-#./clean2.sh
-
-### Fourth
-#EXPERIMENT_NUMBER=3
-#./clean2.sh
-#./run_all.sh $EXPERIMENT_NUMBER $1 $3 $4 $TEST_TYPE $ALGO_TYPE
-#sleep $2
-#python3 get_results_vnffg_updates.py $EXPERIMENT_NUMBER $1 causal $3 $4 $TEST_STRING
-#sleep $2
-#./clean2.sh
-
-## Fifth
-#EXPERIMENT_NUMBER=4
-#./clean2.sh
-#./run_all.sh $EXPERIMENT_NUMBER $1 $3 $4 $TEST_TYPE $ALGO_TYPE
-#sleep $2
-#python3 get_results_vnffg_updates.py $EXPERIMENT_NUMBER $1 causal $3 $4 $TEST_STRING
-#sleep $2
-#./clean2.sh
 echo 'Finish Causal'
-
-########################################### Concurrent - Standard ###################################
-EXPERIMENT_NUMBER=0
+#
+############################################ Concurrent - Standard ###################################
 ALGO_TYPE=1
 TEST_TYPE=0
 TEST_STRING=concurrent
+ALGO_NAME=standard
 
-## First
-./clean2.sh
-./run_all.sh $EXPERIMENT_NUMBER $1 $3 $4 $TEST_TYPE $ALGO_TYPE
-sleep $2
-python3 get_results_vnffg_updates.py $EXPERIMENT_NUMBER $1 standard $3 $4 $TEST_STRING
-sleep $2
-./clean2.sh
+for EXPERIMENT_NUMBER in $( seq 0 $EXPERIMENT_REPETITIONS )
+  do
+    ./clean2.sh
+    ./run_all.sh $EXPERIMENT_NUMBER $NUMBER_OF_UPDATES $MAX_DELAY $REPETITION_PROBABILITY $TEST_TYPE $ALGO_TYPE $NEGATION_PROBABILITY
+    sleep $WAITING_TIME
+    python3 get_results_vnffg_updates.py $EXPERIMENT_NUMBER $NUMBER_OF_UPDATES $ALGO_NAME $MAX_DELAY $REPETITION_PROBABILITY $TEST_STRING $NEGATION_PROBABILITY
+    sleep $WAITING_TIME
+    ./clean2.sh
+done
 
-## Second
-#EXPERIMENT_NUMBER=1
-#./clean2.sh
-#./run_all.sh $EXPERIMENT_NUMBER $1 $3 $4 $TEST_TYPE $ALGO_TYPE
-#sleep $2
-#python3 get_results_vnffg_updates.py $EXPERIMENT_NUMBER $1 standard $3 $4 $TEST_STRING
-#sleep $2
-#./clean2.sh
-#
-#### Third
-#EXPERIMENT_NUMBER=2
-#./clean2.sh
-#./run_all.sh $EXPERIMENT_NUMBER $1 $3 $4 $TEST_TYPE $ALGO_TYPE
-#sleep $2
-#python3 get_results_vnffg_updates.py $EXPERIMENT_NUMBER $1 standard $3 $4 $TEST_STRING
-#sleep $2
-#./clean2.sh
-#
-### Fourth
-#EXPERIMENT_NUMBER=3
-#./clean2.sh
-#./run_all.sh $EXPERIMENT_NUMBER $1 $3 $4 $TEST_TYPE $ALGO_TYPE
-#sleep $2
-#python3 get_results_vnffg_updates.py $EXPERIMENT_NUMBER $1 standard $3 $4 $TEST_STRING
-#sleep $2
-#./clean2.sh
-##
-### Fifth
-#EXPERIMENT_NUMBER=4
-#./clean2.sh
-#./run_all.sh $EXPERIMENT_NUMBER $1 $3 $4 $TEST_TYPE $ALGO_TYPE
-#sleep $2
-#python3 get_results_vnffg_updates.py $EXPERIMENT_NUMBER $1 standard $3 $4 $TEST_STRING
-#sleep $2
-#./clean2.sh
-
-################################## Sequential - Standard #################################
-EXPERIMENT_NUMBER=0
+################################### Sequential - Standard #################################
 ALGO_TYPE=1
 TEST_TYPE=1
 TEST_STRING=sequential
+ALGO_NAME=standard
 
-#First
-./clean2.sh
-./run_all.sh $EXPERIMENT_NUMBER $1 $3 $4 $TEST_TYPE $ALGO_TYPE
-sleep $2
-python3 get_results_vnffg_updates.py $EXPERIMENT_NUMBER $1 standard $3 $4 $TEST_STRING
-sleep $2
-./clean2.sh
+for EXPERIMENT_NUMBER in $( seq 0 $EXPERIMENT_REPETITIONS )
+  do
+    ./clean2.sh
+    ./run_all.sh $EXPERIMENT_NUMBER $NUMBER_OF_UPDATES $MAX_DELAY $REPETITION_PROBABILITY $TEST_TYPE $ALGO_TYPE $NEGATION_PROBABILITY
+    sleep $WAITING_TIME
+    python3 get_results_vnffg_updates.py $EXPERIMENT_NUMBER $NUMBER_OF_UPDATES $ALGO_NAME $MAX_DELAY $REPETITION_PROBABILITY $TEST_STRING $NEGATION_PROBABILITY
+    sleep $WAITING_TIME
+    ./clean2.sh
+done
 
-### Second
-#EXPERIMENT_NUMBER=1
-#./clean2.sh
-#./run_all.sh $EXPERIMENT_NUMBER $1 $3 $4 $TEST_TYPE $ALGO_TYPE
-#sleep $2
-#python3 get_results_vnffg_updates.py $EXPERIMENT_NUMBER $1 standard $3 $4 $TEST_STRING
-#sleep $2
-#./clean2.sh
-#
-## Third
-#EXPERIMENT_NUMBER=2
-#./clean2.sh
-#./run_all.sh $EXPERIMENT_NUMBER $1 $3 $4 $TEST_TYPE $ALGO_TYPE
-#sleep $2
-#python3 get_results_vnffg_updates.py $EXPERIMENT_NUMBER $1 standard $3 $4 $TEST_STRING
-#sleep $2
-#./clean2.sh
-#
-## Fourth
-#EXPERIMENT_NUMBER=3
-#./clean2.sh
-#./run_all.sh $EXPERIMENT_NUMBER $1 $3 $4 $TEST_TYPE $ALGO_TYPE
-#sleep $2
-#python3 get_results_vnffg_updates.py $EXPERIMENT_NUMBER $1 standard $3 $4 $TEST_STRING
-#sleep $2
-#./clean2.sh
-#
-## Fifth
-#EXPERIMENT_NUMBER=4
-#./clean2.sh
-#./run_all.sh $EXPERIMENT_NUMBER $1 $3 $4 $TEST_TYPE $ALGO_TYPE
-#sleep $2
-#python3 get_results_vnffg_updates.py $EXPERIMENT_NUMBER $1 standard $3 $4 $TEST_STRING
-#sleep $2
-#./clean2.sh
 echo 'Finish Standard'
 
-########################################### Concurrent - Preventive ###################################
-EXPERIMENT_NUMBER=0
+############################################ Concurrent - Preventive ###################################
 ALGO_TYPE=4
 TEST_TYPE=0
 TEST_STRING=concurrent
+ALGO_NAME=preventive
 
-## First
-./clean2.sh
-./run_all.sh $EXPERIMENT_NUMBER $1 $3 $4 $TEST_TYPE $ALGO_TYPE
-sleep $2
-python3 get_results_vnffg_updates.py $EXPERIMENT_NUMBER $1 preventive $3 $4 $TEST_STRING
-sleep $2
-./clean2.sh
+for EXPERIMENT_NUMBER in $( seq 0 $EXPERIMENT_REPETITIONS )
+  do
+    ./clean2.sh
+    ./run_all.sh $EXPERIMENT_NUMBER $NUMBER_OF_UPDATES $MAX_DELAY $REPETITION_PROBABILITY $TEST_TYPE $ALGO_TYPE $NEGATION_PROBABILITY
+    sleep $WAITING_TIME
+    python3 get_results_vnffg_updates.py $EXPERIMENT_NUMBER $NUMBER_OF_UPDATES $ALGO_NAME $MAX_DELAY $REPETITION_PROBABILITY $TEST_STRING $NEGATION_PROBABILITY
+    sleep $WAITING_TIME
+    ./clean2.sh
+done
 
-## Second
-#EXPERIMENT_NUMBER=1
-#./clean2.sh
-#./run_all.sh $EXPERIMENT_NUMBER $1 $3 $4 $TEST_TYPE $ALGO_TYPE
-#sleep $2
-#python3 get_results_vnffg_updates.py $EXPERIMENT_NUMBER $1 preventive $3 $4 $TEST_STRING
-#sleep $2
-#./clean2.sh
-#
-## Third
-#EXPERIMENT_NUMBER=2
-#./clean2.sh
-#./run_all.sh $EXPERIMENT_NUMBER $1 $3 $4 $TEST_TYPE $ALGO_TYPE
-#sleep $2
-#python3 get_results_vnffg_updates.py $EXPERIMENT_NUMBER $1 preventive $3 $4 $TEST_STRING
-#sleep $2
-#./clean2.sh
-#
-## Fourth
-#EXPERIMENT_NUMBER=3
-#./clean2.sh
-#./run_all.sh $EXPERIMENT_NUMBER $1 $3 $4 $TEST_TYPE $ALGO_TYPE
-#sleep $2
-#python3 get_results_vnffg_updates.py $EXPERIMENT_NUMBER $1 preventive $3 $4 $TEST_STRING
-#sleep $2
-#./clean2.sh
-#
-## Fifth
-#EXPERIMENT_NUMBER=4
-#./clean2.sh
-#./run_all.sh $EXPERIMENT_NUMBER $1 $3 $4 $TEST_TYPE $ALGO_TYPE
-#sleep $2
-#python3 get_results_vnffg_updates.py $EXPERIMENT_NUMBER $1 preventive $3 $4 $TEST_STRING
-#sleep $2
-#./clean2.sh
-
-########################################### Sequential - Preventive ###################################
-EXPERIMENT_NUMBER=0
+############################################ Sequential - Preventive ###################################
 ALGO_TYPE=4
 TEST_TYPE=1
 TEST_STRING=sequential
+ALGO_NAME=preventive
 
-## First
-./clean2.sh
-./run_all.sh $EXPERIMENT_NUMBER $1 $3 $4 $TEST_TYPE $ALGO_TYPE
-sleep $2
-python3 get_results_vnffg_updates.py $EXPERIMENT_NUMBER $1 preventive $3 $4 $TEST_STRING
-sleep $2
-./clean2.sh
+for EXPERIMENT_NUMBER in $( seq 0 $EXPERIMENT_REPETITIONS )
+  do
+    ./clean2.sh
+    ./run_all.sh $EXPERIMENT_NUMBER $NUMBER_OF_UPDATES $MAX_DELAY $REPETITION_PROBABILITY $TEST_TYPE $ALGO_TYPE $NEGATION_PROBABILITY
+    sleep $WAITING_TIME
+    python3 get_results_vnffg_updates.py $EXPERIMENT_NUMBER $NUMBER_OF_UPDATES $ALGO_NAME $MAX_DELAY $REPETITION_PROBABILITY $TEST_STRING $NEGATION_PROBABILITY
+    sleep $WAITING_TIME
+    ./clean2.sh
+done
 
-## Second
-#EXPERIMENT_NUMBER=1
-#./clean2.sh
-#./run_all.sh $EXPERIMENT_NUMBER $1 $3 $4 $TEST_TYPE $ALGO_TYPE
-#sleep $2
-#python3 get_results_vnffg_updates.py $EXPERIMENT_NUMBER $1 preventive $3 $4 $TEST_STRING
-#sleep $2
-#./clean2.sh
-#
-## Third
-#EXPERIMENT_NUMBER=2
-#./clean2.sh
-#./run_all.sh $EXPERIMENT_NUMBER $1 $3 $4 $TEST_TYPE $ALGO_TYPE
-#sleep $2
-#python3 get_results_vnffg_updates.py $EXPERIMENT_NUMBER $1 preventive $3 $4 $TEST_STRING
-#sleep $2
-#./clean2.sh
-#
-## Fourth
-#EXPERIMENT_NUMBER=3
-#./clean2.sh
-#./run_all.sh $EXPERIMENT_NUMBER $1 $3 $4 $TEST_TYPE $ALGO_TYPE
-#sleep $2
-#python3 get_results_vnffg_updates.py $EXPERIMENT_NUMBER $1 preventive $3 $4 $TEST_STRING
-#sleep $2
-#./clean2.sh
-#
-## Fifth
-#EXPERIMENT_NUMBER=4
-#./clean2.sh
-#./run_all.sh $EXPERIMENT_NUMBER $1 $3 $4 $TEST_TYPE $ALGO_TYPE
-#sleep $2
-#python3 get_results_vnffg_updates.py $EXPERIMENT_NUMBER $1 preventive $3 $4 $TEST_STRING
-#sleep $2
-#./clean2.sh
 echo 'Finish Preventive'
 
-########################################### Concurrent - Corrective ###################################
-EXPERIMENT_NUMBER=0
+############################################ Concurrent - Corrective ###################################
 ALGO_TYPE=5
 TEST_TYPE=0
 TEST_STRING=concurrent
+ALGO_NAME=corrective
 
-## First
-./clean2.sh
-./run_all.sh $EXPERIMENT_NUMBER $1 $3 $4 $TEST_TYPE $ALGO_TYPE
-sleep $2
-python3 get_results_vnffg_updates.py $EXPERIMENT_NUMBER $1 corrective $3 $4 $TEST_STRING
-sleep $2
-./clean2.sh
+for EXPERIMENT_NUMBER in $( seq 0 $EXPERIMENT_REPETITIONS )
+  do
+    ./clean2.sh
+    ./run_all.sh $EXPERIMENT_NUMBER $NUMBER_OF_UPDATES $MAX_DELAY $REPETITION_PROBABILITY $TEST_TYPE $ALGO_TYPE $NEGATION_PROBABILITY
+    sleep $WAITING_TIME
+    python3 get_results_vnffg_updates.py $EXPERIMENT_NUMBER $NUMBER_OF_UPDATES $ALGO_NAME $MAX_DELAY $REPETITION_PROBABILITY $TEST_STRING $NEGATION_PROBABILITY
+    sleep $WAITING_TIME
+    ./clean2.sh
+done
 
-## Second
-#EXPERIMENT_NUMBER=1
-#./clean2.sh
-#./run_all.sh $EXPERIMENT_NUMBER $1 $3 $4 $TEST_TYPE $ALGO_TYPE
-#sleep $2
-#python3 get_results_vnffg_updates.py $EXPERIMENT_NUMBER $1 corrective $3 $4 $TEST_STRING
-#sleep $2
-#./clean2.sh
-#
-## Third
-#EXPERIMENT_NUMBER=2
-#./clean2.sh
-#./run_all.sh $EXPERIMENT_NUMBER $1 $3 $4 $TEST_TYPE $ALGO_TYPE
-#sleep $2
-#python3 get_results_vnffg_updates.py $EXPERIMENT_NUMBER $1 corrective $3 $4 $TEST_STRING
-#sleep $2
-#./clean2.sh
-#
-## Fourth
-#EXPERIMENT_NUMBER=3
-#./clean2.sh
-#./run_all.sh $EXPERIMENT_NUMBER $1 $3 $4 $TEST_TYPE $ALGO_TYPE
-#sleep $2
-#python3 get_results_vnffg_updates.py $EXPERIMENT_NUMBER $1 corrective $3 $4 $TEST_STRING
-#sleep $2
-#./clean2.sh
-#
-## Fifth
-#EXPERIMENT_NUMBER=4
-#./clean2.sh
-#./run_all.sh $EXPERIMENT_NUMBER $1 $3 $4 $TEST_TYPE $ALGO_TYPE
-#sleep $2
-#python3 get_results_vnffg_updates.py $EXPERIMENT_NUMBER $1 corrective $3 $4 $TEST_STRING
-#sleep $2
-#./clean2.sh
-
-########################################### Sequential - Corrective ###################################
+############################################ Sequential - Corrective ###################################
 EXPERIMENT_NUMBER=0
 ALGO_TYPE=5
 TEST_TYPE=1
 TEST_STRING=sequential
+ALGO_NAME=corrective
 
-## First
-./clean2.sh
-./run_all.sh $EXPERIMENT_NUMBER $1 $3 $4 $TEST_TYPE $ALGO_TYPE
-sleep $2
-python3 get_results_vnffg_updates.py $EXPERIMENT_NUMBER $1 corrective $3 $4 $TEST_STRING
-sleep $2
-./clean2.sh
+for EXPERIMENT_NUMBER in $( seq 0 $EXPERIMENT_REPETITIONS )
+  do
+    ./clean2.sh
+    ./run_all.sh $EXPERIMENT_NUMBER $NUMBER_OF_UPDATES $MAX_DELAY $REPETITION_PROBABILITY $TEST_TYPE $ALGO_TYPE $NEGATION_PROBABILITY
+    sleep $WAITING_TIME
+    python3 get_results_vnffg_updates.py $EXPERIMENT_NUMBER $NUMBER_OF_UPDATES $ALGO_NAME $MAX_DELAY $REPETITION_PROBABILITY $TEST_STRING $NEGATION_PROBABILITY
+    sleep $WAITING_TIME
+    ./clean2.sh
+done
 
-## Second
-#EXPERIMENT_NUMBER=1
-#./clean2.sh
-#./run_all.sh $EXPERIMENT_NUMBER $1 $3 $4 $TEST_TYPE $ALGO_TYPE
-#sleep $2
-#python3 get_results_vnffg_updates.py $EXPERIMENT_NUMBER $1 corrective $3 $4 $TEST_STRING
-#sleep $2
-#./clean2.sh
-#
-## Third
-#EXPERIMENT_NUMBER=2
-#./clean2.sh
-#./run_all.sh $EXPERIMENT_NUMBER $1 $3 $4 $TEST_TYPE $ALGO_TYPE
-#sleep $2
-#python3 get_results_vnffg_updates.py $EXPERIMENT_NUMBER $1 corrective $3 $4 $TEST_STRING
-#sleep $2
-#./clean2.sh
-#
-## Fourth
-#EXPERIMENT_NUMBER=3
-#./clean2.sh
-#./run_all.sh $EXPERIMENT_NUMBER $1 $3 $4 $TEST_TYPE $ALGO_TYPE
-#sleep $2
-#python3 get_results_vnffg_updates.py $EXPERIMENT_NUMBER $1 corrective $3 $4 $TEST_STRING
-#sleep $2
-#./clean2.sh
-#
-## Fifth
-#EXPERIMENT_NUMBER=4
-#./clean2.sh
-#./run_all.sh $EXPERIMENT_NUMBER $1 $3 $4 $TEST_TYPE $ALGO_TYPE
-#sleep $2
-#python3 get_results_vnffg_updates.py $EXPERIMENT_NUMBER $1 corrective $3 $4 $TEST_STRING
-#sleep $2
-#./clean2.sh
 echo 'Finish Corrective'
-
-
 echo 'Finish all algorithms'

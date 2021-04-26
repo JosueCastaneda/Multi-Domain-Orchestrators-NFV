@@ -5,8 +5,9 @@ import random
 from utilities.random_integer_generation import generate_random_integer, generate_unique_identifier
 
 
-class DockerScriptGeneratorExternal:
+class DockerScriptGenerator:
 
+    # def __init__(self, experiment_index, configuration, initial_vnf_port, number_of_vnffg_updates=640):
     def __init__(self, experiment_index, configuration):
         self.experiment_index = experiment_index
         self.configuration = configuration
@@ -16,11 +17,11 @@ class DockerScriptGeneratorExternal:
         self.orchestrator_index = 0
         self.file_commands = None
         self.random_running_index = 0
-        self.number_of_vnffg_updates = 10
+        self.number_of_vnffg_updates = configuration.number_of_updates
         self.running_experiment = 0
-        self.is_external = True
+        self.is_external = configuration.is_external
+        self.vnf_port = configuration.vnf_port_local
         self.algorithm_index = configuration.algorithm_index
-
 
     def set_index(self, index):
         self.orchestrator_index = index
@@ -83,134 +84,82 @@ class DockerScriptGeneratorExternal:
         header = '#!/bin/sh' + '\n'
         self.file_commands.write(header + '\n')
 
-    def set_up_run_orchestrators_local(self):
-        random_seed = self.configuration.random_seed_list[self.running_experiment]
-        current_orchestrator = self.data['orchestrators'][self.orchestrator_index]
-        first_string = 'python orchestrator_script.py -i ' + str(self.orchestrator_index)
-        second_string = ' -e ' + str(self.experiment_index) + ' -h \'127.0.0.1\' -p '
-        five_string = ' -a ' + str(self.algorithm_index)
-        third_string = current_orchestrator['port'] + ' -r ' + str(random_seed) + five_string + ' &'
-        self.file_commands.write(first_string + second_string + third_string + '\n')
-
-    def set_up_run_orchestrators_external(self):
-        random_seed = self.configuration.random_seed_list[self.running_experiment]
-        first_string = 'python orchestrator_script.py -i ' + str(self.orchestrator_index)
-        second_string = ' -e ' + str(self.experiment_index) + ' -h \'0.0.0.0\' -p '
-        five_string = ' -a ' + str(self.algorithm_index)
-        third_string = str(self.get_port_based_on_index()) + ' -r ' + str(random_seed) + five_string + ' &'
-        self.file_commands.write(first_string + second_string + third_string + '\n')
-
     def set_up_run_orchestrators(self):
         self.file_commands.write('# Launch orchestrator' + '\n')
+        random_seed = self.configuration.random_seed_list[self.running_experiment]
+        current_orchestrator = self.data['orchestrators'][self.orchestrator_index]
+        first_string = 'python3 orchestrator_script.py -i ' + str(self.orchestrator_index)
         if self.is_external:
-            self.set_up_run_orchestrators_external()
+            second_string = ' -e ' + str(self.experiment_index) + ' -h \'0.0.0.0\' -p '
         else:
-            self.set_up_run_orchestrators_local()
+            second_string = ' -e ' + str(self.experiment_index) + ' -h \'127.0.0.1\' -p '
+        five_string = ' -a $3'
+        third_string = current_orchestrator['port'] + ' -r ' + str(random_seed) + five_string + ' -x $1 -y $2 -w $4 &'
+        self.file_commands.write(first_string + second_string + third_string + '\n')
+        fourth_string = 'sleep 2'
+        self.file_commands.write(fourth_string + '\n')
         self.write_new_line_to_file()
-
-    def set_up_chain_orchestrators_external(self):
-        current_orchestrator = self.data['orchestrators'][self.orchestrator_index]
-        for i in range(len(self.data['orchestrators'])):
-            if i != self.orchestrator_index:
-                other_orchestrator = self.data['orchestrators'][i]
-                first_string = 'python message_factory.py -t add_orchestrator -h 0.0.0.0'
-                second_string = ' -p ' + current_orchestrator['port']
-                third_string = ' -n none -m none --vnf_host ' + other_orchestrator['ip'] + ' --vnf_port ' + \
-                               other_orchestrator[
-                                   'port'] + ' -x ' + other_orchestrator['id']
-                self.file_commands.write(first_string + second_string + third_string + '\n')
-
-    def set_up_chain_orchestrators_local(self):
-        current_orchestrator = self.data['orchestrators'][self.orchestrator_index]
-        for i in range(len(self.data['orchestrators'])):
-            if i != self.orchestrator_index:
-                other_orchestrator = self.data['orchestrators'][i]
-                first_string = 'python message_factory.py -t add_orchestrator -h 127.0.0.1'
-                second_string = ' -p ' + current_orchestrator['port']
-                third_string = ' -n none -m none --vnf_host ' + other_orchestrator['ip'] + ' --vnf_port ' + \
-                               other_orchestrator[
-                                   'port'] + ' -x ' + other_orchestrator['id']
-                self.file_commands.write(first_string + second_string + third_string + '\n')
 
     def set_up_chain_orchestrators(self):
         self.file_commands.write('# Add orchestrator\'s information to my orchestrator' + '\n')
-        if self.is_external:
-            self.set_up_chain_orchestrators_external()
-        else:
-            self.set_up_chain_orchestrators_local()
+        current_orchestrator = self.data['orchestrators'][self.orchestrator_index]
+        for i in range(len(self.data['orchestrators'])):
+            if i != self.orchestrator_index:
+                other_orchestrator = self.data['orchestrators'][i]
+                if self.is_external:
+                    first_string = 'python message_factory.py -t add_orchestrator -h 0.0.0.0'
+                else:
+                    first_string = 'python3 message_factory.py -t add_orchestrator -h 127.0.0.1'
+                second_string = ' -p ' + current_orchestrator['port']
+                third_string = ' -n none -m none --vnf_host ' + other_orchestrator['ip'] + ' --vnf_port ' + \
+                               other_orchestrator[
+                                   'port'] + ' -x ' + other_orchestrator['id']
+                self.file_commands.write(first_string + second_string + third_string + '\n')
         self.write_new_line_to_file()
-
-    def set_up_running_vnf_external(self):
-        current_orchestrator = self.data['orchestrators'][self.orchestrator_index]
-        vnf_port = 3001
-        for vnf_index in range(len(current_orchestrator['vnfs'])):
-            first_string = 'python vnf_script.py -i ' + str(vnf_index) + ' -o ' + str(self.orchestrator_index) + ' -e '
-            third_string = str(self.experiment_index) + ' -h \'0.0.0.0\' -p ' + str(vnf_port) + ' &'
-            self.file_commands.write(first_string + third_string + '\n')
-            vnf_port += 1
-
-    def set_up_running_vnf_local(self):
-        current_orchestrator = self.data['orchestrators'][self.orchestrator_index]
-        for vnf_index in range(len(current_orchestrator['vnfs'])):
-            first_string = 'python vnf_script.py -i ' + str(vnf_index) + ' -o ' + str(self.orchestrator_index) + ' -e '
-            third_string = str(self.experiment_index) + ' -h \'127.0.0.1\' -p ' + str(self.vnf_port) + ' &'
-            self.file_commands.write(first_string + third_string + '\n')
-            self.vnf_port += 1
 
     def set_up_running_vnf(self):
         self.file_commands.write('# Instantiate the orchestrator\'s VNFs \n')
-        if self.is_external:
-            self.set_up_running_vnf_external()
-        else:
-            self.set_up_running_vnf_local()
+        fourth_string = 'sleep 2'
+        self.file_commands.write(fourth_string + '\n')
+        current_orchestrator = self.data['orchestrators'][self.orchestrator_index]
+        vnf_port = 3001
+        for vnf_index in range(len(current_orchestrator['vnfs'])):
+            first_string = 'python3 vnf_script.py -i ' + str(vnf_index) + ' -o ' + str(self.orchestrator_index) + ' -e '
+            if self.is_external:
+                third_string = str(self.experiment_index) + ' -h \'0.0.0.0\' -p ' + str(vnf_port) + ' &'
+            else:
+                third_string = str(self.experiment_index) + ' -h \'127.0.0.1\' -p ' + str(self.vnf_port) + ' &'
+            self.file_commands.write(first_string + third_string + '\n')
+            self.vnf_port += 1
+            vnf_port += 1
         self.write_new_line_to_file()
 
     def add_vnf_chains(self):
         self.file_commands.write('#Add chains to services \n')
-        if self.is_external:
-            self.add_vnf_chains_external()
-        else:
-            self.add_vnf_chains_local()
+        for orchestrator in self.data['orchestrators']:
+            for service in orchestrator['services']:
+                first_index = 0
+                first_dependency = None
+                while first_index < len(service['dependencies']) - 1:
+                    if first_dependency is None:
+                        first_dependency = self.get_dependency_connection_point_by_id(
+                            service['dependencies'][first_index])
+                    second_dependency = self.get_dependency_connection_point_by_id(
+                        service['dependencies'][first_index + 1],
+                        False)
+                    if self.is_external:
+                        first_str = '# python message_factory.py -t add_chain -h ' + orchestrator['ip'] + ' -p '
+                        second_str = orchestrator['port'] + ' -s ' + first_dependency['id'] + ' -d ' + first_dependency[
+                            'id']
+                    else:
+                        first_str = 'docker exec -it mn.source python message_factory.py -t add_chain -h ' + \
+                                    first_dependency['server']
+                        second_str = ' -p ' + str(first_dependency['port']) + ' -n none -m none -v ' + second_dependency[
+                            'server'] + ' --vnf_port ' + str(second_dependency['port'])
+                    self.file_commands.write(first_str + second_str + '\n')
+                    first_index += 1
+                    first_dependency = second_dependency
         self.write_new_line_to_file()
-
-    def add_vnf_chains_external(self):
-        for orchestrator in self.data['orchestrators']:
-            for service in orchestrator['services']:
-                first_index = 0
-                first_dependency = None
-                while first_index < len(service['dependencies']) - 1:
-                    if first_dependency is None:
-                        first_dependency = self.get_dependency_connection_point_by_id(
-                            service['dependencies'][first_index])
-                    second_dependency = self.get_dependency_connection_point_by_id(
-                        service['dependencies'][first_index + 1],
-                        False)
-                    first_str = '# python message_factory.py -t add_chain -h ' + orchestrator['ip'] + ' -p '
-                    second_str = orchestrator['port'] + ' -s ' + first_dependency['id'] + ' -d ' + first_dependency[
-                        'id']
-                    self.file_commands.write(first_str + second_str + '\n')
-                    first_index += 1
-                    first_dependency = second_dependency
-
-    def add_vnf_chains_local(self):
-        for orchestrator in self.data['orchestrators']:
-            for service in orchestrator['services']:
-                first_index = 0
-                first_dependency = None
-                while first_index < len(service['dependencies']) - 1:
-                    if first_dependency is None:
-                        first_dependency = self.get_dependency_connection_point_by_id(
-                            service['dependencies'][first_index])
-                    second_dependency = self.get_dependency_connection_point_by_id(
-                        service['dependencies'][first_index + 1],
-                        False)
-                    first_str = 'docker exec -it mn.source python message_factory.py -t add_chain -h ' + \
-                                first_dependency['server']
-                    second_str = ' -p ' + str(first_dependency['port']) + ' -n none -m none -v ' + second_dependency[
-                        'server'] + ' --vnf_port ' + str(second_dependency['port'])
-                    self.file_commands.write(first_str + second_str + '\n')
-                    first_index += 1
-                    first_dependency = second_dependency
 
     def get_dependency_connection_point_by_id(self, dependency, is_first=True):
         if dependency['type'] == 'Service':
@@ -247,82 +196,35 @@ class DockerScriptGeneratorExternal:
 
     def add_request_of_scaling(self):
         self.file_commands.write('# Request scaling \n')
-        if self.is_external:
-            self.add_add_request_of_scaling_external()
-        else:
-            self.add_request_of_scaling_local()
+        for i in range(0, len(self.configuration.random_seed_list)):
+            random_seed = self.configuration.random_seed_list[i]
+            random_service_to_scalate = self.get_random_service(random_seed)
+            first_str = 'docker exec -it mn.source python message_factory.py -t request_scale -h ' + \
+                        random_service_to_scalate['orchestrator'][0]
+            second_str = ' -p ' + random_service_to_scalate['orchestrator'][1] + ' -i ' + random_service_to_scalate[
+                'service_id']
+            third_str = ' --seed ' + str(random_seed)
+            self.file_commands.write(first_str + second_str + third_str + '\n')
         self.write_new_line_to_file()
-
-    def add_add_request_of_scaling_external(self):
-        for i in range(0, len(self.configuration.random_seed_list)):
-            random_seed = self.configuration.random_seed_list[i]
-            random_service_to_scalate = self.get_random_service(random_seed)
-            first_str = 'docker exec -it mn.source python message_factory.py -t request_scale -h ' + \
-                        random_service_to_scalate['orchestrator'][0]
-            second_str = ' -p ' + random_service_to_scalate['orchestrator'][1] + ' -i ' + random_service_to_scalate[
-                'service_id']
-            third_str = ' --seed ' + str(random_seed)
-            self.file_commands.write(first_str + second_str + third_str + '\n')
-        # service_list = list()
-        # orchestrator_list = list()
-        # for i in range(0, self.configuration.number_of_scalings):
-        #     random_seed = self.configuration.random_np_seed_list[self.random_running_index + self.running_experiment]
-        #     random_service_to_scalate = self.get_random_service(random_seed)
-        #     if self.is_valid_random_service(random_service_to_scalate, service_list, orchestrator_list):
-        #         first_str = 'python message_factory.py -t request_scaling_of_service -h ' + \
-        #                     random_service_to_scalate['orchestrator'][0]
-        #         second_str = ' -p ' + random_service_to_scalate['orchestrator'][1] + ' -i ' + random_service_to_scalate[
-        #             'service_id']
-        #         third_str = ' --seed ' + str(random_seed)
-        #         self.file_commands_causal.write(first_str + second_str + third_str + '\n')
-        #         self.file_commands_normal.write(first_str + second_str + third_str + '\n')
-        #         fourth_str = 'python3 message_factory.py -r external'
-        #         self.file_commands_causal.write(fourth_str + '\n')
-        #         self.file_commands_normal.write(fourth_str + '\n')
-        #         service_list.append(random_service_to_scalate)
-        #         orchestrator_list.append(random_service_to_scalate['orchestrator'][0])
-        #     self.random_running_index += 1
-
-    def add_request_of_scaling_local(self):
-        for i in range(0, len(self.configuration.random_seed_list)):
-            random_seed = self.configuration.random_seed_list[i]
-            random_service_to_scalate = self.get_random_service(random_seed)
-            first_str = 'docker exec -it mn.source python message_factory.py -t request_scale -h ' + \
-                        random_service_to_scalate['orchestrator'][0]
-            second_str = ' -p ' + random_service_to_scalate['orchestrator'][1] + ' -i ' + random_service_to_scalate[
-                'service_id']
-            third_str = ' --seed ' + str(random_seed)
-            self.file_commands.write(first_str + second_str + third_str + '\n')
 
     def add_request_of_updates(self):
         self.file_commands.write('# Request updates (Commented) \n')
-        if self.is_external:
-            self.add_request_of_updates_external()
-        else:
-            self.add_request_of_updates_local()
+        for i in range(0, len(self.configuration.random_seed_list)):
+            random_seed = self.configuration.random_seed_list[i]
+            random_service_to_scalate = self.get_random_service(random_seed)
+            if self.is_external:
+                first_str = '# python message_factory.py -t request_update -h ' + \
+                            random_service_to_scalate['orchestrator'][0]
+                second_str = ' -p ' + random_service_to_scalate['orchestrator'][1] + ' -i ' + random_service_to_scalate[
+                    'service_id']
+            else:
+                first_str = 'docker exec -it mn.source python message_factory.py -t request_update -h ' + \
+                            random_service_to_scalate['orchestrator'][0]
+                second_str = ' -p ' + random_service_to_scalate['orchestrator'][1] + ' -i ' + random_service_to_scalate[
+                    'service_id']
+            third_str = ' --seed ' + str(random_seed)
+            self.file_commands.write(first_str + second_str + third_str + '\n')
         self.write_new_line_to_file()
-
-    def add_request_of_updates_external(self):
-        for i in range(0, len(self.configuration.random_seed_list)):
-            random_seed = self.configuration.random_seed_list[i]
-            random_service_to_scalate = self.get_random_service(random_seed)
-            first_str = '# python message_factory.py -t request_update -h ' + \
-                        random_service_to_scalate['orchestrator'][0]
-            second_str = ' -p ' + random_service_to_scalate['orchestrator'][1] + ' -i ' + random_service_to_scalate[
-                'service_id']
-            third_str = ' --seed ' + str(random_seed)
-            self.file_commands.write(first_str + second_str + third_str + '\n')
-
-    def add_request_of_updates_local(self):
-        for i in range(0, len(self.configuration.random_seed_list)):
-            random_seed = self.configuration.random_seed_list[i]
-            random_service_to_scalate = self.get_random_service(random_seed)
-            first_str = 'docker exec -it mn.source python message_factory.py -t request_update -h ' + \
-                        random_service_to_scalate['orchestrator'][0]
-            second_str = ' -p ' + random_service_to_scalate['orchestrator'][1] + ' -i ' + random_service_to_scalate[
-                'service_id']
-            third_str = ' --seed ' + str(random_seed)
-            self.file_commands.write(first_str + second_str + third_str + '\n')
 
     def get_random_service(self, seed):
         random.seed(seed)
@@ -343,7 +245,7 @@ class DockerScriptGeneratorExternal:
 
     def generate_vnf_forwarding_graph_update(self):
         vnf_forwarding_graph_updates = list()
-        remaining_updates = self.number_of_vnffg_updates
+        remaining_updates = int(self.number_of_vnffg_updates)
         while remaining_updates:
             random_orchestrator = self.get_random_orchestrator()
             random_vnf_forwarding_graph = self.get_random_vnffg(random_orchestrator)
@@ -366,6 +268,7 @@ class DockerScriptGeneratorExternal:
         self.file_vnf_forwarding_graph_update.flush()
         self.file_vnf_forwarding_graph_update.close()
 
+    # TODO: THE file_directory scrwws over....
     def create_vnf_forwarding_graph_update(self):
         file_directory = 'experiments/experiment_' + self.experiment_index + '/'
         file_name = 'updates_vnf_forwarding_graphs.sh'
@@ -430,7 +333,7 @@ class DockerScriptGeneratorExternal:
         return new_update
 
     def write_new_rsp_entry(self, vnf_forwarding_graph_update:dict):
-        first = 'python message_factory.py --type update_vnffg_rsp --host ' + vnf_forwarding_graph_update['host']
+        first = 'python3 message_factory.py --type update_vnffg_rsp --host ' + vnf_forwarding_graph_update['host']
         second = ' --port ' + vnf_forwarding_graph_update['port'] + ' --vnf_identifier '
         third = vnf_forwarding_graph_update['vnf_identifier'] + ' --order ' + str(vnf_forwarding_graph_update['order'])
         fourth = ' --ingress_connection_point ' + vnf_forwarding_graph_update['ingress_connection_point']
@@ -438,7 +341,7 @@ class DockerScriptGeneratorExternal:
         self.file_vnf_forwarding_graph_update.write(first + second + third + fourth + fifth + ' & \n')
 
     def write_new_classifier_entry(self, vnf_forwarding_graph_update:dict):
-        first = 'python message_factory.py --type update_vnffg_classifier --host ' + vnf_forwarding_graph_update['host']
+        first = 'python3 message_factory.py --type update_vnffg_classifier --host ' + vnf_forwarding_graph_update['host']
         second = ' --port ' + vnf_forwarding_graph_update['port'] + ' --match_identifier '
         third = vnf_forwarding_graph_update['identifier'] + ' --ip_proto ' + vnf_forwarding_graph_update['ip_proto']
         fourth = ' --source_ip ' + str(vnf_forwarding_graph_update['source_ip'])
@@ -475,8 +378,6 @@ class DockerScriptGeneratorExternal:
             list_valid_services.append(self.get_list_of_valid_services_by_total_dependencies(i))
             random_list = self.generate_random_list_from_np_seeds(i, len(list_valid_services[i]))
             random_list_per_experiment.append(random_list)
-
-        # print('List_valid_services: ' + str(len(list_valid_services)))
 
         for experiment_list in list_valid_services:
             sublist_copia = list()
@@ -546,7 +447,6 @@ class DockerScriptGeneratorExternal:
 
     def generate_random_list_from_np_seeds(self, index, max_numbers):
         random.seed(self.configuration.collect_random[index])
-        # print('Max numbers: ' + str(max_numbers))
         return random.sample(range(0, max_numbers), 5)
 
     def create_second_client_file(self, experiment_index):

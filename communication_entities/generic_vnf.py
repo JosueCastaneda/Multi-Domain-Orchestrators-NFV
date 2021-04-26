@@ -71,7 +71,7 @@ class GenericVNF:
 
     async def send_message_to_orchestrator(self, message):
         url = 'http://' + self.orchestrator_ip + ':' + str(self.orchestrator_port) + '/' + message.message_type
-        # print(url)
+        print(url)
         async with aiohttp.ClientSession() as session:
             async with session.post(url, data=message.data) as resp:
                 x = 2

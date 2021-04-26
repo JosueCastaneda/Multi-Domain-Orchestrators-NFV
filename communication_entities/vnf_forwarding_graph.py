@@ -319,6 +319,8 @@ class VNFForwardingGraph:
             update_result_as_dictionary['vnffg_short_name'] = self.short_name
             update_result_as_dictionary['type_of_change_attribute'] = 'matching_attribute'
             update_result_as_dictionary['running_time'] = result['running_time']
+            update_result_as_dictionary['initial_time'] = result['initial_time']
+            update_result_as_dictionary['reconfiguration_time'] = result['reconfiguration_time']
 
         update_result_as_dictionary['is_positive_result'] = result['update_result']
         update_result_as_dictionary['replicas'] = replicas_to_send_notifications

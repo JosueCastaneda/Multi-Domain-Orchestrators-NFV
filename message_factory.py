@@ -163,7 +163,9 @@ async def send_message(command, message):
         # await get_results_external('20.185.45.222', 5004)
         # await get_results_external('52.151.70.54', 5005)
         log.error(e)
-
+    # except ConnectionResetError as e:
+    #     log.error('Connection Reset Error ')
+    #     log.error(e)
 
 async def send_message_local(port):
     url = 'http://0.0.0.0:' + str(port) + '/'

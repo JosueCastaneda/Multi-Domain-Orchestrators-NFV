@@ -1,10 +1,10 @@
 import asyncio
+import datetime
 import json
 import logging
 import os
 import random
 import sys
-import time
 
 import aiohttp
 
@@ -44,11 +44,10 @@ def is_orchestrator_included_for_notification(id_orchestrator, excluding_list):
 class Orchestrator:
 
     def __init__(self, experiment_index, orchestrator_index, server_host, server_port, random_seed,
-                 causal_delivery=False, algorithm_type='causal', waiting_time=30, probability_repeated_messages=30):
+                 causal_delivery=False, algorithm_type='causal', waiting_time=30, probability_repeated_messages=30, probability_negated=10):
         self.waiting_time = waiting_time
         self.log = None
         self.probability_repeated_message = probability_repeated_messages
-        print('Waiting time: ' + str(self.waiting_time) + ' Probability: ' + str(self.probability_repeated_message))
         self.experiment_name = 'experiment_' + experiment_index
         self.experiment_index = experiment_index
         self.name = 'orch_' + orchestrator_index
@@ -77,15 +76,16 @@ class Orchestrator:
         self.causal_delivery = False
         self.causal_delivery = causal_delivery
         self.random_seed = random_seed
-        # self.random_seed = 11240
         self.pending_operations_repetitions = 0
         self.time_elapsed_in_reconfiguration = 0.0
         self.algorithm_type = algorithm_type
         random.seed(self.random_seed)
         self.total_time_for_experimentation = 0.0
+        self.overhead_per_message = 0.0
+        self.number_of_reconfigurations = 0
+        self.total_reconfiguration_time = 0.0
         self.list_pending_vnf_forwarding_updates = []
-        # self.log.info('My orchestrator index is: ' + str(self.orchestrator_index))
-        # self.log.info('Orchestrator is running')
+        self.probability_negated = probability_negated
 
     def add_vnf_forwarding_graph(self, vnf_forwarding_graphs):
         string_1 = ROOT_DIR + '/' + 'experiments/experiment_'
@@ -173,6 +173,11 @@ class Orchestrator:
                 return orchestrator
         return self.entry_as_dictionary()
 
+    def increase_total_reconfiguration_time(self, value):
+        self.log.info(self.total_reconfiguration_time)
+        self.total_reconfiguration_time += value
+        self.log.info(self.total_reconfiguration_time)
+
     def entry_as_dictionary(self):
         orchestrator_format = dict()
         orchestrator_format['ip'] = self.ip
@@ -189,8 +194,38 @@ class Orchestrator:
         orchestrator_format['messages_sent'] = self.messages_sent
         orchestrator_format['pending_operations'] = len(self.pending_lcm_operations)
         orchestrator_format['time_elapsed_in_last_reconfiguration'] = self.time_elapsed_in_reconfiguration
-        orchestrator_format['total_time_for_experimentation'] = self.total_time_for_experimentation
+        orchestrator_format['latency_per_operation'] = self.total_time_for_experimentation
+        orchestrator_format['overhead_data_structure'] = 0.0
+        orchestrator_format['probability_negation'] = self.probability_negated
+        if self.algorithm_type == 'causal':
+            for vnf_forwarding_graph in self.vnf_forwarding_graphs:
+                rule = vnf_forwarding_graph.classification_rules[0]
+                for matching_attribute in rule.matching_attributes:
+                    orchestrator_format['overhead_data_structure'] += sys.getsizeof(matching_attribute.vector_clock)
+        elif self.algorithm_type == 'standard':
+            for vnf_forwarding_graph in self.vnf_forwarding_graphs:
+                rule = vnf_forwarding_graph.classification_rules[0]
+                for matching_attribute in rule.matching_attributes:
+                    orchestrator_format['overhead_data_structure'] += sys.getsizeof(matching_attribute.counter)
+        elif self.algorithm_type == 'preventive':
+            orchestrator_format['overhead_data_structure'] = sys.getsizeof(self.list_pending_vnf_forwarding_updates)
+        elif self.algorithm_type == 'corrective':
+            orchestrator_format['overhead_data_structure'] = 0.0
+            for vnf_forwarding_graph in self.vnf_forwarding_graphs:
+                rule = vnf_forwarding_graph.classification_rules[0]
+                for matching_attribute in rule.matching_attributes:
+                    orchestrator_format['overhead_data_structure'] += sys.getsizeof(matching_attribute.list_positive_entries) + sys.getsizeof(matching_attribute.list_negative_entries) + sys.getsizeof(matching_attribute.counter) + sys.getsizeof(matching_attribute.max_counter)
+
+        orchestrator_format['overhead_per_message'] = self.overhead_per_message
+        orchestrator_format['number_of_reconfigurations'] = self.number_of_reconfigurations
+        orchestrator_format['total_reconfiguration_time'] = self.total_reconfiguration_time
         return orchestrator_format
+
+    def increase_number_of_reconfigurations_counter(self, value=0):
+        if value == 0:
+            self.number_of_reconfigurations += 1
+        else:
+            self.number_of_reconfigurations += value
 
     def get_service_by_id(self, service_id):
         for service in self.services:
@@ -198,8 +233,11 @@ class Orchestrator:
                 return service
 
     async def wait_before_notification(self, data):
-        wait_period = random.randint(0, self.waiting_time)
+        self.log.info('Got this data: ' + str(data))
+        wait_period = random.uniform(0, self.waiting_time)
+        self.log.info('Wait period: ' + str(wait_period) + ' MAX wait time: ' + str(self.waiting_time))
         await asyncio.sleep(wait_period)
+        self.log.info('Doing notification of LCM ')
         await self.notification_of_lcm(data)
 
     def set_up_my_logger(self):
@@ -208,11 +246,11 @@ class Orchestrator:
         logging.basicConfig(filename=other_folder)
         self.log = logging.getLogger('logger')
         self.log.propagate = False
-        self.log.setLevel(logging.DEBUG)
+        self.log.setLevel(logging.WARNING)
         log_str = '%(asctime)s - %(filename)s - %(lineno)s - %(message)s'
         formatter = logging.Formatter(log_str)
         fh = logging.FileHandler(other_folder, mode='w', encoding='utf-8')
-        fh.setLevel(logging.DEBUG)
+        fh.setLevel(logging.WARNING)
         fh.setFormatter(formatter)
         self.log.addHandler(fh)
         ch = logging.StreamHandler()
@@ -224,6 +262,8 @@ class Orchestrator:
         self.inconsistencies += 1
 
     async def notification_of_lcm(self, data):
+        self.log.info('Received notification: ')
+        self.log.info(data)
         my_clock_is_greater = False
         vector_clock_string = data['vector_clock']
         sender_id = data['orchestrator_sender_id']
@@ -241,6 +281,7 @@ class Orchestrator:
         if my_clock_is_greater and self.algorithm_type == 'causal':
             pass
         else:
+            self.log.info('Appliying notification')
             await self.apply_notification_of_lifecycle_management_operation(vector_difference, other_clock, sender_id, data, my_clock_is_greater)
             self.pending_operations_repetitions = 0
         return_success()
@@ -263,6 +304,7 @@ class Orchestrator:
 
     async def apply_notification_of_lifecycle_management_operation(self, vector_difference, vector_clock, sender, data=None, my_clock_is_greater=False):
         if self.algorithm_type == 'causal':
+            self.log.info('Appliying causal')
             await self.notification_of_lcm_causal(vector_difference, vector_clock, sender, data)
         elif self.algorithm_type == 'standard':
             if vector_difference > 1 or my_clock_is_greater:
@@ -282,12 +324,14 @@ class Orchestrator:
 
     async def notification_of_lcm_causal(self, difference_in_vectors, vector_clock, orchestrator_sender_id, data=None):
         if difference_in_vectors <= 1:
+            self.log.info('Appliying notification differences <=1')
             await self.apply_notification_of_lcm_operation(vector_clock, orchestrator_sender_id, data)
         else:
+            self.log.info('Waiting difference is: ' + str(difference_in_vectors))
             if data:
                 my_clock = self.get_clock_from_entry_of_vnf_forwarding_graph(data)
                 if my_clock.are_different(vector_clock.clock_list):
-                    start = time.time()
+                    start = datetime.datetime.now()
                     data['buffer_time'] += start
                     new_pending_operation = PendingLCMScalingOperation(vnf_component_to_scale_id='',
                                                                        operation='notification',
@@ -308,11 +352,12 @@ class Orchestrator:
     async def apply_notification_of_lcm_operation(self, vector_clock, orchestrator_sender_id, data=None):
         my_clock = self.get_clock_from_entry_of_vnf_forwarding_graph(data)
         if not my_clock.is_equal(vector_clock):
-            start = time.time()
+            start_time = datetime.datetime.now()
+            self.log.info('Updating clock')
+            self.log.info(data)
+            self.log.info('Where do I update the thing')
             my_clock.update_clock(vector_clock, orchestrator_sender_id, self.log)
-            end_time = time.time()
-            time_difference = end_time - start
-            self.total_time_for_experimentation += time_difference
+            self.increase_latency_per_operation(start_time)
         total_pending_operations = len(self.pending_lcm_operations)
         if total_pending_operations > 0:
             await self.do_pending_lcm_notifications_notifications()
@@ -331,14 +376,22 @@ class Orchestrator:
         data['vnffg_name'] = result['vnffg_name']
         data['vnffg_short_name'] = result['vnffg_short_name']
         data['type_of_change_attribute'] = result['type_of_change_attribute']
+        concurrent_updates = []
+        self.log.info('Sending to orchestrators... ' + str(list_of_replicas_to_notify))
         for orchestrator in self.list_orchestrator:
             if is_orchestrator_included_for_notification(orchestrator['id'], list_of_replicas_to_notify):
+                self.log.info('Sending Notification of Clock Message to: ' + str(orchestrator['ip']) + ' ' + str(orchestrator['port']))
                 new_message = NotificationLCMOperation(orchestrator['ip'], str(orchestrator['port']), data)
+                self.increase_overhead_per_message(sys.getsizeof(data))
                 self.increment_sent_messages()
-                await asyncio.create_task(send_message(new_message))
+                concurrent_updates.append(send_message(new_message))
+        await asyncio.gather(*concurrent_updates)
 
     def increment_sent_messages(self):
         self.messages_sent += 1
+
+    def increase_overhead_per_message(self, value):
+        self.overhead_per_message += value
 
     async def do_pending_lcm_notifications_notifications(self):
         at_least_one_clock_changed = True
@@ -381,8 +434,8 @@ class Orchestrator:
         if difference_in_clocks <= 1 and pending_operation.is_not_done:
             change_took_place = await self.apply_lcm_operation(pending_operation)
             if change_took_place:
-                end_time = time.time()
-                self.total_time_for_experimentation += (end_time - pending_operation.vnffg_data['buffer_time'])
+                self.increase_latency_per_operation(pending_operation.vnffg_data['buffer_time'])
+                self.increase_number_of_reconfigurations_counter()
         else:
             self.add_pending_operation(pending_operation)
         return change_took_place
@@ -436,7 +489,8 @@ class Orchestrator:
 
     async def wait_before_delivery_grant(self, vnf_component_to_scale_id, operation, original_service,
                                          sender_vector_clock=None):
-        wait_period = random.randint(0, self.waiting_time)
+        self.log.info('Waiting a bit before scale')
+        wait_period = random.uniform(0, self.waiting_time)
         await asyncio.sleep(wait_period)
         await self.grant_lcm_operation_of_service(vnf_component_to_scale_id, operation, original_service,
                                                   sender_vector_clock)
@@ -603,13 +657,16 @@ class Orchestrator:
         return data
 
     async def update_unique_vnf_forwarding_graph_rendered_service_path(self, connection_point: ConnectionPointReference):
-        if self.algorithm_type == 'causal' or self.algorithm_type == 'standard':
-            await self.update_unique_vnf_forwarding_graph_connection_point_causal_standard(connection_point)
-        elif self.algorithm_type == 'preventive':
-            await self.update_unique_vnf_forwarding_graph_connection_point_preventive(connection_point)
-        elif self.algorithm_type == 'corrective':
-            # self.log.info('Doing corrective')
-            await self.update_unique_vnf_forwarding_graph_connection_point_corrective(connection_point)
+        pass
+        # self.log.info('First update: ' + str(connection_point.vnf_identifier[0:8]))
+        # connection_point.set_time(time.time())
+        # if self.algorithm_type == 'causal' or self.algorithm_type == 'standard':
+        #     await self.update_unique_vnf_forwarding_graph_connection_point_causal_standard(connection_point)
+        # elif self.algorithm_type == 'preventive':
+        #     await self.update_unique_vnf_forwarding_graph_connection_point_preventive(connection_point)
+        # elif self.algorithm_type == 'corrective':
+        #     # self.log.info('Doing corrective')
+        #     await self.update_unique_vnf_forwarding_graph_connection_point_corrective(connection_point)
 
     async def update_unique_vnf_forwarding_graph_connection_point_corrective(self, connection_point: ConnectionPointReference):
         pass
@@ -645,7 +702,6 @@ class Orchestrator:
         #         break
         # self.log.info('How many VNF-FGs have it ' + str(how_many_vnfs_have_it))
 
-
     async def update_unique_vnf_forwarding_graph_connection_point_causal_standard(self, connection_point: ConnectionPointReference):
         for vnf_forwarding_graph in self.vnf_forwarding_graphs:
             if len(connection_point.list_of_orchestrator_id) == 0:
@@ -657,12 +713,15 @@ class Orchestrator:
             list_caller['first_call'] = True
             update_result = await vnf_forwarding_graph.update_unique_rendered_service_path(connection_point, self.log, self.orchestrator_index, list_caller)
             if update_result['is_positive_result']:
+                self.increase_latency_per_operation(update_result['initial_time'])
+                self.increase_number_of_reconfigurations_counter()
                 result = await self.notify_all_replicas_and_orchestrators_of_positive_change(update_result)
                 return result
         return return_failure('No VNF ID FOUND! ' + str(connection_point.get_vnf_identifier()))
 
     # TODO: Change this quick fix function by separating in each orchestrator
-    async def update_unique_vnf_forwarding_graph_classifier_rule_causal_standard(self, attribute: MatchingAttribute):
+    async def update_unique_vnf_forwarding_graph_classifier_rule_causal_standard(self, attribute: MatchingAttribute, start_time):
+        self.log.info('Trying to update VNF-FG with attribute: ' + str(attribute.identifier[0:8]))
         if len(attribute.list_of_orchestrator_id) == 0:
             attribute.list_of_orchestrator_id = self.orchestrators_ids
             attribute.add_clocks()
@@ -672,8 +731,10 @@ class Orchestrator:
             list_caller['caller'] = self.id
             list_caller['first_call'] = True
             update_result = await vnf_forwarding_graph.update_unique_classifier_rule(attribute, self.log, list_caller)
-
             if update_result['is_positive_result']:
+                self.increase_latency_per_operation(start_time)
+                self.increase_number_of_reconfigurations_counter()
+                self.increase_total_reconfiguration_time(update_result['reconfiguration_time'])
                 result = await self.notify_all_replicas_and_orchestrators_of_positive_change(update_result)
                 return result
         return return_failure('No Matching attribute with ID found! ' + str(attribute.get_identifier()))
@@ -716,32 +777,31 @@ class Orchestrator:
         data['affected_vnf_forwarding_graphs'] = list_orchestrators_id
         return data
 
-    # TODO: Change this quick fix function by separating in each orchestrator
-    async def update_unique_vnf_forwarding_graph_classifier_rule_preventive(self, attribute: MatchingAttribute):
-        # self.log.info('First update of matching attribute')
+    async def update_unique_vnf_forwarding_graph_classifier_rule_preventive(self, attribute: MatchingAttribute, start_time):
         data = self.get_vnf_forwarding_graph_by_attribute(attribute)
         entry = await self.fill_entry_with_data(data)
         entry['attribute_id'] = attribute.identifier
         entry['type'] = 'matching_attribute'
+        entry['initial_time'] = start_time
+        self.log.info('My entry')
+        self.log.info(entry)
         await self.add_to_pending_list_and_send_message(entry, attribute)
 
     async def update_unique_vnf_forwarding_graph_connection_point_preventive(self, connection_point: ConnectionPointReference):
         # self.log.info('First update of connection point')
-        data = self.get_vnf_forwarding_graph_by_connection_point(connection_point)
-        entry = await self.fill_entry_with_data(data)
-        entry['attribute_id'] = connection_point.vnf_identifier
-        entry['type'] = 'connection_point'
-        await self.add_to_pending_list_and_send_message(entry, connection_point)
+        pass
+        # data = self.get_vnf_forwarding_graph_by_connection_point(connection_point)
+        # entry = await self.fill_entry_with_data(data)
+        # entry['attribute_id'] = connection_point.vnf_identifier
+        # entry['type'] = 'connection_point'
+        # await self.add_to_pending_list_and_send_message(entry, connection_point)
 
     async def add_to_pending_list_and_send_message(self, entry, item):
         entry['value'] = item.as_dictionary()
-        entry_as_json = json.dumps(entry)
+        entry_as_json = json.dumps(entry, default=str)
         self.list_pending_vnf_forwarding_updates.append(entry)
-        # self.log.info(entry)
         str_log = str(entry['attribute_id'][0:8]) + ' Counter: ' + str(entry['attribute_counter']) + ' Max.' + str(entry['current_max_orchestrator_index']) + ' Messages ' + str(entry['messages_sent'])
         self.log.info('New value: ' + str_log)
-        # my_status = GODZI
-        # self.list_pending_vnf_forwarding_updates.append(data)
         str_my_status=''
         for pending in self.list_pending_vnf_forwarding_updates:
             if pending['attribute_id'] == entry['attribute_id']:
@@ -751,21 +811,21 @@ class Orchestrator:
                     str_my_status += '('+str(my_orch['port']) + ' ' + str(value) + '), '
                 str_my_status += ']'
 
-        # self.log.info('My status')
-        # self.log.info(self.list_pending_vnf_forwarding_updates[0])
-
         for orch in entry['affected_orchestrators']:
             orch_def = self.find_orchestrator_by_id(orch)
             self.log.info('Sending to: ' + str(orch_def['ip']) + ':' + str(orch_def['port']) + str(str_my_status))
         await self.send_json_encoded_message(entry['affected_orchestrators'], entry_as_json)
 
     async def send_json_encoded_message(self, orchestrator_identifiers, entry):
+        concurrent_tasks = []
         for orchestrator in orchestrator_identifiers:
             if orchestrator != self.id:
                 my_orch = self.find_orchestrator_by_id(orchestrator)
                 new_message = ProposedVNFForwardingGraphUpdateMessage(my_orch['ip'], str(my_orch['port']), entry)
+                self.increase_overhead_per_message(sys.getsizeof(entry))
                 self.increment_sent_messages()
-                await asyncio.create_task(self.send_message_with_json(new_message))
+                concurrent_tasks.append(self.send_message_with_json(new_message))
+        await asyncio.gather(*concurrent_tasks)
 
     async def fill_entry_with_data(self, data) -> dict:
         entry = dict()
@@ -782,9 +842,8 @@ class Orchestrator:
         entry['type'] = 'matching_attribute'
         return entry
 
-    async def   send_message_with_json(self, message):
+    async def send_message_with_json(self, message):
         url = 'http://' + message.host + ':' + str(message.port) + '/' + message.type
-        # self.log.info(url)
         async with aiohttp.ClientSession() as session:
             async with session.post(url, json=message.data) as resp:
                 str_log_encoded = await (resp.text())
@@ -799,12 +858,10 @@ class Orchestrator:
             if is_same_vnf_forwarding_graph and is_same_attribute and is_same_counter and is_same_max_index and is_same_messages:
                 return entry
 
-    # TODO: Update this function to pass. Now is a stub
+    # TODO: Update this function with a different probability
     def check_is_valid_change(self, data):
-        # random.seed(1324)
         random_number = random.randint(0, 100)
-        # random_number = generate_random_number_between_zero_one_hundred()
-        if random_number > 70:
+        if random_number > int(self.probability_negated):
             self.log.info('Negated ' + data['attribute_id'][0:8])
             return False
         return True
@@ -828,24 +885,17 @@ class Orchestrator:
 
     async def mark_as_positive_update_and_apply_if_full(self, data):
         my_entry = self.get_entry_from_list(data)
-        # self.log.info('MARK A')
         self.log.info('Before update: ' + data['attribute_id'][0:8] + ' ' + str(my_entry['affected_vnf_forwarding_graphs']))
         my_entry['affected_vnf_forwarding_graphs'][self.id] = True
         my_entry['affected_vnf_forwarding_graphs'][data['orchestrator_id']] = True
-        # self.log.info('MARK B')
         self.log.info('After update: ' + data['attribute_id'][0:8] + ' ' + str(my_entry['affected_vnf_forwarding_graphs']))
         all_positive_entries = self.are_all_positive(my_entry)
-        # self.log.info('All positive entries? ' + str(all_positive_entries))
         if all_positive_entries:
-            # self.log.info('All positive entries, updating...')
             for vnf_forwarding_graph in self.vnf_forwarding_graphs:
                 if vnf_forwarding_graph.identifier == data['vnf_forwarding_graph_id']:
                     self.log.info('CHECKING A')
                     await vnf_forwarding_graph.update_data(data, self.log)
                     self.log.info('Finished updating hehe')
-        # else:
-        #     self.log.info('No all positive, waiting until all')
-        # self.log.info('MARK ENDED')
 
     def check_if_entry_in_my_list(self, data):
         for entry in self.list_pending_vnf_forwarding_updates:
@@ -870,7 +920,6 @@ class Orchestrator:
             self.list_pending_vnf_forwarding_updates.append(data)
 
         if self.id in data['affected_orchestrators_replicas']:
-            # TEST HERE:
             is_valid = self.check_is_valid_change(data)
             if is_valid:
                 await self.mark_as_positive_update_and_apply_if_full(data)
@@ -884,32 +933,18 @@ class Orchestrator:
                     data['attribute_counter']) + ' Max. ' + str(
                     data['current_max_orchestrator_index'])
                 self.log.info(str_log)
-
-            # self.log.info('Yes, I am marking as positive and doing all Notify')
-            # await self.mark_as_positive_update_and_apply_if_full(data)
-            # answer = True
-        elif self.id in data['affected_orchestrators_dependencies']:
-            is_valid = self.check_is_valid_change(data)
-            if is_valid:
-                await self.mark_as_positive_update_and_apply_if_full(data)
-                answer = True
-            else:
-                my_entry = self.get_entry_from_list(data)
-                my_entry[self.id] = False
-                my_entry[data['orchestrator_id']] = False
-                str_log = 'Negated: ' + data['attribute_id'] + ' Counter: ' + str(
-                    data['attribute_counter']) + ' Max. ' + str(
-                    data['current_max_orchestrator_index'])
-                self.log.info(str_log)
-
+                self.log.info('Valid is negated: Doing the time.....')
+                self.log.info(my_entry)
+                if isinstance(my_entry['initial_time'], str):
+                    self.log.info('Converting... ' + str(my_entry['initial_time']))
+                    start_time = datetime.datetime.strptime(my_entry['initial_time'], '%Y-%m-%d %H:%M:%S.%f')
+                else:
+                    start_time = my_entry['initial_time']
+                self.increase_latency_per_operation(start_time)
         data['answer'] = answer
         data['reply_id'] = self.id
         entry_as_json = json.dumps(data)
-
         str_my_status = ''
-        # same_attributes_log = pending['attribute_counter'] == data['attribute_counter']
-        # same_attributes_log = pending['current_max_orchestrator_index'] == data['current_max_orchestrator_index']
-        # same_attributes_log = pending['messages_sent'] == data['messages_sent']
 
         for pending in self.list_pending_vnf_forwarding_updates:
             same_attributes = pending['attribute_counter'] == data['attribute_counter']
@@ -924,16 +959,12 @@ class Orchestrator:
                     str_my_status += '(' + str(my_orch['port']) + ' ' + str(value) + '), '
                 str_my_status += ']'
 
+        concurrent_updates = []
         for orchestrator in data['affected_orchestrators']:
             my_orch = self.get_orchestrator_information_by_id(orchestrator)
             first_condition = self.ip != my_orch['ip'] and self.port != my_orch['port']
             second_condition = self.ip == '127.0.0.1' and self.port != my_orch['port']
             if first_condition or second_condition:
-                # self.log.info('REPLYINGS')
-                # self.log.info(my_orch)
-                # self.log.info(str_my_status)
-                # self.log.info(data['answer'])
-                # str_log = 'Sending reply to: ' + str(my_orch['ip']) + ':' + str(my_orch['port']) + ' answer: ' + data['answer']
                 if str_my_status == '':
                     self.log.info('Status is empty...')
                     powa = self.get_entry_from_list(data)
@@ -943,18 +974,17 @@ class Orchestrator:
                         str_my_status += '(' + str(orch_log_debug['port']) + ' ' + str(value) + '), '
                     str_my_status += ']'
 
-
                 str_log = 'Sending reply to: ' + str(my_orch['ip']) + ':'+ str(my_orch['port']) + ' for ' + data['attribute_id'][0:8] + ' answer: ' + str(data['answer']) + ' my status: ' + str(str_my_status)
                 self.log.info(str_log)
                 new_message = ReplyProposedVNFForwardingGraphUpdateMessage(my_orch['ip'], str(my_orch['port']), entry_as_json)
                 self.increment_sent_messages()
-                await asyncio.create_task(self.send_message_with_json(new_message))
+                self.increase_overhead_per_message(sys.getsizeof(entry_as_json))
+                concurrent_updates.append(self.send_message_with_json(new_message))
+        await asyncio.gather(*concurrent_updates)
 
     async def reply_notify_proposal_for_vnf_forwarding_graph(self, data):
-        # self.log.info('REPLY NOTIFIY....')
         my_orch_debug = self.get_orchestrator_information_by_id(data['reply_id'])
-        # self.log.info('REPLY NOTIFIY....')
-        str_log_1= 'Reply notify proposal: ' + str(my_orch_debug['ip']) + ':'+str(my_orch_debug['port'])
+        str_log_1 = 'Reply notify proposal: ' + str(my_orch_debug['ip']) + ':'+str(my_orch_debug['port'])
         str_log_2 = ' ID: ' + data['attribute_id'][0:8] + ' Counter: ' + str(data['attribute_counter']) + ' Max. ' + str(
             data['current_max_orchestrator_index']) + ' Messages. ' + str(data['messages_sent']) + ' Answer: ' + str(data['answer'])
         self.log.info(str_log_1 + str_log_2)
@@ -965,40 +995,42 @@ class Orchestrator:
 
         my_entry = self.get_entry_from_list(data)
         str_affected_log = '['
-        for item,value in my_entry['affected_vnf_forwarding_graphs'].items():
+        for item, value in my_entry['affected_vnf_forwarding_graphs'].items():
             my_orch_affected = self.find_orchestrator_by_id(item)
             str_affected_log += '(' + str(my_orch_affected['port']) + ' ' + str(value) + '), '
         str_affected_log += ']'
-        # self.log.info('Before update..')
-        # str_log_old = 'Before update: ' + data['attribute_id'][0:8] + ' ' + str(my_entry['affected_vnf_forwarding_graphs']) + ' Answer: ' + str(data['answer'])
         str_log_old = 'Before update: ' + data['attribute_id'][0:8] + ' ' + str_affected_log + ' Answer: ' + str(data['answer'])
-
         self.log.info(str_log_old)
         my_entry['affected_vnf_forwarding_graphs'][data['reply_id']] = data['answer']
-
         str_affected_log = '['
         for item, value in my_entry['affected_vnf_forwarding_graphs'].items():
             my_orch_affected = self.find_orchestrator_by_id(item)
             str_affected_log += '(' + str(my_orch_affected['port']) + ' ' + str(value) + '), '
         str_affected_log += ']'
-
-        # str_log_old = 'After update: ' + data['attribute_id'][0:8] + ' ' + str(my_entry['affected_vnf_forwarding_graphs'])
         str_log_old = 'After update: ' + data['attribute_id'][0:8] + ' ' + str(str_affected_log)
-
         self.log.info(str_log_old)
         all_positive_entries = self.are_all_positive(my_entry)
         if all_positive_entries:
+            start_time_reconfiguration = datetime.datetime.now()
             for vnf_forwarding_graph in self.vnf_forwarding_graphs:
                 if vnf_forwarding_graph.identifier == data['vnf_forwarding_graph_id']:
-                    self.log.info('B')
                     await vnf_forwarding_graph.update_data(data, self.log)
-                    self.log.info('END B')
+                    if isinstance(my_entry['initial_time'], str):
+                        self.log.info('Converting... ' + str(my_entry['initial_time']))
+                        start_time = datetime.datetime.strptime(my_entry['initial_time'], '%Y-%m-%d %H:%M:%S.%f')
+                    else:
+                        start_time = my_entry['initial_time']
+                    self.increase_latency_per_operation(start_time)
+                    self.increase_number_of_reconfigurations_counter()
+                    end_time_reconfiguration = datetime.datetime.now()
+                    self.increase_total_reconfiguration_time((end_time_reconfiguration - start_time_reconfiguration).total_seconds())
                     break
 
     # TODO: Change this quick fix function by separating in each orchestrator
-    async def update_unique_vnf_forwarding_graph_classifier_rule_corrective(self, attribute: MatchingAttribute):
+    async def update_unique_vnf_forwarding_graph_classifier_rule_corrective(self, attribute: MatchingAttribute, start_time):
         self.log.info('Doing first update for attribute ' + str(attribute.get_identifier()[0:8]))
         data = dict()
+        start_reconfiguration_time = datetime.datetime.now()
         for vnf_forwarding_graph in self.vnf_forwarding_graphs:
             if vnf_forwarding_graph.has_matching_attribute(attribute):
                 data = attribute.as_dictionary()
@@ -1008,6 +1040,11 @@ class Orchestrator:
                 data['attribute_id'] = attribute.identifier
                 data['current_max_orchestrator_index'] = self.orchestrator_index
                 new_entry = await vnf_forwarding_graph.update_data(data, self.log)
+                self.increase_latency_per_operation(start_time)
+                self.log.info('Increasin the reconfiguration')
+                self.increase_number_of_reconfigurations_counter()
+                end_reconfiguration_time = datetime.datetime.now()
+                self.increase_total_reconfiguration_time((end_reconfiguration_time - start_reconfiguration_time).total_seconds())
                 break
         data = self.get_vnf_forwarding_graph_by_attribute(attribute)
         entry = new_entry.as_dictionary()
@@ -1020,25 +1057,14 @@ class Orchestrator:
         entry['first_update'] = 'False'
         await self.send_update_vnf_forwarding_graph_notification_to_affected_orchestrators(entry, data['affected_orchestrators'])
 
-        # for orchestrator in data['affected_orchestrators']:
-        #     my_orch = self.get_orchestrator_information_by_id(orchestrator)
-        #     first_condition = self.ip != my_orch['ip'] and self.port != my_orch['port']
-        #     second_condition = self.ip == '127.0.0.1' and self.port != my_orch['port']
-        #     if first_condition or second_condition:
-        #         str_log = 'Sending First Notification to: ' + str(my_orch['ip']) + ':' + str(my_orch['port']) + ' for ' + str(entry['attribute_id'][0:8])
-        #         self.log.info(str_log)
-        #         new_message = VNFForwardingGraphUpdateMessageCorrective(my_orch['ip'], str(my_orch['port']), entry_as_json)
-        #         self.increment_sent_messages()
-        #         await asyncio.create_task(self.send_message_with_json(new_message))
-
     async def send_update_vnf_forwarding_graph_notification_to_affected_orchestrators(self, entry, affected):
         entry_as_json = json.dumps(entry)
+        concurrent_updates = []
         for orchestrator in affected:
             my_orch = self.get_orchestrator_information_by_id(orchestrator)
             first_condition = self.ip != my_orch['ip'] and self.port != my_orch['port']
             second_condition = self.ip == '127.0.0.1' and self.port != my_orch['port']
             if first_condition or second_condition:
-                # str_log = 'Sending First Notification to: ' + str(my_orch['ip']) + ':' + str(my_orch['port']) + ' for ' + str(entry['attribute_id'][0:8])
                 str_log_1 = 'Sending First Notification to: ' + str(my_orch['ip'])
                 str_log_2 = ':' + str(my_orch['port']) + ' for ' + str(entry['attribute_id'][0:8]) + ' ['
                 str_log_3 = str(entry['counter']) + ',' + str(entry['current_max_orchestrator_index']) + ']'
@@ -1046,10 +1072,13 @@ class Orchestrator:
                 self.log.info(str_log)
                 new_message = VNFForwardingGraphUpdateMessageCorrective(my_orch['ip'], str(my_orch['port']), entry_as_json)
                 self.increment_sent_messages()
-                await asyncio.create_task(self.send_message_with_json(new_message))
+                self.increase_overhead_per_message(sys.getsizeof(entry_as_json))
+                concurrent_updates.append(self.send_message_with_json(new_message))
+        await asyncio.gather(*concurrent_updates)
 
     async def notify_update_vnf_forwarding_graph_corrective(self, data):
         self.log.info('Notify corrective update from: ' + str(data['attribute_id'][0:8]) + ' [' + str(data['counter']) + ', ' + str(data['current_max_orchestrator_index']) + ']' + ' from ' + str(data['op_sender_id']))
+        data['initial_time'] = datetime.datetime.now()
         for vnf_forwarding_graph in self.vnf_forwarding_graphs:
             if vnf_forwarding_graph.has_item(data, self.log):
                 await self.check_and_apply_not_negated(vnf_forwarding_graph, data)
@@ -1062,48 +1091,60 @@ class Orchestrator:
             is_valid = self.check_is_valid_change(data)
             if is_valid:
                 await vnf_forwarding_graph.update_data(data, self.log)
+                self.increase_latency_per_operation(data['initial_time'])
+                self.increase_number_of_reconfigurations_counter()
             else:
+                self.log.info('Handling invalid corrective update')
                 await self.handle_invalid_corrective_update(vnf_forwarding_graph, data)
+                self.log.info('Increasing time')
+                self.increase_latency_per_operation(data['initial_time'])
         else:
             self.log.info('Element is negated ' + str(data['attribute_id'][0:8]) + ' ignoring...')
+            self.increase_latency_per_operation(data['initial_time'])
 
+    def increase_latency_per_operation(self, start_delta):
+        end_time = datetime.datetime.now()
+        self.total_time_for_experimentation += (end_time - start_delta).total_seconds()
+
+    # TODO: Add count metrics
     async def handle_invalid_corrective_update(self, vnf_forwarding_graph, data):
-        # self.log.info('Adding the data to my negated...')
         rule = vnf_forwarding_graph.classification_rules[0]
         if data['type'] == 'matching_attribute':
             new_matching_attribute = None
             for matching_attribute in rule.matching_attributes:
                 if matching_attribute.get_identifier() == data['attribute_id']:
-                    # self.log.info('Adding matching attribute to incorrect things')
                     new_matching_attribute = matching_attribute.add_invalid_corrective_update(data, self.log)
-
         elif data['type'] == 'connection_point':
             # ERROR: Godzilla poder
             self.log.info('IMPLEMENT connection point')
 
-        # await vnf_forwarding_graph.update_data(data, self.log)
-
+        concurrent_updates = []
         # Send negative answer to all affected
         for orchestrator in data['affected_orchestrators']:
             my_orch = self.get_orchestrator_information_by_id(orchestrator)
             first_condition = self.ip != my_orch['ip'] and self.port != my_orch['port']
             second_condition = self.ip == '127.0.0.1' and self.port != my_orch['port']
             if first_condition or second_condition:
-                # str(data['current_max_orchestrator_index']) + ']')
                 str_log_1 = 'Sending Negative Answer to: ' + str(my_orch['ip'])
                 str_log_2 = ':' + str(my_orch['port']) + ' for ' + str(data['attribute_id'][0:8]) + ' ['
                 str_log_3 = str(data['counter']) + ',' + str(data['current_max_orchestrator_index']) + ']'
                 str_log = str_log_1 + str_log_2 + str_log_3
                 self.log.info(str_log)
                 data['sender_id'] = self.port
-                entry_as_json = json.dumps(data)
+                self.log.info('Trying to ENCODE AS JSON')
+                entry_as_json = json.dumps(data, default=str)
+                self.log.info('JSON WAS GOOD')
                 new_message = CorrectiveNegativeMessage(my_orch['ip'], str(my_orch['port']),
                                                         entry_as_json)
                 self.increment_sent_messages()
-                await asyncio.create_task(self.send_message_with_json(new_message))
+                self.increase_overhead_per_message(sys.getsizeof(entry_as_json))
+                concurrent_updates.append(self.send_message_with_json(new_message))
+        await asyncio.gather(*concurrent_updates)
 
+    # TODO: Implement other metrics too
     async def notify_reject_corrective(self, data):
         self.log.info('Notify negative corrective update: ' + str(data['attribute_id'][0:8]) + ' [' + str(data['counter']) + ', ' + str(data['current_max_orchestrator_index']) + ']' + ' from ' + str(data['sender_id']))
+        start_time = datetime.datetime.now()
         for vnf_forwarding_graph in self.vnf_forwarding_graphs:
             if vnf_forwarding_graph.has_item(data):
                 is_element_in_negative = vnf_forwarding_graph.check_item_is_negated(data, self.log)
@@ -1111,7 +1152,9 @@ class Orchestrator:
                 self.log.info('Is element ' + str(data['attribute_id'][0:8]) + ' accepted? ' + str(is_element_in_positive) + ', negated? ' + str(is_element_in_negative))
                 if is_element_in_positive:
                     self.log.info('Removing item from heap and reconfigure ' + str(data['attribute_id'][0:8]))
-                    await vnf_forwarding_graph.remove_item_from_heap_and_reconfigure(data, self.log)
+                    itermediate_reconfigurations = await vnf_forwarding_graph.remove_item_from_heap_and_reconfigure(data, self.log)
+                    self.log.info('Intermediate reconf: ' + (itermediate_reconfigurations))
+                    self.increase_number_of_reconfigurations_counter(itermediate_reconfigurations)
                 if is_element_in_negative:
                     self.log.info('Already negative pass ' + str(data['attribute_id'][0:8]))
                     pass
@@ -1121,17 +1164,22 @@ class Orchestrator:
         self.log.info('Finished negative corrective update for ' + str(data['attribute_id'][0:8]) + ' [' + str(
             data['counter']) + ', ' + str(data['current_max_orchestrator_index']) + ']' + ' from ' + str(
             data['sender_id']))
+        self.increase_latency_per_operation(start_time)
 
     async def update_unique_vnf_forwarding_graph_classifier_rule(self, attribute: MatchingAttribute):
+        self.log.info('First update: ' + str(attribute.identifier[0:8]))
+        start_time = datetime.datetime.now()
         if self.algorithm_type == 'causal' or self.algorithm_type == 'standard':
-            await self.update_unique_vnf_forwarding_graph_classifier_rule_causal_standard(attribute)
+            await self.update_unique_vnf_forwarding_graph_classifier_rule_causal_standard(attribute, start_time)
         elif self.algorithm_type == 'preventive':
-            await self.update_unique_vnf_forwarding_graph_classifier_rule_preventive(attribute)
+            await self.update_unique_vnf_forwarding_graph_classifier_rule_preventive(attribute, start_time)
         elif self.algorithm_type == 'corrective':
-            await self.update_unique_vnf_forwarding_graph_classifier_rule_corrective(attribute)
+            await self.update_unique_vnf_forwarding_graph_classifier_rule_corrective(attribute, start_time)
 
     async def notify_all_replicas_and_orchestrators_of_positive_change(self, result):
+        answer_1 = await self.notify_replicas_of_vnf_forwarding_graph_update(result)
         if self.algorithm_type == 'causal':
+            self.log.info('Notifying all orchestrators of change')
             await self.notify_all_orchestrators_of_change(result)
         self.total_time_for_experimentation += result['running_time']
         return return_success()
@@ -1154,6 +1202,7 @@ class Orchestrator:
                     vnf_forwarding_graph['vnffg_name'] = data['vnffg_name']
                     vnf_forwarding_graph['vnffg_short_name'] = data['vnffg_short_name']
                     vnf_forwarding_graph['type_of_change_attribute'] = data['type_of_change_attribute']
+                    vnf_forwarding_graph['initial_time'] = data['initial_time']
                     new_message = UpdateVNFForwardingGraph(host=orchestrator['ip'],
                                                            port=orchestrator['port'],
                                                            data=vnf_forwarding_graph)
@@ -1162,27 +1211,33 @@ class Orchestrator:
                     if self.probability_repeated_message >= random_number:
                         concurrent_updates = []
                         self.increment_sent_messages()
+                        self.log.info('Sending Update Instruction to: ' + str(orchestrator['ip']) + ":" + str(orchestrator['port']))
                         concurrent_updates.append(send_message(new_message))
+                        self.increase_overhead_per_message(sys.getsizeof(new_message.data))
                         while self.probability_repeated_message >= random_number:
                             concurrent_updates.append(self.wait_before_repeated(new_message))
                             random_number = generate_random_number_between_zero_one_hundred()
                         await asyncio.gather(*concurrent_updates)
                     else:
                         self.increment_sent_messages()
+                        self.increase_overhead_per_message(sys.getsizeof(new_message.data))
                         result = await send_message(new_message)
                     # ERROR: POSSIBLE TO UNCOMMENT
-                    # if self.algorithm_type == 'last_writer_wins':
-                    #     self.increment_sent_messages()
         return result
 
     async def wait_before_repeated(self, message):
-        wait_period = random.randint(0, self.waiting_time)
+        self.log.info('Wait a bit before repeated')
+        wait_period = random.uniform(0, self.waiting_time)
         await asyncio.sleep(wait_period)
         await send_message(message)
 
     async def wait_before_notify_update_of_vnf_forwarding_graph(self, vnf_forwarding_graph):
-        wait_period = random.randint(0, self.waiting_time)
+        self.log.info('Receveied update instruction for: ' + str(vnf_forwarding_graph['identifier'][0:8]))
+        # wait_period = random.randint(0, self.waiting_time)
+        wait_period = random.uniform(0, self.waiting_time)
         await asyncio.sleep(wait_period)
+        vnf_forwarding_graph['initial_time'] = datetime.datetime.now()
+        self.log.info('Checking if update is valid or not  ' + str(vnf_forwarding_graph['initial_time']))
         await self.notify_update_of_vnf_forwarding_graph(vnf_forwarding_graph)
 
     async def notify_update_of_vnf_forwarding_graph(self, vnf_forwarding_graph):
@@ -1195,6 +1250,7 @@ class Orchestrator:
         are_clocks_equal = my_vector_clock.is_equal(vector_clock)
         if vnf_forwarding_graph['type'] == 'causal':
             if difference_in_vectors <= 1:
+                self.log.info('Updating value ' + vnf_forwarding_graph['identifier'][0:8])
                 my_vector_clock.update_clock(vector_clock, sender_id, self.log)
                 await self.apply_vnf_fg_update_notification(vnf_forwarding_graph)
                 if len(self.pending_lcm_operations) > 0:
@@ -1237,7 +1293,7 @@ class Orchestrator:
         else:
             new_vector_clock.create_from_list(data['vector_clock'].as_string())
 
-        start = time.time()
+        start = datetime.datetime.now()
         data['buffer_time'] = start
         new_pending_operation = PendingLCMScalingOperation(vnf_component_to_scale_id='',
                                                            operation='vnf_fg_update',
@@ -1248,19 +1304,23 @@ class Orchestrator:
         self.add_pending_operation(new_pending_operation)
 
     async def apply_vnf_fg_update_notification(self, vnf_forwarding_graph):
+        self.log.info('Apply VNF-FG UPDATE for ' + vnf_forwarding_graph['identifier'][0:8])
         for vnf_fg_entry in self.vnf_forwarding_graphs:
             is_same_identifier = vnf_fg_entry.get_identifier() == vnf_forwarding_graph['identifier']
             is_same_identifier_alternate = vnf_fg_entry.get_identifier() == vnf_forwarding_graph['vnffg_identifier']
             if is_same_identifier or is_same_identifier_alternate:
-                start = time.time()
                 if vnf_forwarding_graph['type_of_change'] == 'rsp':
                     new_change = self.create_vnf_fg_update_entry_rsp(vnf_forwarding_graph)
                     await self.update_vnf_forwarding_graph_unique_rsp(vnf_fg_entry, new_change)
                 if vnf_forwarding_graph['type_of_change'] == 'classifier_rule':
+                    self.log.info('Updating classifier....')
                     new_change = self.create_vnf_fg_update_entry_classifier(vnf_forwarding_graph)
-                    await self.update_vnf_forwarding_graph_unique_classifier(vnf_fg_entry, new_change)
-                end = time.time()
-                self.total_time_for_experimentation += (end - start)
+                    self.log.info('Updating unique yeah....')
+                    result = await self.update_vnf_forwarding_graph_unique_classifier(vnf_fg_entry, new_change)
+                    self.increase_total_reconfiguration_time(result['reconfiguration_time'])
+
+                self.increase_latency_per_operation(vnf_forwarding_graph['initial_time'])
+                self.log.info('Done!')
                 break
 
         total_pending_operations = len(self.pending_lcm_operations)
@@ -1314,7 +1374,7 @@ class Orchestrator:
         return result
 
     async def wait_before_vnf_fg_update(self, update):
-        wait_period = random.randint(0, self.waiting_time)
+        wait_period = random.uniform(0, self.waiting_time)
         await asyncio.sleep(wait_period)
         if update['type'] == 'update_vnffg_classifier':
             await self.update_unique_vnf_forwarding_graph_classifier_rule(update['data'])
@@ -1339,7 +1399,6 @@ class Orchestrator:
             if update['host'] == self.ip and update['port'] == str(self.port) and update['type'] != 'update_all_vnffg':
                 await self.wait_before_vnf_fg_update(update)
                 my_updates += 1
-        print('Number of updates: ' + str(my_updates))
 
     def read_vnf_forwarding_graph_updates(self):
         updates = []

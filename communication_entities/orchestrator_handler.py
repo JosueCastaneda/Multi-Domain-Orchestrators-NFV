@@ -138,8 +138,36 @@ class OrchestratorHandler:
 
     async def notify_update_vnf_forwarding_graph(self, request: web.Request) -> Response:
         try:
+            # print('DATA PAWA')
             data = await request.post()
-            result = await self.orchestrator.wait_before_notify_update_of_vnf_forwarding_graph(data)
+            # print(data)
+            empty_dictionary = dict()
+            empty_dictionary['identifier'] = data['identifier']
+            empty_dictionary['name'] = data['name']
+            empty_dictionary['short_name'] = data['short_name']
+            empty_dictionary['type_of_change'] = data['type_of_change']
+            empty_dictionary['rendered_service_paths'] = data['rendered_service_paths']
+            empty_dictionary['classification_rules'] = data['classification_rules']
+            empty_dictionary['change_identifier'] = data['change_identifier']
+            empty_dictionary['change_ip_proto'] = data['change_ip_proto']
+            empty_dictionary['change_source_ip'] = data['change_source_ip']
+            empty_dictionary['change_destination_ip'] = data['change_destination_ip']
+            empty_dictionary['change_source_port'] = data['change_source_port']
+            empty_dictionary['change_destination_port'] = data['change_destination_port']
+            empty_dictionary['vnffg_counter'] = data['vnffg_counter']
+            empty_dictionary['vector_clock'] = data['vector_clock']
+            empty_dictionary['orchestrator_id'] = data['orchestrator_id']
+            empty_dictionary['type'] = data['type']
+            empty_dictionary['orchestrator_index'] = data['orchestrator_index']
+            empty_dictionary['vnffg_identifier'] = data['vnffg_identifier']
+            empty_dictionary['vnffg_name'] = data['vnffg_name']
+            empty_dictionary['vnffg_short_name'] = data['vnffg_short_name']
+            empty_dictionary['type_of_change_attribute'] = data['type_of_change_attribute']
+            empty_dictionary['type_of_change'] = data['type_of_change']
+            # print('initial_time')
+            empty_dictionary['initial_time'] = data['initial_time']
+            # print('Doing magic')
+            result = await self.orchestrator.wait_before_notify_update_of_vnf_forwarding_graph(empty_dictionary)
             answer = {'status': 'Good', 'result': result}
             return web.json_response(answer)
         except Exception as e:
@@ -197,14 +225,8 @@ class OrchestratorHandler:
 
     async def reply_to_notify_proposal_vnf_forwarding_graph(self, request: web.Request) -> Response:
         try:
-            # data = await request.post()
-            # print('180 - reply_to_notify_proposal_vnf_forwarding_graph - Called')
-            # data = await request.json()
             data_raw = await request.json()
-            # print(data_raw)
-            # print('182 - reply_to_notify_proposal_vnf_forwarding_graph - loading json')
             data = json.loads(data_raw)
-            # print('184 - reply_to_notify_proposal_vnf_forwarding_graph - data loaded')
             result = await self.orchestrator.reply_notify_proposal_for_vnf_forwarding_graph(data)
             answer = {'status': 'Good', 'result': result}
             return web.json_response(answer)
