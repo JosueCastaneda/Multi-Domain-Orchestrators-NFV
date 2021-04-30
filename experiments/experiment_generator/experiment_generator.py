@@ -120,7 +120,9 @@ class ExperimentGenerator:
         return new_list_of_components
 
     def create_json_file_for_experiment(self, experiment_number):
-        dir_name = 'experiments/experiment_' + str(experiment_number)
+        dir_name_1 = 'experiments/number_of_reconfigurations_' + str(self.number_of_updates)
+        dir_name_2 = '/experiment_' + str(experiment_number)
+        dir_name = dir_name_1 + dir_name_2
         file_name = dir_name + '/experiment_' + str(experiment_number) + '.json'
         if not os.path.exists(dir_name):
             os.makedirs(dir_name)
@@ -290,6 +292,7 @@ class ExperimentGenerator:
         return None
 
     def generate_experiment(self):
+        # print('Self updates ' + str(self.number_of_updates))
         for experiment_counter in range(self.number_of_experiments):
             self.change_random_seeds(experiment_counter)
             self.add_vnfs_to_orchestrators()

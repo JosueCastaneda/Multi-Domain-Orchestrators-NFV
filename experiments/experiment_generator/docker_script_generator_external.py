@@ -11,9 +11,6 @@ class DockerScriptGenerator:
     def __init__(self, experiment_index, configuration):
         self.experiment_index = experiment_index
         self.configuration = configuration
-        self.data = self.load_all_required_data()
-        self.all_dependencies = self.get_all_vnf_dependencies()
-        self.all_services = self.get_all_services()
         self.orchestrator_index = 0
         self.file_commands = None
         self.random_running_index = 0
@@ -23,22 +20,32 @@ class DockerScriptGenerator:
         self.vnf_port = configuration.vnf_port_local
         self.algorithm_index = configuration.algorithm_index
 
+        dir_name_1 = 'experiments/number_of_reconfigurations_' + str(self.number_of_vnffg_updates)
+        dir_name_2 = '/experiment_' + str(self.experiment_index) + '/'
+        self.dir_name = dir_name_1 + dir_name_2
+
+        self.data = self.load_all_required_data()
+        self.all_dependencies = self.get_all_vnf_dependencies()
+        self.all_services = self.get_all_services()
+
     def set_index(self, index):
         self.orchestrator_index = index
 
     def create_orchestrator_file(self):
-        file_directory = 'experiments/experiment_' + self.experiment_index + '/docker_files/'
+
+        file_directory = self.dir_name + '/docker_files/'
         file_name = 'docker_commands_' + str(self.orchestrator_index) + '.sh'
+
         if not os.path.exists(file_directory):
             os.makedirs(file_directory)
         self.file_commands = open(file_directory + file_name, 'w+')
 
     def create_client_file(self):
-        file_directory = 'experiments/experiment_' + self.experiment_index + '/'
+        # file_directory = 'experiments/experiment_' + self.experiment_index + '/'
         file_name = 'client_commands.sh'
-        if not os.path.exists(file_directory):
-            os.makedirs(file_directory)
-        self.file_commands = open(file_directory + file_name, 'w+')
+        if not os.path.exists(self.dir_name):
+            os.makedirs(self.dir_name)
+        self.file_commands = open(self.dir_name + file_name, 'w+')
 
     def generate_orchestrator_commands(self, experiment_index):
         self.create_orchestrator_file()
@@ -75,9 +82,16 @@ class DockerScriptGenerator:
         return services
 
     def load_all_required_data(self):
-        directory_path = 'experiments/experiment_' + self.experiment_index + '/'
+
+        # dir_name_1 = 'experiments/number_of_reconfigurations_' + str(self.number_of_vnffg_updates)
+        # dir_name_2 = '/experiment_' + str(self.experiment_index) + '/'
+        # dir_name = 'experiments/experiment_' + str(experiment_number)
+        # dir_name = dir_name_1 + dir_name_2
+        # print(dir_name)
+        # directory_path = 'experiments/experiment_' + self.experiment_index + '/'
         file_name = 'experiment_' + self.experiment_index + '.json'
-        with open(directory_path + file_name) as json_file:
+        with open(self.dir_name + file_name) as json_file:
+        # with open(directory_path + file_name) as json_file:
             return json.load(json_file)
 
     def write_first_line_to_file(self):
@@ -94,7 +108,7 @@ class DockerScriptGenerator:
         else:
             second_string = ' -e ' + str(self.experiment_index) + ' -h \'127.0.0.1\' -p '
         five_string = ' -a $3'
-        third_string = current_orchestrator['port'] + ' -r ' + str(random_seed) + five_string + ' -x $1 -y $2 -w $4 &'
+        third_string = current_orchestrator['port'] + ' -r ' + str(random_seed) + five_string + ' -x $1 -y $2 -w $4 -u $5 &'
         self.file_commands.write(first_string + second_string + third_string + '\n')
         fourth_string = 'sleep 2'
         self.file_commands.write(fourth_string + '\n')
@@ -126,9 +140,9 @@ class DockerScriptGenerator:
         for vnf_index in range(len(current_orchestrator['vnfs'])):
             first_string = 'python3 vnf_script.py -i ' + str(vnf_index) + ' -o ' + str(self.orchestrator_index) + ' -e '
             if self.is_external:
-                third_string = str(self.experiment_index) + ' -h \'0.0.0.0\' -p ' + str(vnf_port) + ' &'
+                third_string = str(self.experiment_index) + ' -h \'0.0.0.0\' -p ' + str(vnf_port) + ' -u $5' + ' &'
             else:
-                third_string = str(self.experiment_index) + ' -h \'127.0.0.1\' -p ' + str(self.vnf_port) + ' &'
+                third_string = str(self.experiment_index) + ' -h \'127.0.0.1\' -p ' + str(self.vnf_port) + ' -u $5' + ' &'
             self.file_commands.write(first_string + third_string + '\n')
             self.vnf_port += 1
             vnf_port += 1
@@ -246,6 +260,7 @@ class DockerScriptGenerator:
     def generate_vnf_forwarding_graph_update(self):
         vnf_forwarding_graph_updates = list()
         remaining_updates = int(self.number_of_vnffg_updates)
+        # print('Remaining updates ' + str(remaining_updates))
         while remaining_updates:
             random_orchestrator = self.get_random_orchestrator()
             random_vnf_forwarding_graph = self.get_random_vnffg(random_orchestrator)
@@ -270,11 +285,10 @@ class DockerScriptGenerator:
 
     # TODO: THE file_directory scrwws over....
     def create_vnf_forwarding_graph_update(self):
-        file_directory = 'experiments/experiment_' + self.experiment_index + '/'
         file_name = 'updates_vnf_forwarding_graphs.sh'
-        if not os.path.exists(file_directory):
-            os.makedirs(file_directory)
-        self.file_vnf_forwarding_graph_update = open(file_directory + file_name, 'w+')
+        if not os.path.exists(self.dir_name):
+            os.makedirs(self.dir_name)
+        self.file_vnf_forwarding_graph_update = open(self.dir_name + file_name, 'w+')
 
     def get_random_orchestrator(self):
         number_of_orchestrators = len(self.data['orchestrators'])
@@ -404,8 +418,12 @@ class DockerScriptGenerator:
         # TODO: Make utility function
     def load_service_data_from_experiment(self, experiment_index):
         list_of_services = list()
-        directory_path = 'experiments/experiment_' + str(experiment_index) + '/'
+        # directory_path = 'experiments/experiment_' + str(experiment_index) + '/'
         file_name = 'experiment_' + str(experiment_index) + '.json'
+
+        dir_name_1 = 'experiments/number_of_reconfigurations_' + str(self.number_of_vnffg_updates)
+        dir_name_2 = '/experiment_' + str(experiment_index) + '/'
+        directory_path = dir_name_1 + dir_name_2
         with open(directory_path + file_name) as json_file:
             all_data = json.load(json_file)
         for orchestrator in all_data['orchestrators']:
@@ -447,6 +465,9 @@ class DockerScriptGenerator:
 
     def generate_random_list_from_np_seeds(self, index, max_numbers):
         random.seed(self.configuration.collect_random[index])
+        # print('Max number: ' + str(max_numbers))
+        if max_numbers < 5:
+            return random.sample(range(0, max_numbers), max_numbers)
         return random.sample(range(0, max_numbers), 5)
 
     def create_second_client_file(self, experiment_index):
@@ -459,8 +480,14 @@ class DockerScriptGenerator:
     # TODO: Make utility function
     def get_orchestrator_by_service(self, service):
         list_orchestrators = list()
-        directory_path = 'experiments/experiment_' + str(service['experiment_index']) + '/'
+        # directory_path = 'experiments/experiment_' + str(service['experiment_index']) + '/'
         file_name = 'experiment_' + str(service['experiment_index']) + '.json'
+        # print(self.dir_name)
+        dir_name_1 = 'experiments/number_of_reconfigurations_' + str(self.number_of_vnffg_updates)
+        dir_name_2 = '/experiment_' + str(service['experiment_index']) + '/'
+        directory_path = dir_name_1 + dir_name_2
+        # print(directory_path + file_name)
+
         with open(directory_path + file_name) as json_file:
             data_orchestrators = json.load(json_file)
             list_orchestrators.append(data_orchestrators)

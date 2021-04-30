@@ -1,5 +1,6 @@
 .idea/
 example_scripts/
+results/
 venv/
 *.mp4
 *.webm

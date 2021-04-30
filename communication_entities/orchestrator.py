@@ -44,7 +44,7 @@ def is_orchestrator_included_for_notification(id_orchestrator, excluding_list):
 class Orchestrator:
 
     def __init__(self, experiment_index, orchestrator_index, server_host, server_port, random_seed,
-                 causal_delivery=False, algorithm_type='causal', waiting_time=30, probability_repeated_messages=30, probability_negated=10):
+                 causal_delivery=False, algorithm_type='causal', waiting_time=30, probability_repeated_messages=30, probability_negated=10, file_number_of_updates=-1):
         self.waiting_time = waiting_time
         self.log = None
         self.probability_repeated_message = probability_repeated_messages
@@ -52,8 +52,11 @@ class Orchestrator:
         self.experiment_index = experiment_index
         self.name = 'orch_' + orchestrator_index
         self.orchestrator_index = orchestrator_index
+        self.file_number_of_updates = file_number_of_updates
         self.orchestrator_counter = 0
-        self.directory_path = 'experiments/experiment_' + self.experiment_index + '/'
+        self.directory_path = 'experiments/number_of_reconfigurations_' + str(self.file_number_of_updates) + '/experiment_' + self.experiment_index + '/'
+
+        # self.directory_path = 'experiments/experiment_' + self.experiment_index + '/'
         self.id = ''
         self.location = ''
         self.orchestrators_ids = []
@@ -69,11 +72,6 @@ class Orchestrator:
         self.vnf_forwarding_graphs = list()
         self.inconsistencies = 0
         self.messages_sent = 0
-        self.load_server_information()
-        self.add_service_information()
-        self.life_cycle_manager = LifeCycleManagement(self, self.vnfs, self.services)
-        self.vector_clock = VectorClock(self.id)
-        self.causal_delivery = False
         self.causal_delivery = causal_delivery
         self.random_seed = random_seed
         self.pending_operations_repetitions = 0
@@ -86,11 +84,19 @@ class Orchestrator:
         self.total_reconfiguration_time = 0.0
         self.list_pending_vnf_forwarding_updates = []
         self.probability_negated = probability_negated
+        self.vector_clock = VectorClock(self.id)
+
+        self.load_server_information()
+        self.add_service_information()
+        self.life_cycle_manager = LifeCycleManagement(self, self.vnfs, self.services)
 
     def add_vnf_forwarding_graph(self, vnf_forwarding_graphs):
-        string_1 = ROOT_DIR + '/' + 'experiments/experiment_'
-        directory_path = string_1 + str(self.experiment_index) + '/' + 'experiment_' + str(self.experiment_index)
-        with open(directory_path + '.json') as json_file:
+        # string_1 = ROOT_DIR + '/' + 'experiments/experiment_'
+        all_route = ROOT_DIR + '/' + self.directory_path + self.experiment_name + '.json'
+        # directory_path = string_1 + str(self.experiment_index) + '/' + 'experiment_' + str(self.experiment_index)
+
+        # with open(directory_path + '.json') as json_file:
+        with open(all_route) as json_file:
             raw_data = json.load(json_file)
         for orchestrator in raw_data['orchestrators']:
             self.orchestrators_ids.append(orchestrator['id'])
@@ -110,6 +116,14 @@ class Orchestrator:
 
     def load_server_information(self):
         all_route = ROOT_DIR + '/' + self.directory_path + self.experiment_name + '.json'
+        # all_route = ROOT_DIR + '/'
+        # self.log.info(all_route)
+        # self.log.info(self.directory_path)
+        # self.log.info(self.experiment_index)
+        # self.log.info('Myself as dictionary')
+        # self.log.info(self.entry_as_dictionary())
+        # self.log.info('ENDED!')
+
         with open(all_route) as json_file:
             raw_data = json.load(json_file)
 
@@ -197,6 +211,7 @@ class Orchestrator:
         orchestrator_format['latency_per_operation'] = self.total_time_for_experimentation
         orchestrator_format['overhead_data_structure'] = 0.0
         orchestrator_format['probability_negation'] = self.probability_negated
+        orchestrator_format['file_number_of_updates'] = self.file_number_of_updates
         if self.algorithm_type == 'causal':
             for vnf_forwarding_graph in self.vnf_forwarding_graphs:
                 rule = vnf_forwarding_graph.classification_rules[0]
@@ -1403,9 +1418,12 @@ class Orchestrator:
     def read_vnf_forwarding_graph_updates(self):
         updates = []
         string_1 = ROOT_DIR + '/experiments/experiment_'
-        directory_path = string_1 + str(self.experiment_index) + '/' + 'updates_vnf_forwarding_graphs.sh'
-        print(directory_path)
-        file1 = open(directory_path, 'r')
+        all_route = ROOT_DIR + '/' + self.directory_path + '/' + 'updates_vnf_forwarding_graphs.sh'
+        self.log.info(all_route)
+        # directory_path = string_1 + str(self.experiment_index) + '/' + 'updates_vnf_forwarding_graphs.sh'
+        # self.log.info(directory_path)
+
+        file1 = open(all_route, 'r')
         lines = file1.readlines()
         for current_line in lines:
             line = current_line.split()

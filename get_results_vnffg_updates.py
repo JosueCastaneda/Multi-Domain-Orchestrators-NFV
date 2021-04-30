@@ -121,12 +121,18 @@ async def get_orchestrator_information(orchestrator):
     return results
 
 
-def load_orchestrators(experiment_number):
+def load_orchestrators(experiment_number, number_of_updates=150):
     base_dir = os.path.dirname(__file__)
+    # print('GODZILLAAAAAAAAAAAAAAA')
     file_path = ROOT_DIR + '/experiments/experiment_'+ str(experiment_number)
     file_name = '/experiment_' + str(experiment_number) + '.json'
-    complete_file_path_name = file_path + file_name
-    with open(complete_file_path_name ) as json_file:
+    # print('get_results_vnffg_updates - 128 - load_orchestrastors(')
+    file_path_new = ROOT_DIR + '/experiments/number_of_reconfigurations_' + str(number_of_updates) + '/experiment_' + str(experiment_number) + '/' + file_name
+    # print(file_path_new)
+    # complete_file_path_name = file_path + file_name
+    # print(complete_file_path_name)
+    # with open(complete_file_path_name ) as json_file:
+    with open(file_path_new) as json_file:
         raw_data = json.load(json_file)
     return raw_data['orchestrators']
 

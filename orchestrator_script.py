@@ -45,7 +45,8 @@ async def init_app(parameters) -> web.Application:
                               waiting_time=parameters['waiting_time'],
                               probability_repeated_messages=parameters['probability_redundancy'],
                               algorithm_type=algorithm_type,
-                              probability_negated=parameters['probability_negated'])
+                              probability_negated=parameters['probability_negated'],
+                              file_number_of_updates=parameters['file_number_of_updates'])
     handler = OrchestratorHandler(orchestrator)
     init_routes(app, handler)
     return app
@@ -73,14 +74,16 @@ def main(argv) -> None:
     waiting_time = 0
     probability_redundancy = 0.0
     probability_negated = 0.0
+    file_number_of_updates = -1
+
     if debug:
         orchestrator_index = '0'
         experiment_index = '0'
         server_host = '127.0.0.1'
         server_port = 4437
     try:
-        valid_arguments_as_string = "i:e:h:p:r:a:x:y:w:"
-        list_valid_arguments = ["service_id=", "experiment_id=", "host=", "port=", "random_seed=", "algorithm=", "wait_time", "prob_redundant", "prob_negated"]
+        valid_arguments_as_string = "i:e:h:p:r:a:x:y:w:u:"
+        list_valid_arguments = ["service_id=", "experiment_id=", "host=", "port=", "random_seed=", "algorithm=", "wait_time", "prob_redundant", "prob_negated", "number_of_updates"]
         opts, args = getopt.getopt(argv, valid_arguments_as_string, list_valid_arguments)
     except getopt.GetoptError:
         sys.exit(2)
@@ -103,6 +106,8 @@ def main(argv) -> None:
             probability_redundancy = arg
         elif opt in ("-w", "--prob_negated"):
             probability_negated = arg
+        elif opt in ("-u", "--number_of_updates"):
+            file_number_of_updates = arg
 
     if server_host == '' and server_port == 0:
         server_host, server_port = get_server_and_port(experiment_index, orchestrator_index)
@@ -122,6 +127,7 @@ def main(argv) -> None:
     experiment_parameters['waiting_time'] = float(waiting_time)
     experiment_parameters['probability_redundancy'] = float(probability_redundancy)
     experiment_parameters['probability_negated'] = float(probability_negated)
+    experiment_parameters['file_number_of_updates'] = int(file_number_of_updates)
 
     app = loop.run_until_complete(init_app(experiment_parameters))
     web.run_app(app, host=server_host, port=server_port)

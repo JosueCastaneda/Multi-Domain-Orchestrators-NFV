@@ -11,13 +11,14 @@ from communication_entities.virtual_network_function_routes import init_routes
 from utilities.logger import log
 
 
-async def init_app(experiment_index, orchestrator_index, vnf_index, server_host, server_port) -> web.Application:
+async def init_app(experiment_index, orchestrator_index, vnf_index, server_host, server_port, number_of_updates) -> web.Application:
     app = web.Application()
     vnf = GenericVNF(orchestrator_index=orchestrator_index,
                      experiment_index=experiment_index,
                      vnf_index=vnf_index,
                      server_host=server_host,
-                     server_port=server_port)
+                     server_port=server_port,
+                     number_of_updates=number_of_updates)
     await vnf.set_up_to_orchestrator()
     handler = VirtualNetworkFunctionHandler(vnf)
     init_routes(app, handler)
@@ -44,6 +45,7 @@ def main(argv) -> None:
     server_host = ''
     server_port = 0
     debug = False
+    number_of_updates = -1
 
     if debug:
         orchestrator_index = '0'
@@ -53,8 +55,8 @@ def main(argv) -> None:
         server_port = 3008
 
     try:
-        string_arguments = 'v:o:e:h:p:i:'
-        list_of_valid_arguments = ["vnf_id=", "orchestrator_id=", "experiment_id=", "host=", "port=", "index="]
+        string_arguments = 'v:o:e:h:p:i:u:'
+        list_of_valid_arguments = ["vnf_id=", "orchestrator_id=", "experiment_id=", "host=", "port=", "index=", "number_of_updates="]
         opts, args = getopt.getopt(argv, string_arguments, list_of_valid_arguments)
     except getopt.GetoptError:
         log.info('Error')
@@ -72,6 +74,8 @@ def main(argv) -> None:
             server_port = arg
         elif opt in ("-i", "--index"):
             vnf_index = arg
+        elif opt in ("-u", "--number_of_updates"):
+            number_of_updates = arg
 
     if server_host == '' and server_port == 0:
         server_host, server_port = get_server_and_port(experiment_index, orchestrator_index, vnf_index)
@@ -84,7 +88,8 @@ def main(argv) -> None:
                                            orchestrator_index,
                                            vnf_index,
                                            server_host,
-                                           server_port))
+                                           server_port,
+                                           number_of_updates))
     web.run_app(app, host=server_host, port=server_port)
 
 

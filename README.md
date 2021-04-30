@@ -35,7 +35,7 @@ chmod +x create_experiments.sh
 
 # Cloud orchestrators
 0) Claire 
-1) Duracell
+1) Sherry
 2) Jill
 3) Ada
 4) Rebecca

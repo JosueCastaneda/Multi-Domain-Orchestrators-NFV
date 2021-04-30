@@ -36,8 +36,9 @@ from utilities.socket_size import SocketSize
 
 class GenericVNF:
 
-    def __init__(self, experiment_index, orchestrator_index, vnf_index, server_host, server_port):
+    def __init__(self, experiment_index, orchestrator_index, vnf_index, server_host, server_port, number_of_updates):
         self.experiment_name = 'experiment_' + str(experiment_index)
+        self.number_of_updates=number_of_updates
         self.experiment_index = experiment_index
         self.orchestrator_index = int(orchestrator_index)
         self.vnf_index = int(vnf_index)
@@ -55,8 +56,19 @@ class GenericVNF:
 
     def load_text_data(self):
         # all_route = ROOT_DIR + '/' + self.directory_path + self.experiment_name + '.json'
-        directory_path = ROOT_DIR + '/' + 'experiments/experiment_' + self.experiment_index + '/'
-        with open(directory_path + self.experiment_name + '.json') as json_file:
+        # directory_path = ROOT_DIR + '/' + 'experiments/experiment_' + self.experiment_index + '/'
+        directory_path_new = ROOT_DIR + '/experiments/number_of_reconfigurations_' + str(self.number_of_updates) + '/experiment_' + self.experiment_index + '/'
+        # print('generic_vnf.py - 59 - load_text_data(self)')
+        # print('BEGINING')
+        # print(directory_path)
+        # print(directory_path_new)
+        # all_route = ROOT_DIR + '/' + self.directory_path + self.experiment_name + '.json'
+        # print(directory_path + self.experiment_name + '.json')
+        # print('Exp name ' + str(self.experiment_name) + ' Exp. index ' + str(self.experiment_index))
+        # print('Orc. ind ' + str(self.orchestrator_index) + ' VNF index: ' + str(self.vnf_index) + ' updates ' + str(self.number_of_updates))
+        # print('ENDED')
+
+        with open(directory_path_new + self.experiment_name + '.json') as json_file:
             raw_data = json.load(json_file)
         vnf_information = raw_data['orchestrators'][self.orchestrator_index]['vnfs'][self.vnf_index]
         orchestrator_information = raw_data['orchestrators'][self.orchestrator_index]
@@ -71,7 +83,7 @@ class GenericVNF:
 
     async def send_message_to_orchestrator(self, message):
         url = 'http://' + self.orchestrator_ip + ':' + str(self.orchestrator_port) + '/' + message.message_type
-        print(url)
+        # print(url)
         async with aiohttp.ClientSession() as session:
             async with session.post(url, data=message.data) as resp:
                 x = 2
