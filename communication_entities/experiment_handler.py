@@ -320,8 +320,8 @@ class ExperimentHandler:
             repetition_probability_array = [0, 5, 10]
             negation_probability_array = [0, 5, 10]
             data = dict()
-            data['experiment_type'] = 'local'
-            data['waiting_time'] = 30
+            data['experiment_type'] = 'global'
+            data['waiting_time'] = 20
             data['experiment_repetitions'] = 4
 
             for i in range(0, repetitions):
