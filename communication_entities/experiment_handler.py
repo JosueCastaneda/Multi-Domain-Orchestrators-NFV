@@ -23,7 +23,7 @@ class ExperimentHandler:
                                            'port': 7041})
         self.list_of_orchestrators.append({'host': '20.68.168.123',
                                            'port': 7043})
-        self.list_of_orchestrators.append({'host': '52.231.193.62',
+        self.list_of_orchestrators.append({'host': '52.231.152.194',
                                            'port': 7045})
         self.single_execution = 0
         self.is_master = is_master
