@@ -1,3 +1,3 @@
 #!/bin/bash
 
-python3 ../experiment_script.py -p 7045 &
+python3 experiment_script.py -p 7045 &
