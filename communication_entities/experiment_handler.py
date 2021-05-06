@@ -66,6 +66,7 @@ class ExperimentHandler:
             # print('Stoping the orchestrator')
             print('Stoping orchestrator')
 
+            found_process = False
             if platform == "linux" or platform == "linux2":
                 out = subprocess.check_output(["netstat", "-lpn", "|", "grep", str(port_number)])
                 out_str = out.decode('UTF-8')
@@ -85,7 +86,10 @@ class ExperimentHandler:
                             processus_identifier = good_line[0:index_score]
                             print('Stoping...')
                             subprocess.Popen(['kill', '-9', processus_identifier])
+                            found_process = True
                             print('Stopped...')
+                    if found_process:
+                        break
             elif platform == "darwin":
                 out = subprocess.check_output(["netstat", "-anv", "|", "grep", str(port_number)])
                 out_str = out.decode('UTF-8')
