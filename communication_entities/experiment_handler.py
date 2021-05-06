@@ -375,7 +375,7 @@ class ExperimentHandler:
             str_0 = 'experiments/number_of_reconfigurations_'
             str_1 = '/experiment_' + str(experiment_number) + '/docker_files/docker_commands_'
             complete_file_new = str_0 + str(number_of_updates) + str_1 + str(orchestrator_number) + '.sh'
-            # print(complete_file_new)
+            print(complete_file_new)
 
             # Doing setup
             string_setup = current_directory + '/setup.sh ' + str(experiment_number) + ' ' + str(number_of_updates)
@@ -385,6 +385,7 @@ class ExperimentHandler:
             string_orch_1 = complete_file_new + ' ' + str(max_delay) + ' ' + str(repetition_probability) + ' '
             string_orch_2 = str(algo_type) + ' ' + str(negation_probability) + ' ' + str(number_of_updates) + ' &'
             string_launch_orchestrator = string_orch_1 + string_orch_2
+            print(string_launch_orchestrator)
             subprocess.call(string_launch_orchestrator, shell=True)
             answer = {'status': 'Good', 'result': 'Good!'}
             return web.json_response(answer)

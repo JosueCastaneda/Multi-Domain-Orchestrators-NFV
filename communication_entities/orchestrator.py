@@ -1397,6 +1397,7 @@ class Orchestrator:
             await self.update_unique_vnf_forwarding_graph_rendered_service_path(update['data'])
 
     async def apply_concurrent_updates(self):
+        print('Called concurrent updates')
         vnf_forwarding_graph_updates = self.read_vnf_forwarding_graph_updates()
         coroutines = []
         my_updates = 0
