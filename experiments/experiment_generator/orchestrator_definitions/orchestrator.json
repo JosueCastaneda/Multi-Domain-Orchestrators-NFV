@@ -76,7 +76,7 @@
     {
       "id":"15d4de14-7fc6-11ea-8736-04ea56f99520",
       "type": "orchestrator",
-      "ip": "52.231.193.62",
+      "ip": "52.231.152.194",
       "port": "5005",
       "name": "rebecca",
       "vnfs": [],

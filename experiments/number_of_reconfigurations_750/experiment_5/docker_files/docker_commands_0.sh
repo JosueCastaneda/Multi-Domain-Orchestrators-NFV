@@ -5,8 +5,8 @@ python3 orchestrator_script.py -i 0 -e 5 -h '0.0.0.0' -p 5001 -r 276529 -a $3 -x
 sleep 2
 
 # Add orchestrator's information to my orchestrator
-python message_factory.py -t add_orchestrator -h 0.0.0.0 -p 5001 -n none -m none --vnf_host 40.81.204.178 --vnf_port 5002 -x 0d3f4446-ada7-11eb-8bcb-48d705d95785
-python message_factory.py -t add_orchestrator -h 0.0.0.0 -p 5001 -n none -m none --vnf_host 20.84.67.101 --vnf_port 5003 -x 0d3f4554-ada7-11eb-8bcb-48d705d95785
-python message_factory.py -t add_orchestrator -h 0.0.0.0 -p 5001 -n none -m none --vnf_host 20.68.168.123 --vnf_port 5004 -x 0d3f4630-ada7-11eb-8bcb-48d705d95785
-python message_factory.py -t add_orchestrator -h 0.0.0.0 -p 5001 -n none -m none --vnf_host 52.231.193.62 --vnf_port 5005 -x 0d3f4748-ada7-11eb-8bcb-48d705d95785
+python message_factory.py -t add_orchestrator -h 0.0.0.0 -p 5001 -n none -m none --vnf_host 40.81.204.178 --vnf_port 5002 -x e6a428b2-ae44-11eb-a1e2-48d705d95785
+python message_factory.py -t add_orchestrator -h 0.0.0.0 -p 5001 -n none -m none --vnf_host 20.84.67.101 --vnf_port 5003 -x e6a42966-ae44-11eb-a1e2-48d705d95785
+python message_factory.py -t add_orchestrator -h 0.0.0.0 -p 5001 -n none -m none --vnf_host 20.68.168.123 --vnf_port 5004 -x e6a429f2-ae44-11eb-a1e2-48d705d95785
+python message_factory.py -t add_orchestrator -h 0.0.0.0 -p 5001 -n none -m none --vnf_host 52.231.152.194 --vnf_port 5005 -x e6a42a9c-ae44-11eb-a1e2-48d705d95785
 
