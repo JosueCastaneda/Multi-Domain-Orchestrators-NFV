@@ -48,18 +48,23 @@ class ExperimentHandler:
             # extra_list = []
             print('List of VNFs')
             if orchestrator_number == 0:
-                port_number = '4437'
+                # port_number = '4437'
+                port_number = '5001'
             elif orchestrator_number == 1:
-                port_number = '4439'
+                # port_number = '4439'
+                port_number = '5002'
                 # extra_list = [3011, 3012, 3013, 3014, 3015, 3016, 3017, 3018, 3019, 3020]
             elif orchestrator_number == 2:
-                port_number = '4441'
+                # port_number = '4441'
+                port_number = '5003'
                 # extra_list = [3021, 3022, 3023, 3024, 3025, 3026, 3027, 3028, 3029, 3030]
             elif orchestrator_number == 3:
-                port_number = '4443'
+                # port_number = '4443'
+                port_number = '5004'
                 # extra_list = [3031, 3032, 3033, 3034, 3035, 3036, 3037, 3038, 3039, 3040]
             elif orchestrator_number == 4:
-                port_number = '4445'
+                # port_number = '4445'
+                port_number = '5005'
                 # extra_list = [3041, 3042, 3043, 3044, 3045, 3046, 3047, 3048, 3049, 3050]
             # list_of_ports_for_vnfs.extend(extra_list)
 
