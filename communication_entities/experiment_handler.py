@@ -70,16 +70,12 @@ class ExperimentHandler:
             if platform == "linux" or platform == "linux2":
                 out = subprocess.check_output(["netstat", "-lpn", "|", "grep", str(port_number)])
                 out_str = out.decode('UTF-8')
-                print('Now checking output')
                 for line in out_str.split('\n'):
-                    print('Now checking lines?')
                     if port_number in line:
-                        print('now checking line')
                         line_split = line.split()
                         line_split_port_with_port = line_split[3]
                         line_split_port_with_port_split = line_split_port_with_port.split(':')
                         my_port_number = line_split_port_with_port_split[1]
-                        print('Now my port number')
                         if str(my_port_number) == str(port_number):
                             good_line = line_split[6]
                             index_score = good_line.find('/')
