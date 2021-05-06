@@ -95,7 +95,7 @@ class ExperimentHandler:
                             print(line_with_port)
                             good_line = line_split[8]
                             processus_identifier = good_line
-                            print('Stoping...')
+                            print('Stopping...')
                             subprocess.Popen(['kill', '-9', processus_identifier])
                             print('Stopped...')
                         # break
