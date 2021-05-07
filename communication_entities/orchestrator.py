@@ -261,11 +261,11 @@ class Orchestrator:
         logging.basicConfig(filename=other_folder)
         self.log = logging.getLogger('logger')
         self.log.propagate = False
-        self.log.setLevel(logging.WARNING)
+        self.log.setLevel(logging.DEBUG)
         log_str = '%(asctime)s - %(filename)s - %(lineno)s - %(message)s'
         formatter = logging.Formatter(log_str)
         fh = logging.FileHandler(other_folder, mode='w', encoding='utf-8')
-        fh.setLevel(logging.WARNING)
+        fh.setLevel(logging.DEBUG)
         fh.setFormatter(formatter)
         self.log.addHandler(fh)
         ch = logging.StreamHandler()
