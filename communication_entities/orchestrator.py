@@ -1419,7 +1419,8 @@ class Orchestrator:
     def read_vnf_forwarding_graph_updates(self):
         updates = []
         string_1 = ROOT_DIR + '/experiments/experiment_'
-        all_route = ROOT_DIR + '/' + self.directory_path + '/' + 'updates_vnf_forwarding_graphs.sh'
+        # all_route = ROOT_DIR + '/' + self.directory_path + '/' + 'updates_vnf_forwarding_graphs.sh'
+        all_route = ROOT_DIR + '/' + self.directory_path + 'updates_vnf_forwarding_graphs.sh'
         self.log.info(all_route)
         # directory_path = string_1 + str(self.experiment_index) + '/' + 'updates_vnf_forwarding_graphs.sh'
         # self.log.info(directory_path)
