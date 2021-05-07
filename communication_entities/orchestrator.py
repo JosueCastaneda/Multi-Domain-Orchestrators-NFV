@@ -131,6 +131,7 @@ class Orchestrator:
         orchestrator_index = int(self.name[orchestrator_number + 1:])
         self.id = raw_data['orchestrators'][orchestrator_index]['id']
         self.location = raw_data['orchestrators'][orchestrator_index]['location']
+        self.ip = raw_data['orchestrators'][orchestrator_index]['ip']
 
     def find_orchestrator_by_id(self, id_orchestrator):
         for orchestrator in self.list_orchestrator:
