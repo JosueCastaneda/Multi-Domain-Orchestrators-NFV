@@ -229,8 +229,8 @@ class ExperimentHandler:
         data['algo_type'] = algo_type
         data['algo_name'] = algo_name
         data['test_string'] = test_string
-        # for experiment_number in range(0, data['experiment_repetitions']):
-        for experiment_number in range(0, 1):
+        for experiment_number in range(0, data['experiment_repetitions']):
+        # for experiment_number in range(0, 1):
             data['experiment_number'] = experiment_number
             await self.run_experiment(data, experiment_number, test_string, algo_name, test_type)
 
@@ -335,10 +335,12 @@ class ExperimentHandler:
                     data['max_delay'] = max_delay
                     for repetition_probability in repetition_probability_array:
                         data['repetition_probability'] = repetition_probability
+                        is_negation_running = True
                         for negation_probability in negation_probability_array:
                             data['negation_probability'] = negation_probability
                             subprocess.call('sleep 3', shell=True)
-                            await self.run_all_experiments(data)
+                            await self.run_all_experiments(data, is_negation_running)
+                            is_negation_running = False
                         print('Updating repetition_probability')
                     print('Updating Max_delay')
                 number_of_updates += 150
@@ -348,11 +350,13 @@ class ExperimentHandler:
             response = {'status': 'failed', 'message': str(e)}
             # return web.json_response(response)
 
-    async def run_all_experiments(self, data):
-        await self.run_causal_concurrent(data)
-        await self.run_causal_sequential(data)
-        await self.run_standard_concurrent(data)
-        await self.run_standard_sequential(data)
+    # is_negation_running allows for a single execution as this parameter does not affect causal or standard
+    async def run_all_experiments(self, data, is_negation_running=False):
+        if is_negation_running:
+            await self.run_causal_concurrent(data)
+            await self.run_causal_sequential(data)
+            await self.run_standard_concurrent(data)
+            await self.run_standard_sequential(data)
         await self.run_preventive_concurrent(data)
         await self.run_preventive_sequential(data)
         await self.run_corrective_concurrent(data)
