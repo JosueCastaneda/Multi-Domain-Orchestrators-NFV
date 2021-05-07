@@ -350,13 +350,13 @@ class ExperimentHandler:
 
     async def run_all_experiments(self, data):
         await self.run_causal_concurrent(data)
-        await self.run_causal_sequential(data)
-        await self.run_standard_concurrent(data)
-        await self.run_standard_sequential(data)
-        await self.run_preventive_concurrent(data)
-        await self.run_preventive_sequential(data)
-        await self.run_corrective_concurrent(data)
-        await self.run_corrective_sequential(data)
+        # await self.run_causal_sequential(data)
+        # await self.run_standard_concurrent(data)
+        # await self.run_standard_sequential(data)
+        # await self.run_preventive_concurrent(data)
+        # await self.run_preventive_sequential(data)
+        # await self.run_corrective_concurrent(data)
+        # await self.run_corrective_sequential(data)
         print('Finish running all experiments')
 
     async def run_orchestrator(self, request: web.Request) -> Response:

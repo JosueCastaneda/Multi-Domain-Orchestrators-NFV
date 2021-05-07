@@ -1402,11 +1402,12 @@ class Orchestrator:
         coroutines = []
         my_updates = 0
         for update in vnf_forwarding_graph_updates:
+            self.log.info(update)
             if update['host'] == self.ip and update['port'] == str(self.port) and update['type'] != 'update_all_vnffg':
                 coroutines.append(self.wait_before_vnf_fg_update(update))
                 my_updates += 1
         await asyncio.gather(*coroutines)
-        print('Number of updates: ' + str(my_updates))
+        self.log.info('Number of updates: ' + str(my_updates))
 
     async def apply_sequential_updates(self):
         vnf_forwarding_graph_updates = self.read_vnf_forwarding_graph_updates()
