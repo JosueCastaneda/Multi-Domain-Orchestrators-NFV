@@ -1406,6 +1406,10 @@ class Orchestrator:
             if update['host'] == self.ip and update['port'] == str(self.port) and update['type'] != 'update_all_vnffg':
                 coroutines.append(self.wait_before_vnf_fg_update(update))
                 my_updates += 1
+            elif update['host'] == '0.0.0.0' and update['port'] == str(self.port) and update['type'] != 'update_all_vnffg':
+                coroutines.append(self.wait_before_vnf_fg_update(update))
+                my_updates += 1
+
         await asyncio.gather(*coroutines)
         self.log.info('Number of updates: ' + str(my_updates))
 
@@ -1414,6 +1418,9 @@ class Orchestrator:
         my_updates = 0
         for update in vnf_forwarding_graph_updates:
             if update['host'] == self.ip and update['port'] == str(self.port) and update['type'] != 'update_all_vnffg':
+                await self.wait_before_vnf_fg_update(update)
+                my_updates += 1
+            elif update['host'] == '0.0.0.0' and update['port'] == str(self.port) and update['type'] != 'update_all_vnffg':
                 await self.wait_before_vnf_fg_update(update)
                 my_updates += 1
 
