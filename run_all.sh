@@ -57,22 +57,22 @@ VAR2="local"
 if [ $TEST_STRING -eq 0 ]; then
   if [ $EXPERIMENT_TYPE == $VAR1 ]; then
     echo './test_asynchronous_vnffg_updates_global.sh'
-    sleep 20
+    sleep 10
     ./test_asynchronous_vnffg_updates_global.sh
   else
     echo './test_asynchronous_vnffg_updates_local.sh'
-    sleep 20
+    sleep 10
     ./test_asynchronous_vnffg_updates_local.sh
   fi
 else
   if [ $EXPERIMENT_TYPE == $VAR1 ]; then
 #    echo './test_sequential_vnffg_updates_global.sh'
-    sleep 15
+    sleep 10
     ./test_sequential_vnffg_updates_global.sh
   else
 #    echo './test_sequential_vnffg_updates_local.sh'
-    sleep 15
+    sleep 10
     ./test_sequential_vnffg_updates_local.sh
   fi
 fi
-sleep 15
+sleep 45
