@@ -89,10 +89,8 @@ class MatchingAttribute:
 
             str_before = 'Updating heap with a positive entry ' + str(identifier[0:8]) + ' . Before adding: ' + str(len(self.list_positive_entries)) + ' ' + str(
                 len(self.list_negative_entries))
-            # orchestrator_log.info()
             heappush(self.list_positive_entries, new_matching_attribute)
             my_top_value = self.list_positive_entries[0]
-            # str_top = ' [' + str(my_top_value.counter) + ' ,' + str(my_top_value.current_max_orchestrator_index) + '] '
             str_top = ''
             str_after = ' , After adding: ' + str(len(self.list_positive_entries)) + ' ' + str(
                 len(self.list_negative_entries)) + ' top: '
@@ -101,10 +99,6 @@ class MatchingAttribute:
                 str_top += ' [' + str(entry.counter) + ' ,' + str(entry.current_max_orchestrator_index) + '] '
 
             orchestrator_log.info(str_before + str_after + str_top)
-
-            # orchestrator_log.info('Done, printing result...')
-            # orchestrator_log.info(self.as_dictionary(orchestrator_log))
-            # orchestrator_log.info('Finish adding to heap')
         return new_matching_attribute
 
     def add_invalid_corrective_update(self, data, orchestrator_log):
@@ -392,6 +386,7 @@ class MatchingAttribute:
         else:
             str_after = ' After removing: ' + str(len(self.list_positive_entries)) + ' ' + str(len(self.list_negative_entries)) + ' Empty positives'
             orchestrator_log.info(str_before + str_after)
+        # print('Matching Attribute 389 -- Extra number of reconfigurations: ' + str(number_of_reconfigurations))
         return number_of_reconfigurations
 
     def update_sent_messages(self):

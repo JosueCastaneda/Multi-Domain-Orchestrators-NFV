@@ -248,7 +248,7 @@ class ExperimentHandler:
         try:
             repetitions = 20
             number_of_updates = 150
-            max_delay_array = [0.001, 0.1, 1.0]
+            max_delay_array = [0.001, 0.01, 0.1, 1.0]
             repetition_probability_array = [0, 5, 10]
             negation_probability_array = [0, 5, 10]
             data = dict()

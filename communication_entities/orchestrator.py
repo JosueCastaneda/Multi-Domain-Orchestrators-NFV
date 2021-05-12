@@ -188,9 +188,7 @@ class Orchestrator:
         return self.entry_as_dictionary()
 
     def increase_total_reconfiguration_time(self, value):
-        self.log.info(self.total_reconfiguration_time)
         self.total_reconfiguration_time += value
-        self.log.info(self.total_reconfiguration_time)
 
     def entry_as_dictionary(self):
         orchestrator_format = dict()
@@ -236,7 +234,7 @@ class Orchestrator:
         orchestrator_format['total_reconfiguration_time'] = self.total_reconfiguration_time
         return orchestrator_format
 
-    def increase_number_of_reconfigurations_counter(self, value=0):
+    def increase_extra_number_of_reconfigurations_counter(self, value=0):
         if value == 0:
             self.number_of_reconfigurations += 1
         else:
@@ -450,7 +448,7 @@ class Orchestrator:
             change_took_place = await self.apply_lcm_operation(pending_operation)
             if change_took_place:
                 self.increase_latency_per_operation(pending_operation.vnffg_data['buffer_time'])
-                self.increase_number_of_reconfigurations_counter()
+                # self.increase_extra_number_of_reconfigurations_counter()
         else:
             self.add_pending_operation(pending_operation)
         return change_took_place
@@ -673,49 +671,9 @@ class Orchestrator:
 
     async def update_unique_vnf_forwarding_graph_rendered_service_path(self, connection_point: ConnectionPointReference):
         pass
-        # self.log.info('First update: ' + str(connection_point.vnf_identifier[0:8]))
-        # connection_point.set_time(time.time())
-        # if self.algorithm_type == 'causal' or self.algorithm_type == 'standard':
-        #     await self.update_unique_vnf_forwarding_graph_connection_point_causal_standard(connection_point)
-        # elif self.algorithm_type == 'preventive':
-        #     await self.update_unique_vnf_forwarding_graph_connection_point_preventive(connection_point)
-        # elif self.algorithm_type == 'corrective':
-        #     # self.log.info('Doing corrective')
-        #     await self.update_unique_vnf_forwarding_graph_connection_point_corrective(connection_point)
 
     async def update_unique_vnf_forwarding_graph_connection_point_corrective(self, connection_point: ConnectionPointReference):
         pass
-        # # Fix later concentrate on the attribute
-        # self.log.info('Doing this part :)')
-        # self.log.info('Doing corrective unique for attribute ' + str(connection_point.get_vnf_identifier()[0:8]))
-        # data = dict()
-        # how_many_vnfs_have_it = 0
-        # for vnf_forwarding_graph in self.vnf_forwarding_graphs:
-        #     if vnf_forwarding_graph.has_connection_point(connection_point):
-        #         # CHECK THIS FUNCTION
-        #         data = connection_point.as_dictionary()
-        #         data['type'] = 'connection_point'
-        #         data['update'] = 'corrective'
-        #         data['attribute_id'] = connection_point.vnf_identifier
-        #         data['current_max_orchestrator_index'] = self.orchestrator_index
-        #         new_entry = await vnf_forwarding_graph.update_data(data, self.log)
-        #         how_many_vnfs_have_it += 1
-        #
-        #         self.log.info('How many VNF-FGs have it ' + str(how_many_vnfs_have_it))
-        #         # self.log.info('Trying to send to alls')
-        #         # data = self.get_vnf_forwarding_graph_by_connection_point(connection_point)
-        #         entry = new_entry.as_dictionary()
-        #         entry['attribute_id'] = connection_point.vnf_identifier
-        #         entry['update'] = 'corrective'
-        #         entry['type'] = 'connection_point'
-        #         entry['affected_orchestrators'] = vnf_forwarding_graph.get_affected_orchestrators()
-        #         entry['sender_id'] = self.port
-        #         await self.send_update_vnf_forwarding_graph_notification_to_affected_orchestrators(entry, entry['affected_orchestrators'])
-        #
-        #         # self.log.info(vnf_forwarding_graph.as_dictionary())
-        #         # ERROR: Here it could be repeated for some reason...
-        #         break
-        # self.log.info('How many VNF-FGs have it ' + str(how_many_vnfs_have_it))
 
     async def update_unique_vnf_forwarding_graph_connection_point_causal_standard(self, connection_point: ConnectionPointReference):
         for vnf_forwarding_graph in self.vnf_forwarding_graphs:
@@ -729,7 +687,7 @@ class Orchestrator:
             update_result = await vnf_forwarding_graph.update_unique_rendered_service_path(connection_point, self.log, self.orchestrator_index, list_caller)
             if update_result['is_positive_result']:
                 self.increase_latency_per_operation(update_result['initial_time'])
-                self.increase_number_of_reconfigurations_counter()
+                # self.increase_extra_number_of_reconfigurations_counter()
                 result = await self.notify_all_replicas_and_orchestrators_of_positive_change(update_result)
                 return result
         return return_failure('No VNF ID FOUND! ' + str(connection_point.get_vnf_identifier()))
@@ -745,11 +703,23 @@ class Orchestrator:
             list_caller = dict()
             list_caller['caller'] = self.id
             list_caller['first_call'] = True
+
+            start_reconfiguration_time = datetime.datetime.now()
             update_result = await vnf_forwarding_graph.update_unique_classifier_rule(attribute, self.log, list_caller)
             if update_result['is_positive_result']:
-                self.increase_latency_per_operation(start_time)
-                self.increase_number_of_reconfigurations_counter()
-                self.increase_total_reconfiguration_time(update_result['reconfiguration_time'])
+                # self.increase_latency_per_operation(start_time)
+                self.log.info('Increasing latency per operation....')
+                # self.increase_latency_per_operation(update_result['reconfiguration_time'])
+                self.increase_latency_per_operation(start_reconfiguration_time)
+
+                # self.increase_extra_number_of_reconfigurations_counter()
+                self.log.info('Increasing using the float...')
+                # self.increase_total_reconfiguration_time(update_result['reconfiguration_time'])
+
+                end_reconfiguration_time = datetime.datetime.now()
+                self.increase_total_reconfiguration_time(
+                    (end_reconfiguration_time - start_reconfiguration_time).total_seconds())
+
                 result = await self.notify_all_replicas_and_orchestrators_of_positive_change(update_result)
                 return result
         return return_failure('No Matching attribute with ID found! ' + str(attribute.get_identifier()))
@@ -803,13 +773,7 @@ class Orchestrator:
         await self.add_to_pending_list_and_send_message(entry, attribute)
 
     async def update_unique_vnf_forwarding_graph_connection_point_preventive(self, connection_point: ConnectionPointReference):
-        # self.log.info('First update of connection point')
         pass
-        # data = self.get_vnf_forwarding_graph_by_connection_point(connection_point)
-        # entry = await self.fill_entry_with_data(data)
-        # entry['attribute_id'] = connection_point.vnf_identifier
-        # entry['type'] = 'connection_point'
-        # await self.add_to_pending_list_and_send_message(entry, connection_point)
 
     async def add_to_pending_list_and_send_message(self, entry, item):
         entry['value'] = item.as_dictionary()
@@ -909,8 +873,20 @@ class Orchestrator:
             for vnf_forwarding_graph in self.vnf_forwarding_graphs:
                 if vnf_forwarding_graph.identifier == data['vnf_forwarding_graph_id']:
                     self.log.info('CHECKING A')
+                    start_reconfiguration_time = datetime.datetime.now()
                     await vnf_forwarding_graph.update_data(data, self.log)
+                    end_reconfiguration_time = datetime.datetime.now()
+                    self.increase_total_reconfiguration_time(
+                        (end_reconfiguration_time - start_reconfiguration_time).total_seconds())
                     self.log.info('Finished updating hehe')
+                    break
+            my_entry = self.get_entry_from_list(data)
+            if isinstance(my_entry['initial_time'], str):
+                self.log.info('Converting... ' + str(my_entry['initial_time']))
+                start_time = datetime.datetime.strptime(my_entry['initial_time'], '%Y-%m-%d %H:%M:%S.%f')
+            else:
+                start_time = my_entry['initial_time']
+            self.increase_latency_per_operation(start_time)
 
     def check_if_entry_in_my_list(self, data):
         for entry in self.list_pending_vnf_forwarding_updates:
@@ -1029,14 +1005,19 @@ class Orchestrator:
             start_time_reconfiguration = datetime.datetime.now()
             for vnf_forwarding_graph in self.vnf_forwarding_graphs:
                 if vnf_forwarding_graph.identifier == data['vnf_forwarding_graph_id']:
+                    start_reconfiguration_time = datetime.datetime.now()
                     await vnf_forwarding_graph.update_data(data, self.log)
+                    end_reconfiguration_time = datetime.datetime.now()
+                    self.increase_total_reconfiguration_time(
+                        (end_reconfiguration_time - start_reconfiguration_time).total_seconds())
+
                     if isinstance(my_entry['initial_time'], str):
                         self.log.info('Converting... ' + str(my_entry['initial_time']))
                         start_time = datetime.datetime.strptime(my_entry['initial_time'], '%Y-%m-%d %H:%M:%S.%f')
                     else:
                         start_time = my_entry['initial_time']
                     self.increase_latency_per_operation(start_time)
-                    self.increase_number_of_reconfigurations_counter()
+                    # self.increase_extra_number_of_reconfigurations_counter()
                     end_time_reconfiguration = datetime.datetime.now()
                     self.increase_total_reconfiguration_time((end_time_reconfiguration - start_time_reconfiguration).total_seconds())
                     break
@@ -1045,7 +1026,6 @@ class Orchestrator:
     async def update_unique_vnf_forwarding_graph_classifier_rule_corrective(self, attribute: MatchingAttribute, start_time):
         self.log.info('Doing first update for attribute ' + str(attribute.get_identifier()[0:8]))
         data = dict()
-        start_reconfiguration_time = datetime.datetime.now()
         for vnf_forwarding_graph in self.vnf_forwarding_graphs:
             if vnf_forwarding_graph.has_matching_attribute(attribute):
                 data = attribute.as_dictionary()
@@ -1054,11 +1034,12 @@ class Orchestrator:
                 data['first_update'] = 'True'
                 data['attribute_id'] = attribute.identifier
                 data['current_max_orchestrator_index'] = self.orchestrator_index
+                start_reconfiguration_time = datetime.datetime.now()
                 new_entry = await vnf_forwarding_graph.update_data(data, self.log)
-                self.increase_latency_per_operation(start_time)
-                self.log.info('Increasin the reconfiguration')
-                self.increase_number_of_reconfigurations_counter()
                 end_reconfiguration_time = datetime.datetime.now()
+                self.increase_latency_per_operation(start_time)
+                self.log.info('Increasing the reconfiguration')
+                # self.increase_extra_number_of_reconfigurations_counter()
                 self.increase_total_reconfiguration_time((end_reconfiguration_time - start_reconfiguration_time).total_seconds())
                 break
         data = self.get_vnf_forwarding_graph_by_attribute(attribute)
@@ -1105,21 +1086,27 @@ class Orchestrator:
         if not is_negated:
             is_valid = self.check_is_valid_change(data)
             if is_valid:
-                await vnf_forwarding_graph.update_data(data, self.log)
                 self.increase_latency_per_operation(data['initial_time'])
-                self.increase_number_of_reconfigurations_counter()
+                start_reconfiguration_time = datetime.datetime.now()
+                await vnf_forwarding_graph.update_data(data, self.log)
+                end_reconfiguration_time = datetime.datetime.now()
+                self.increase_total_reconfiguration_time(
+                    (end_reconfiguration_time - start_reconfiguration_time).total_seconds())
+                # self.increase_extra_number_of_reconfigurations_counter()
             else:
                 self.log.info('Handling invalid corrective update')
-                await self.handle_invalid_corrective_update(vnf_forwarding_graph, data)
                 self.log.info('Increasing time')
                 self.increase_latency_per_operation(data['initial_time'])
+                await self.handle_invalid_corrective_update(vnf_forwarding_graph, data)
         else:
             self.log.info('Element is negated ' + str(data['attribute_id'][0:8]) + ' ignoring...')
-            self.increase_latency_per_operation(data['initial_time'])
+            # self.increase_latency_per_operation(data['initial_time'])
 
     def increase_latency_per_operation(self, start_delta):
         end_time = datetime.datetime.now()
-        self.total_time_for_experimentation += (end_time - start_delta).total_seconds()
+        delta_time = (end_time - start_delta).total_seconds()
+        self.log.info('Adding ' + str(delta_time) + ' seconds')
+        self.total_time_for_experimentation += delta_time
 
     # TODO: Add count metrics
     async def handle_invalid_corrective_update(self, vnf_forwarding_graph, data):
@@ -1146,9 +1133,7 @@ class Orchestrator:
                 str_log = str_log_1 + str_log_2 + str_log_3
                 self.log.info(str_log)
                 data['sender_id'] = self.port
-                self.log.info('Trying to ENCODE AS JSON')
                 entry_as_json = json.dumps(data, default=str)
-                self.log.info('JSON WAS GOOD')
                 new_message = CorrectiveNegativeMessage(my_orch['ip'], str(my_orch['port']),
                                                         entry_as_json)
                 self.increment_sent_messages()
@@ -1167,9 +1152,16 @@ class Orchestrator:
                 self.log.info('Is element ' + str(data['attribute_id'][0:8]) + ' accepted? ' + str(is_element_in_positive) + ', negated? ' + str(is_element_in_negative))
                 if is_element_in_positive:
                     self.log.info('Removing item from heap and reconfigure ' + str(data['attribute_id'][0:8]))
+                    start_reconfiguration_time = datetime.datetime.now()
                     itermediate_reconfigurations = await vnf_forwarding_graph.remove_item_from_heap_and_reconfigure(data, self.log)
-                    self.log.info('Intermediate reconf: ' + (itermediate_reconfigurations))
-                    self.increase_number_of_reconfigurations_counter(itermediate_reconfigurations)
+                    # print('1157 - orchestrator.py --- Intermediate reconf: ' + str(itermediate_reconfigurations))
+                    end_reconfiguration_time = datetime.datetime.now()
+                    self.increase_total_reconfiguration_time(
+                        (end_reconfiguration_time - start_reconfiguration_time).total_seconds())
+
+                    self.log.info('Intermediate reconf: ' + str(itermediate_reconfigurations))
+                    # print('Orchestrator -- 1158 -- Intermediate reconf: ' + str(itermediate_reconfigurations))
+                    self.increase_extra_number_of_reconfigurations_counter(itermediate_reconfigurations)
                 if is_element_in_negative:
                     self.log.info('Already negative pass ' + str(data['attribute_id'][0:8]))
                     pass
@@ -1229,7 +1221,9 @@ class Orchestrator:
                         self.log.info('Sending Update Instruction to: ' + str(orchestrator['ip']) + ":" + str(orchestrator['port']))
                         concurrent_updates.append(send_message(new_message))
                         self.increase_overhead_per_message(sys.getsizeof(new_message.data))
+                        # self.increase_extra_number_of_reconfigurations_counter()
                         while self.probability_repeated_message >= random_number:
+                            self.increase_extra_number_of_reconfigurations_counter()
                             concurrent_updates.append(self.wait_before_repeated(new_message))
                             random_number = generate_random_number_between_zero_one_hundred()
                         await asyncio.gather(*concurrent_updates)
@@ -1247,7 +1241,7 @@ class Orchestrator:
         await send_message(message)
 
     async def wait_before_notify_update_of_vnf_forwarding_graph(self, vnf_forwarding_graph):
-        self.log.info('Receveied update instruction for: ' + str(vnf_forwarding_graph['identifier'][0:8]))
+        self.log.info('Received update instruction for: ' + str(vnf_forwarding_graph['identifier'][0:8]))
         # wait_period = random.randint(0, self.waiting_time)
         wait_period = random.uniform(0, self.waiting_time)
         await asyncio.sleep(wait_period)
@@ -1331,8 +1325,13 @@ class Orchestrator:
                     self.log.info('Updating classifier....')
                     new_change = self.create_vnf_fg_update_entry_classifier(vnf_forwarding_graph)
                     self.log.info('Updating unique yeah....')
+                    start_reconfiguration_time =  datetime.datetime.now()
                     result = await self.update_vnf_forwarding_graph_unique_classifier(vnf_fg_entry, new_change)
-                    self.increase_total_reconfiguration_time(result['reconfiguration_time'])
+                    end_reconfiguration_time = datetime.datetime.now()
+                    self.increase_total_reconfiguration_time(
+                        (end_reconfiguration_time - start_reconfiguration_time).total_seconds())
+
+                # self.increase_total_reconfiguration_time(result['reconfiguration_time'])
 
                 self.increase_latency_per_operation(vnf_forwarding_graph['initial_time'])
                 self.log.info('Done!')
@@ -1405,7 +1404,7 @@ class Orchestrator:
                 coroutines.append(self.wait_before_vnf_fg_update(update))
                 my_updates += 1
         await asyncio.gather(*coroutines)
-        print('Number of updates: ' + str(my_updates))
+        self.log.info('Number of updates: ' + str(my_updates))
 
     async def apply_sequential_updates(self):
         vnf_forwarding_graph_updates = self.read_vnf_forwarding_graph_updates()

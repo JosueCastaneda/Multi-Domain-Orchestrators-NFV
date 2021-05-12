@@ -115,7 +115,10 @@ class VNFForwardingGraph:
             for matching_attribute in rule.matching_attributes:
                 if matching_attribute.get_identifier() == item['attribute_id']:
                     orchestrator_log.info('Removing item ' + str(item['attribute_id'][0:8]) + ' from attribute')
-                    return matching_attribute.remove_item_from_positive_add_to_negative(item, orchestrator_log)
+                    intermediate_reconfiguration = matching_attribute.remove_item_from_positive_add_to_negative(item, orchestrator_log)
+                    # print('vnf_forwarding_graph.py --- 119 -- intermediate_reconfiguration: ' + str(intermediate_reconfiguration))
+                    return intermediate_reconfiguration
+                    # return matching_attribute.remove_item_from_positive_add_to_negative(item, orchestrator_log)
         if item['type'] == 'connection_point':
             path = self.rendered_service_paths[0]
             for connection_point in path.vnf_descriptor_connection_points:

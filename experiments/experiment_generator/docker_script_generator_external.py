@@ -302,8 +302,8 @@ class DockerScriptGenerator:
 
     def get_random_vnffg_update(self):
         update_number = generate_random_integer(0, 1)
-        if update_number == 0:
-            return 'rsp'
+        # if update_number == 0:
+        #     return 'rsp'
         return 'classifier'
 
     def generate_vnffg_update(self, vnf_forwarding_graph: dict, type_of_update: str, random_orchestrator: dict):
