@@ -15,4 +15,3 @@ sleep 3
 python3 message_factory.py --type do_asynchronous_updates --host $FOURTH_SERVER --port 4443 &
 sleep 3
 python3 message_factory.py --type do_asynchronous_updates --host $FIFTH_SERVER --port 4445 &
-sleep 3
