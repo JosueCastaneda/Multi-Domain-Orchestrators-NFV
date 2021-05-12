@@ -75,4 +75,5 @@ else
     ./test_sequential_vnffg_updates_local.sh
   fi
 fi
+echo 'Trying to sleep'
 sleep 45

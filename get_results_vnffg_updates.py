@@ -151,10 +151,10 @@ def get_inconsistencies_from_entry(first_entry, second_entry):
         new_inconsistencies += count_how_many_differences_between_matching_attributes(first_connection_entry,
                                                                                       second_connection_entry)
 
-        if new_inconsistencies > 0:
-            print('Inconsistencies found')
-            print(first_connection_entry)
-            print(second_connection_entry)
+        # if new_inconsistencies > 0:
+        #     print('Inconsistencies found')
+        #     print(first_connection_entry)
+        #     print(second_connection_entry)
 
         sum_lol = 0
     return new_inconsistencies
