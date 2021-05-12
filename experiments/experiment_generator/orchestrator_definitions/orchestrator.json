@@ -3,7 +3,7 @@
   [
     {
       "id":"82b5bb4e-7fc5-11ea-8736-04ea56f99520",
-      "ip": "40.127.108.223",
+      "ip": "13.91.23.61",
       "type": "orchestrator",
       "port": "5001",
       "vnfs": [],
@@ -22,8 +22,8 @@
     {
       "id":"b97e2c9c-7fc5-11ea-8736-04ea56f99520",
       "type": "orchestrator",
-      "name": "duracell",
-      "ip": "52.229.37.237",
+      "name": "sherry",
+      "ip": "40.81.204.178",
       "port": "5002",
       "vnfs": [],
       "services": [],
@@ -41,7 +41,7 @@
       "id":"d48989be-7fc5-11ea-8736-04ea56f99520",
       "type": "orchestrator",
       "name": "jill",
-      "ip": "52.141.61.172",
+      "ip": "20.84.67.101",
       "port": "5003",
       "vnfs": [],
       "services": [],
@@ -58,7 +58,7 @@
     {
       "id":"fc46f8ba-7fc5-11ea-8736-04ea56f99520",
       "type": "orchestrator",
-      "ip": "20.185.45.222",
+      "ip": "20.68.168.123",
       "port": "5004",
       "name": "ada",
       "vnfs": [],
@@ -76,7 +76,7 @@
     {
       "id":"15d4de14-7fc6-11ea-8736-04ea56f99520",
       "type": "orchestrator",
-      "ip": "52.151.70.54",
+      "ip": "52.231.152.194",
       "port": "5005",
       "name": "rebecca",
       "vnfs": [],

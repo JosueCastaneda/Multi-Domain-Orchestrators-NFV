@@ -52,7 +52,7 @@ class DockerScriptGenerator:
         self.write_first_line_to_file()
         self.set_up_run_orchestrators()
         self.set_up_chain_orchestrators()
-        self.set_up_running_vnf()
+        # self.set_up_running_vnf()
         self.close_file()
         return 1
 

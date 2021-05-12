@@ -207,42 +207,42 @@ async def get_results_local(orchestrator_ip='127.0.0.1', orchestrator_port=5001)
     print(str_result_1 + str_result_2 + str_result_3)
 
 
-async def get_results_external(orchestrator_ip='0.0.0.0', orchestrator_port=5001):
-    total_inconsistencies = 0
-    initial_port = 5001
-    url_list = list()
-    url_list.append('40.127.108.223')
-    url_list.append('52.229.37.237')
-    url_list.append('52.141.61.172')
-    url_list.append('20.185.45.222')
-    url_list.append('52.151.70.54')
-    for i in range(5):
-        url = 'http://' + str(url_list[i]) + ':' + str(initial_port) + '/get_inconsistencies'
-        async with aiohttp.ClientSession() as session:
-            async with session.get(url, data='') as resp:
-                inconsistency_as_text = await resp.text()
-                inconsistency_decoded = json.loads(inconsistency_as_text)
-                total_inconsistencies += int(inconsistency_decoded['result'])
-        initial_port += 1
-
-    url = 'http://' + str(orchestrator_ip) + ':' + str(orchestrator_port) + '/get_time_elapsed'
-    async with aiohttp.ClientSession() as session:
-        async with session.get(url, data='') as resp:
-            elapsed_time_encoded = await resp.text()
-    elapsed_time_decoded = json.loads(elapsed_time_encoded)
-    elapsed_time = elapsed_time_decoded['result']
-
-    url = 'http://' + str(orchestrator_ip) + ':' + str(orchestrator_port) + '/get_messages_sent'
-    async with aiohttp.ClientSession() as session:
-        async with session.get(url, data='') as resp:
-            messages_sent_encoded = await resp.text()
-    messages_sent_decoded = json.loads(messages_sent_encoded)
-    messages_sent = messages_sent_decoded['result']
-    str_result_1 = 'Inconsistencies: ' + str(total_inconsistencies)
-    str_result_2 = ' messages sent: ' + str(messages_sent)
-    str_result_3 = ' elapsed time: ' + str(elapsed_time) + ' seconds'
-    print(str_result_1 + str_result_2 + str_result_3)
-    return [total_inconsistencies, messages_sent, elapsed_time]
+# async def get_results_external(orchestrator_ip='0.0.0.0', orchestrator_port=5001):
+#     total_inconsistencies = 0
+#     initial_port = 5001
+#     url_list = list()
+#     url_list.append('40.127.108.223')
+#     url_list.append('52.229.37.237')
+#     url_list.append('52.141.61.172')
+#     url_list.append('20.185.45.222')
+#     url_list.append('52.151.70.54')
+#     for i in range(5):
+#         url = 'http://' + str(url_list[i]) + ':' + str(initial_port) + '/get_inconsistencies'
+#         async with aiohttp.ClientSession() as session:
+#             async with session.get(url, data='') as resp:
+#                 inconsistency_as_text = await resp.text()
+#                 inconsistency_decoded = json.loads(inconsistency_as_text)
+#                 total_inconsistencies += int(inconsistency_decoded['result'])
+#         initial_port += 1
+#
+#     url = 'http://' + str(orchestrator_ip) + ':' + str(orchestrator_port) + '/get_time_elapsed'
+#     async with aiohttp.ClientSession() as session:
+#         async with session.get(url, data='') as resp:
+#             elapsed_time_encoded = await resp.text()
+#     elapsed_time_decoded = json.loads(elapsed_time_encoded)
+#     elapsed_time = elapsed_time_decoded['result']
+#
+#     url = 'http://' + str(orchestrator_ip) + ':' + str(orchestrator_port) + '/get_messages_sent'
+#     async with aiohttp.ClientSession() as session:
+#         async with session.get(url, data='') as resp:
+#             messages_sent_encoded = await resp.text()
+#     messages_sent_decoded = json.loads(messages_sent_encoded)
+#     messages_sent = messages_sent_decoded['result']
+#     str_result_1 = 'Inconsistencies: ' + str(total_inconsistencies)
+#     str_result_2 = ' messages sent: ' + str(messages_sent)
+#     str_result_3 = ' elapsed time: ' + str(elapsed_time) + ' seconds'
+#     print(str_result_1 + str_result_2 + str_result_3)
+#     return [total_inconsistencies, messages_sent, elapsed_time]
 
 async def get_results_external(orchestrator_ip='0.0.0.0', orchestrator_port=5001):
     total_inconsistencies = 0

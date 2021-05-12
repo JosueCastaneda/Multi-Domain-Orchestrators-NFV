@@ -131,6 +131,7 @@ class Orchestrator:
         orchestrator_index = int(self.name[orchestrator_number + 1:])
         self.id = raw_data['orchestrators'][orchestrator_index]['id']
         self.location = raw_data['orchestrators'][orchestrator_index]['location']
+        self.ip = raw_data['orchestrators'][orchestrator_index]['ip']
 
     def find_orchestrator_by_id(self, id_orchestrator):
         for orchestrator in self.list_orchestrator:
@@ -259,11 +260,11 @@ class Orchestrator:
         logging.basicConfig(filename=other_folder)
         self.log = logging.getLogger('logger')
         self.log.propagate = False
-        self.log.setLevel(logging.WARNING)
+        self.log.setLevel(logging.DEBUG)
         log_str = '%(asctime)s - %(filename)s - %(lineno)s - %(message)s'
         formatter = logging.Formatter(log_str)
         fh = logging.FileHandler(other_folder, mode='w', encoding='utf-8')
-        fh.setLevel(logging.WARNING)
+        fh.setLevel(logging.DEBUG)
         fh.setFormatter(formatter)
         self.log.addHandler(fh)
         ch = logging.StreamHandler()
@@ -1396,13 +1397,19 @@ class Orchestrator:
             await self.update_unique_vnf_forwarding_graph_rendered_service_path(update['data'])
 
     async def apply_concurrent_updates(self):
+        print('Called concurrent updates')
         vnf_forwarding_graph_updates = self.read_vnf_forwarding_graph_updates()
         coroutines = []
         my_updates = 0
         for update in vnf_forwarding_graph_updates:
+            self.log.info(update)
             if update['host'] == self.ip and update['port'] == str(self.port) and update['type'] != 'update_all_vnffg':
                 coroutines.append(self.wait_before_vnf_fg_update(update))
                 my_updates += 1
+            elif update['host'] == '0.0.0.0' and update['port'] == str(self.port) and update['type'] != 'update_all_vnffg':
+                coroutines.append(self.wait_before_vnf_fg_update(update))
+                my_updates += 1
+
         await asyncio.gather(*coroutines)
         self.log.info('Number of updates: ' + str(my_updates))
 
@@ -1413,11 +1420,15 @@ class Orchestrator:
             if update['host'] == self.ip and update['port'] == str(self.port) and update['type'] != 'update_all_vnffg':
                 await self.wait_before_vnf_fg_update(update)
                 my_updates += 1
+            elif update['host'] == '0.0.0.0' and update['port'] == str(self.port) and update['type'] != 'update_all_vnffg':
+                await self.wait_before_vnf_fg_update(update)
+                my_updates += 1
 
     def read_vnf_forwarding_graph_updates(self):
         updates = []
         string_1 = ROOT_DIR + '/experiments/experiment_'
-        all_route = ROOT_DIR + '/' + self.directory_path + '/' + 'updates_vnf_forwarding_graphs.sh'
+        # all_route = ROOT_DIR + '/' + self.directory_path + '/' + 'updates_vnf_forwarding_graphs.sh'
+        all_route = ROOT_DIR + '/' + self.directory_path + 'updates_vnf_forwarding_graphs.sh'
         self.log.info(all_route)
         # directory_path = string_1 + str(self.experiment_index) + '/' + 'updates_vnf_forwarding_graphs.sh'
         # self.log.info(directory_path)
