@@ -5,8 +5,8 @@ python3 orchestrator_script.py -i 3 -e 5 -h '127.0.0.1' -p 4443 -r 276529 -a $3 
 sleep 2
 
 # Add orchestrator's information to my orchestrator
-python3 message_factory.py -t add_orchestrator -h 127.0.0.1 -p 4443 -n none -m none --vnf_host 127.0.0.1 --vnf_port 4437 -x 5a52aaee-b2f6-11eb-8771-04ea56f99520
-python3 message_factory.py -t add_orchestrator -h 127.0.0.1 -p 4443 -n none -m none --vnf_host 127.0.0.1 --vnf_port 4439 -x 5a52aaef-b2f6-11eb-8771-04ea56f99520
-python3 message_factory.py -t add_orchestrator -h 127.0.0.1 -p 4443 -n none -m none --vnf_host 127.0.0.1 --vnf_port 4441 -x 5a52aaf0-b2f6-11eb-8771-04ea56f99520
-python3 message_factory.py -t add_orchestrator -h 127.0.0.1 -p 4443 -n none -m none --vnf_host 127.0.0.1 --vnf_port 4445 -x 5a52aaf2-b2f6-11eb-8771-04ea56f99520
+python3 message_factory.py -t add_orchestrator -h 127.0.0.1 -p 4443 -n none -m none --vnf_host 127.0.0.1 --vnf_port 4437 -x 635ccb3c-b725-11eb-8771-04ea56f99520
+python3 message_factory.py -t add_orchestrator -h 127.0.0.1 -p 4443 -n none -m none --vnf_host 127.0.0.1 --vnf_port 4439 -x 635ccb3d-b725-11eb-8771-04ea56f99520
+python3 message_factory.py -t add_orchestrator -h 127.0.0.1 -p 4443 -n none -m none --vnf_host 127.0.0.1 --vnf_port 4441 -x 635ccb3e-b725-11eb-8771-04ea56f99520
+python3 message_factory.py -t add_orchestrator -h 127.0.0.1 -p 4443 -n none -m none --vnf_host 127.0.0.1 --vnf_port 4445 -x 635ccb40-b725-11eb-8771-04ea56f99520
 

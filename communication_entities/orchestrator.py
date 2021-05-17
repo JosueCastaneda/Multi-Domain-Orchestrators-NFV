@@ -841,7 +841,8 @@ class Orchestrator:
     # TODO: Update this function with a different probability
     def check_is_valid_change(self, data):
         random_number = random.randint(0, 100)
-        if random_number > int(self.probability_negated):
+        if int(self.probability_negated) >  random_number:
+        # if random_number > int(self.probability_negated):
             self.log.info('Negated ' + data['attribute_id'][0:8])
             return False
         return True
