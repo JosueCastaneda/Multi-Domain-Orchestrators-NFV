@@ -933,7 +933,8 @@ class Orchestrator:
                     start_time = datetime.datetime.strptime(my_entry['initial_time'], '%Y-%m-%d %H:%M:%S.%f')
                 else:
                     start_time = my_entry['initial_time']
-                self.increase_latency_per_operation(start_time)
+                # # ERROR: GODZILLA POSSIBLE ERROR, WHY INCREASE LATENCY PER OPERATION IF THE OPERATION WAS NEGATED
+                # self.increase_latency_per_operation(start_time)
         data['answer'] = answer
         data['reply_id'] = self.id
         entry_as_json = json.dumps(data)
@@ -1097,8 +1098,9 @@ class Orchestrator:
                 # self.increase_extra_number_of_reconfigurations_counter()
             else:
                 self.log.info('Handling invalid corrective update')
-                self.log.info('Increasing time')
-                self.increase_latency_per_operation(data['initial_time'])
+                # self.log.info('Increasing time')
+                # # ERROR: Godzilla Possible error, why update this if update is not valid....
+                # self.increase_latency_per_operation(data['initial_time'])
                 await self.handle_invalid_corrective_update(vnf_forwarding_graph, data)
         else:
             self.log.info('Element is negated ' + str(data['attribute_id'][0:8]) + ' ignoring...')
