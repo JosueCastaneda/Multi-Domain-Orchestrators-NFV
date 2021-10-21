@@ -1,11 +1,11 @@
 {
   "experiment":
   {
-    "number_of_experiments": 10,
+    "number_of_experiments": 30,
     "number_of_services": 30,
     "number_of_vnf_components": 8,
     "video_definition": 480,
-    "max_number_of_changes": 20,
+    "max_number_of_changes": 30,
     "number_of_vnfs_per_orchestrator": 10,
     "number_of_vnfs": 40,
     "max_dependencies": 6,
